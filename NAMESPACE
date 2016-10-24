@@ -1,0 +1,6 @@
+exportPattern("^[[:alpha:]]+")
+import(Rcpp)
+import(RcppProgress)
+useDynLib(Rlda)
+
+

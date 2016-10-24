@@ -1,0 +1,21 @@
+Package: Rlda
+Type: Package
+Title: Bayesian LDA for fuzzy clustering analysis
+Version: 0.1.0
+Author: Pedro Albuquerque
+Maintainer: Pedro Albuquerque <pedroa@unb.br>
+Description: The goal of this packageis to describe the Bayesian LDA model for
+    fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli,
+    and Binomial entries).
+License: What license is it under?
+LazyData: TRUE
+LinkingTo: Rcpp
+Imports:
+    Rcpp,
+    RcppProgress
+SystemRequirements: GNU make
+Suggests:
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
+RoxygenNote: 5.0.1

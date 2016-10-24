@@ -1,0 +1,624 @@
+---
+author:
+  - name: Pedro H. M. Albuquerque
+    affiliation: University of Brasília
+    address: >
+      Faculdade de Economia, Administração e Contabilidade,
+      Building A-2 - Office A1-54/7,
+      Brasilia, DF 70910-900.
+    email: pedroa@unb.br
+    url: http://pedrounb.blogspot.com/
+  - name: Denis Ribeiro do Valle
+    affiliation: University of Florida
+    address: >
+      408 McCarty Hall C,
+      PO Box 110339,
+      Gainesville, FL 32611-0410.
+    email: drvalle@ufl.edu
+    url: http://denisvalle.weebly.com/   
+  - name: Daijiang Li
+    affiliation: University of Florida
+    address: >
+      408 McCarty Hall C,
+      PO Box 110339,
+      Gainesville, FL 32611-0410.
+    email: daijianglee@gmail.com
+
+title:
+  formatted: "Bayesian LDA for categorical mixture model clustering."
+  plain:     "Bayesian LDA for categorical mixture model clustering."
+  short:     "\\pkg{Rlda}: Bayesian LDA for categorical clustering."
+abstract: >
+  The goal of this paper is to describe the Bayesian LDA model for fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries) and provide some examples of the use of this model in R. These types of data frequently emerge in fields likeas disparate as ecology, remote sensing, marketing, and finance and others fields and, as a result, we believe this package will be of broad interest for pattern recognition, especially fuzzy clustering for categorical data.
+keywords:
+  # at least one keyword must be supplied
+  formatted: [LDA, fuzzy clustering]
+  plain:     [LDA, fuzzy clustering]
+preamble: >
+  \usepackage{amsmath}
+  \usepackage{amsfonts}
+  \usepackage{bbm}
+  \usepackage{calrsfs}
+  \newcommand{\Za}{\mathcal{Z}}
+output: rticles::jss_article
+
+#output: word_document
+#http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html
+bibliography: bibliography.bib
+---
+
+#Introduction.
+The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to study the tag pattern representation in blogs to construct clusters of tags that represents the most common topics. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis and the correlated topic model. The authors described the limitations of each method, asserting that the LDA limitations were essentially two: the method does not consider relationships between topics and cannot allocate a word to multiple topics . However, beside these limitations the LDA continues to be used in multiple disciplines. For instance, @griffiths2004finding used LDA to identify the main scientific topics in a large corpus of Proceedings of the National Academy of Science (PNAS) articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. In finance, a stock market analysis system based on LDA is used to analyze financial news items together with market data to identify and characterize major events that impact the market. This system is then used to predict whether the stock market will fall or rise, based on news items identified by LDA [@mahajan2008mining]. 
+
+Despite its success in text mining across multiple fields, LDA is a model that need not be restricted to text-mining. More specifically, LDA can be viewed as a mixture model since each element in the sample can belong to more than one cluster (or state) simultaneously. There are a few examples of LDA being used for other purposes than text-mining. For instance, a modified version of LDA has been extensively used on genetic data to identify populations and admixture probabilities of individuals [@pritchard2000inference]. Similarly, LDA has been used in Ecology to identify plant communities from tree data for the eastern United States and from a tropical forest chronosequence [@valle2014decomposing]. 
+
+The aim of this paper is to describe a Bayesian LDA model for mixture model clustering based on different types of data (i.e., multinomial, Bernoulli and Binomial), illustrating its use in a diverse set of examples. The innovative features of this model are that it generalizes LDA for other types of categorical data that commonly appear in Life and Social Science and it enables the selection of the optimal number of clusters based on a truncated stick-breaking prior approach which regularizes model results. Finally, we provide a package to estimate the quantities of interest.
+
+This paper is organized as follows. Section 2 describes the mathematical formulation for the Bayesian LDA model for fuzzy clustering analysis and section 3 shows how the model was implemented in R. Sections 4 and 5 present examples of the use of the package and the conclusions, respectively.
+
+
+#Methods.
+In the Bayesian LDA model for fuzzy clustering we postulate that exists a latent state for which each element can be allocated (not exclusively) in one cluster. Specifically, consider a latent matrix $\mathbf{Z}$ with dimension equals to $L\times C$ where each row represent a sampling unit ($l=1,\dots,L$) and each column a possible state or cluster ($c=1,\dots,C$). The Data Generating Process postulated for this latent matrix is given by:
+<!--  
+$$
+\begin{array}{c}
+Z_{lc}\sim Multinomial(n_{l},\theta_{l})
+\end{array}
+$$
+--> 
+\begin{equation}
+Z_{lc}\sim Multinomial(n_{l},\boldsymbol\theta_{l})
+\label{eq:eq0001}
+\end{equation}
+
+\noindent where $n_{l}$ is total number of elements drawn for location $l$ and $\boldsymbol\theta_{l}=(\theta_{l1},\dots,\theta_{lC})$ is a vector of parameters representing the probability of allocation in each cluster. Following Occam's razor, we intend to create the least number of clusters as possible, which is achieved by assuming a truncated stick-breaking prior:
+<!--  
+$$
+\begin{array}{c}
+\theta_{lc^{*}}=V_{lc^{*}}\displaystyle\prod_{c<c^{*}}^{C}(1-V_{lc})
+\end{array}
+$$
+--> 
+\begin{equation}
+\theta_{lc^{*}}=V_{lc^{*}}\displaystyle\prod_{c<c^{*}}^{C}(1-V_{lc})
+\label{eq:eq0002}
+\end{equation}
+
+
+\noindent where $V_{lc}\sim Beta(1,\alpha)$ for $c=1,\dots,C-1$ and $V_{lC}=1$ by definition. This truncated stick-breaking prior will force the elements to be aggregated in the minimum number of clusters, given that $\theta_{lc^{*}}$ is stochastically exponentially decreasing.
+
+In the second hierarchical level, we consider a matrix $\mathbf{Y}$ with dimension equals to $L\times S$ where each row represents a sampling unit (e.g., locations, firms, individuals, plots) and each column a variable that describes these elements. In the Bayesian LDA model for fuzzy clustering, after integrating over the latent vector $\mathbf{Z}_{l}$, $Y_{ls}$ can follow one of these distributions:
+<!--  
+$$
+\begin{array}{lll}
+\mathbf{Y}_{l\cdot}|Z_{lc}=c^{*}&\sim& Multinomial(n_{l},\phi_{c^{*}})\\
+\mathbf{Y}_{l\cdot}|Z_{lc}=&c^{*}&\sim& Bernoulli(\phi_{c^{*}})\\
+\mathbf{Y}_{l\cdot}|Z_{lc}=&c^{*}&\sim& Binomial(n_{ls},\phi_{c^{*}})
+\end{array}
+$$
+--> 
+\begin{equation}
+\begin{cases}
+\mathbf{Y}_{l\cdot}\sim Multinomial(n_{l},\boldsymbol\theta_{i}^{t}\Phi)\\
+Y_{ls}\sim Bernoulli(\boldsymbol\theta_{i}^{t}\boldsymbol\phi_{s})\\
+Y_{ls}\sim Binomial(n_{ls},\boldsymbol\theta_{i}^{t}\boldsymbol\phi_{s})
+		\label{eq:eq0003}
+\end{cases}		
+\end{equation}
+
+
+\noindent for $l=1,\dots,L$ and $s=1,\dots,S$ possible states. $Y_{ls}$ represents a random variable, $n_{l}$ is the total number of elements in sampling unit $l$ and variable $s$. In these models,  $\boldsymbol\phi_{s}=(\phi_{1s},\dots,\phi_{Cs})$ is a vector of parameters, while:
+
+$$
+\Phi=\begin{bmatrix}
+    \phi_{11} & \phi_{12} & \dots  & \phi_{1S} \\
+    \phi_{21} & \phi_{22} & \dots  & \phi_{2S} \\
+    \vdots & \vdots  & \ddots & \vdots \\
+    \phi_{C1} & \phi_{C2} & \dots  & \phi_{CS} 
+\end{bmatrix}
+$$
+
+\noindent is a $C\times S$ matrix of parameters.
+
+In the last step, we specify the priors for $\phi_{cs}$. For the multinomial model, we adopt a Dirichlet prior (i.e. $\boldsymbol\phi_{c}\sim Dirichlet(\boldsymbol\beta)$ where $\boldsymbol\beta=(\beta_{1},\dots,\beta_{S})$ is the hyperparameter vector). For the Bernoulli and Binomial representations, we assume that $\phi_{cs}$ comes from a Beta distribution, (i.e., $\phi_{cs}\sim Beta(\alpha_{0},\alpha_{1})$).
+
+These models are fit using Gibbs Sampling where parameters draws are iteratively made from each full conditional distribution. From a conceptual perspective, all of these models assume the following matrix decomposition:
+
+\begin{equation}
+\mathbb{E}[\mathbf{Y}_{L\times S}]=\mathbf{K}\circ[\Theta_{L\times C}\Phi_{C\times S}]
+	\label{eq:eq0004} 
+\end{equation}
+
+where $\mathbf{K}$ is a matrix of constants and $\circ$ is the Hadamard product. Sparseness is ensured by forcing large $c$ in the $\Theta_{L\times C}$ matrix to be close to zero. For the multinomial model, the $\mathbf{K}$ matrix contains the total number of elements in each row whereas for the Bernoulli model, this matrix is equal to the identity matrix. Finally, for the Binomial model, the $\mathbf{K}$ matrix has the total number of trials of each binomial distribution (i.e., $n_{ls}$). Although there are many ways matrices can be decomposed, the key characteristic of this particular form of matrix decomposition is that each row of $\mathbf{K}$ is comprised of probabilities that sum to one. As a result, one can interpret $\Phi_{C\times S}$ as the matrix that contain the "pure" features of the data, which are then mixed by the matrix $\Theta_{L\times C}$ and multiplied by $\mathbf{K}$ to generate the expected data.
+
+## Full Conditional Distributions - FCD.
+### Bernoulli model.
+
+The probability of community membership status $Z_{ls}$ is given by: 
+
+\begin{equation}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=y_{ls},\phi_{c^{*}s},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{y_{ls}}(1-\phi_{c^{*}s})^{1-y_{ls}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{y_{ls}}(1-\phi_{cs})^{1-y_{ls}}}
+\end{array}
+\label{eq:eq0005} 
+\end{equation}
+
+Therefore, $Z_{ls}$ can be drawn from a categorical distribution. The FCD for $\phi_{cs}$ is given by:
+
+$$
+p(V_{lc^{*}}|{\mathbf Y})=Beta(N_{lc^{*}}+1,N_{l(c>c^{*})}+\gamma)
+$$
+
+\noindent where $N_{lc^{*}}$ is the total number of elements in location $l$ classified into cluster $c^{*}$, and $N_{l(c>c^{*})}$ is the total number of elements in location $l$ classified in clusters larger than $c^{*}$. These quantities are given by $N_{lc^{*}}=\sum_{s=1}^{S}\mathbbm{1}(z_{ls}=c^{*})$ and $N_{l(c>c^{*})}=\sum_{s=1}^{S}\sum_{c=c^{*}+1}^{C}\mathbbm{1}(z_{ls}=c^{*})$, respectively.
+
+### Binomial model.
+For this model, we have $n_{ls}$ elements for each sampling unit $l$ and community $z$. The $i$-th element is denoted as $Z_{ils}$ and its probability is similar to the one for the Bernoulli model:
+
+\begin{equation}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=y_{ls},\boldsymbol\phi_{s},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{y_{ls}}(1-\phi_{cs})^{1-y_{ls}}}
+\end{array}
+\label{eq:eq0006} 
+\end{equation}
+
+\noindent where $x_{ils}$ are binary random variables such that $\sum_{i=1}^{n_{ls}}x_{ils}=y_{ls}$. Therefore, $Z_{ils}$ can be drawn from a multinomial distribution. The FCD is given by:
+
+\begin{equation}
+\begin{array}{lll}
+p(\phi_{cs}|{\mathbf Z},{\mathbf Y})= Beta\left(\displaystyle\sum_{l=1}^{L}\displaystyle\sum_{i=1}^{n_{ls}}\mathbbm{1}(x_{ils}=1,z_{ils}=c)+\alpha_{0},\displaystyle\sum_{l=1}^{L}\displaystyle\sum_{i=1}^{n_{ls}}\mathbbm{1}(x_{ils}=0,z_{ils}=c)+\alpha_{1}\right)
+\end{array}
+\label{eq:eq0007} 
+\end{equation}
+
+Finally, the final FCD for $V_{lc^{*}}$ is given by: 
+
+\begin{equation}
+p\left(V_{lc^{*}}|Z_{lc^{*}}\right) = Beta(N_{lc^{*}}+1,N_{l(c>c^{*})}+\gamma)
+	\label{eq:eq0008} 
+\end{equation}
+
+\noindent where $N_{lc^{*}}$ is the total number of elements in location $l$ classified into cluster $c^{*}$ and $N_{l(c>c^{*}}$ is the total number of elements in location $l$ classified in clusters larger than $c^{*}$. These quantities are given by $N_{lc^{*}}=\sum_{s=1}^{S}\sum_{i=1}^{n_{ls}}\mathbbm{1}(z_{ils}=c^{*})$ and $N_{l(c>c^{*})}=\sum_{s=1}^{S}\sum_{i=1}^{n_{ls}}\sum_{c=c^{*}+1}^{C}\mathbbm{1}(z_{ils}=c^{*})$.
+
+
+### Multinomial  model.
+For the Multinomial case, if unit $i$ in location $l$ is associated with variable $s$ (i.e., $x_{il}=s$ such that $y_{ls}=\sum_{i=1}^{n_{l}}\mathbbm{1}(x_{il}=s)$), we have that:
+
+\begin{equation}
+p(Z_{lc}=c^{*}|{\bf Y}_{ls}=s,\boldsymbol\phi_{s},\boldsymbol\theta_{l})=\frac{\theta_{lc^{*}}\phi_{sc^{*}}}{\left(\theta_{1l}\phi_{s1}+\dots+\theta_{Cl}\phi_{sC}\right)}
+	\label{eq:eq0009} 
+\end{equation}
+
+Therefore, $Z_{il}$ can be sampled from a categorical distribution. Since we assumed a conjugate prior for $\boldsymbol\phi_{c^{*}}$ with $c^{*}\in\{1,\dots,C\}$ the Full Conditional Distribution for this vector of parameters is a straight-forward Dirichlet distribution: 
+
+\begin{equation}
+p(\boldsymbol\phi_{c^{*}}|{\mathbf Y})=Dirichlet([n_{c^{*}1}+\beta_{1},\dots,n_{c^{*}S}+\beta_{S}])
+	\label{eq:eq0010} 
+\end{equation}
+
+\noindent where $n_{c^{*}s}$ is the total number of observations classified in cluster $c^{*}$ in all locations for the $s$-th variable (i.e., $n_{c^{*}s}=\sum_{l=1}^{L}\sum_{i=1}^{n_{l}}\mathbbm{1}(z_{il}=c^{*},x_{il}=s)$).  
+
+Finally, the FCD for $V_{lc^{*}}$ is given by: 
+
+\begin{equation}
+  p(V_{lc^{*}}|Z_{lc^{*}})=Beta(N_{lc^{*}}+1,N_{l(c>c^{*})} +\gamma)
+	\label{eq:eq0011} 
+\end{equation}
+
+
+\noindent where $N_{lc^{*}}$ is the total number of elements in observation $l$ classified into cluster $c^{*}$ and $N_{l(c>c^{*}}$ is the total number of elements in observation $l$ classified in clusters larger than $c^{*}$. These quantities are given by $N_{lc^{*}}=\sum_{i=1}^{n_{l}}\mathbbm{1}(z_{il}=c^{*})$ and $N_{l(c>c^{*})}=\sum_{i=1}^{n_{l}}\sum_{c=c^{*}+1}^{C}\mathbbm{1}(z_{il}=c)$.
+
+
+#The package.
+The package is not the only one package that can be able to perform the Latent Dirichlet Allocation model. We found four packages that propose model a Latent Dirichlet Allocation structure in R. @hornik2011topicmodels developed the \pkg{topicmodels} package for which there are two LDA implementations, one using the variational inference (as described in @blei2003latent) and the other implementation using Gibbs Sampling based on @phan2013gibbslda. Similarly, @jones2016 proposed the \pkg{textmineR} which has a Gibbs Sampling method to estimate the topics in a corpus structure.
+
+@chang2012lda developed the \pkg{lda} package which includes the  mixed-membership stochastic blockmodel [@airoldi2008mixed], supervised Latent Dirichlet Allocation - sLDA [@mcauliffe2008supervised] and Correspondence-Latent Dirichlet Allocation - corrLDA[@blei2003modeling].
+
+More recently, @roberts2014stm created the \pkg{stm} which has some unsupervised functions to determine the optimal number of clusters. This unsupervised method is based on likelihood metrics obtained by the EM Algorithm, which are then used for a backward model selection approach.
+
+None of these packages adopt the truncated stick-breaking prior and none of them use others distributions besides the Multinomial outcome for the dependent variable. Thus, our package complements current LDA approaches already available in R. 
+
+
+#Examples.
+In this section we present some applications for Latent Dirichlet Allocation in marketing, finance and ecology.
+
+##Marketing.
+
+```{r,echo=FALSE}
+#Load RData (Example 1)
+rm(list=ls())
+load("Example1.RData")
+```
+
+The first application considers the classical LDA for a Multinomial entry in the field of Marketing. More specifically, we are interested in characterizing firms based on their consumers' complaints.
+
+It is well known that attracting a new customer is often considerably more costly than keeping current customer [@kotler2006principles]. For this reason, firms can better retain their customers if they pay careful attention to their consumers' complaints and work to solve them in a satisfactory way. 
+
+The data used is from the 2015 [Consumer Complaint Database](http://catalog.data.gov/dataset/consumer-complaint-database) 
+which are complaints received for the **Bureau of Consumer Financial Protection** in US about financial products and services. Specifically in this example we work with only credit card complaint's and it contains information on the number of complaints for each firm ($L=$ `r length(unique(complaints$Company))`), categorized according to the specific type of issue ($S=$ `r length(unique(complaints$Issue))`). Examples of issues include: Billing disputes, Identity theft / Fraud, Unsolicited issuance of credit card and so on.  Each sampling unit in this case represents a firm and each variable the total number of complaints'complaints associated with each issue. 
+
+The characterization of firms provided by our analysis can be useful to reveal communalities and differences across different firms. This can then be used by managers to identify and potentially adopt the solutions that are employed by other firms to deal with these issues.
+
+To use the \pkg{Rlda} package for the Multinomial entry is necessary to create a matrix where each cell represents the total number of cases observed for each variable and sampling unit.
+
+
+```{r, eval=FALSE}
+library(Rlda)
+#Read the Complaints data
+data(complaints)
+#Create the abundance matrix
+library(reshape2)
+mat1<-dcast(complaints[,c("Company","Issue")], 
+            Company~Issue, length, 
+            value.var="Issue")
+#Create the rowname
+rownames(mat1)<-mat1[,1]
+#Remove the ID variable
+mat1<-mat1[,-1]
+```
+
+To use the \code{GibbsSamplingAbundance} method we need to specify some arguments:
+
+```{r,eval=FALSE}
+#Set seed
+set.seed(9292)
+#Hyperparameters for each prior distribution
+beta<-rep(1,ncol(mat1))
+gamma<-0.01
+#Execute the LDA for the Multinomial entry
+res<-GibbsSamplingAbundance(mat1,30,beta,gamma,1000,TRUE,FALSE)
+```
+
+In the above code we defined the maximum number of clusters as 30 and 1000 Gibbs Sampling iterations with the likelihood computed with priors and not showing the progress bar.
+
+We can visually evaluate the convergence Figure \ref{figure:fig001}:
+
+```{r,eval=FALSE}
+#Get the logLikelihood
+ll<-res[["logLikelihood"]]
+#Plot the log-likelihood
+plot(ll,type="l",xlab="Interations",
+                 ylab="Log-likelihood")
+```
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+#Get the logLikelihood
+ll<-res[["logLikelihood"]]
+pdf("plot001.pdf", width=4, height=3)
+#Plot the log-likelihood
+plot(ll,type="l",xlab="Interations",ylab="Log-likelihood",
+     cex.lab=0.7,cex.axis=0.7, cex.main=0.7, cex.sub=0.7)
+invisible(dev.off())
+```
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics{plot001.pdf}
+  \caption{Log-likelihood interations.}
+  \label{figure:fig001}
+\end{figure}
+
+The Bayesian estimate is given by the \code{Theta} and \code{Phi} matrix. Each line for those objects represent a Gibbs iteration, in this way we can find estimates based on the mean of the matrices only for those iterations after the *burn-in phase*.
+
+```{r,eval=TRUE}
+#Get the Theta Estimate
+Theta<-res[["Theta"]]
+#Burnout
+Theta<-colMeans(Theta[300:1000,])
+#Create the matrix
+Theta<-matrix(Theta,nrow = nrow(mat1),ncol=30)
+#Rownames
+rownames(Theta)<-rownames(mat1)
+```
+
+The \code{Theta} has a sparse structure since our truncated stick-breaking prior tends reduce the total number dominant clusters. We can think that each probability estimated in each cell represent the probability of the $l$-th firm be allocated in cluster $s$, in this case $s=1,\dots,S$.
+
+To describe each cluster, we can look the \code{Phi} matrix:
+
+```{r,eval=TRUE}
+#Get the Phi Estimate
+Phi<-res[["Phi"]]
+#Burnout
+Phi<-colMeans(Phi[300:1000,])
+#Create the matrix
+Phi<-matrix(Phi,nrow =30,ncol=ncol(mat1))
+#Colnames
+colnames(Phi)<-colnames(mat1)
+#Rownames
+rownames(Phi)<-paste0("Cluster ",seq(1,30))
+#Get the most likely issues
+ids<-which(Phi > 0.2, arr.ind = TRUE)
+```
+
+The most likely issues and its clusters are summarized as follow:
+
+```{r xtable1,echo=FALSE, results="asis"}
+#Selected elements
+PhiSel<-Phi[ids]
+matDes<-as.data.frame(cbind(rownames(Phi)[ids[,1]],colnames(Phi)[ids[,2]]))
+#Names
+colnames(matDes)<-c("Cluster","Issue")
+#Remove text
+matDes$Cluster<-trunc(as.numeric(gsub("Cluster ","",matDes$Cluster)))
+#Sort
+matDes <- matDes[order(matDes$Cluster, matDes$Issue),]
+rownames(matDes)<-NULL
+library(xtable)
+tab <- xtable(matDes,digits=c(0,0,0),caption="Clusters description.")
+print(tab,comment=FALSE,
+      include.rownames=FALSE,
+      size="\\fontsize{9pt}{10pt}\\selectfont")
+```
+
+Based on that information we can now analyze the firms with highest probability to belong these clusters:
+
+```{r xtable2, echo=FALSE, results="asis"}
+library(reshape2)
+#Get the Clusters
+idClusters<-unique(matDes[,"Cluster"])
+firms<-Theta[,idClusters]
+#Sort the data
+firms <- as.data.frame(firms[order(-firms[,1], -firms[,2]),])
+#Create colNames
+colnames(firms)<-paste0("Cluster ",idClusters)
+#Keep only the positive probability
+firms<-firms[which(firms[,1]>0.01 | firms[,2]>0.01),]
+#Create the firm name
+firms$Firm<-rownames(firms)
+#melt
+namesMelt<-melt(firms,id="Firm")
+#Colnames
+colnames(namesMelt)<-c("Firm","Cluster","Probability")
+#Print
+tab2 <- xtable(namesMelt,digits=c(0,0,0,4),
+      caption="Probability of belonging for each company.")
+print(tab2,comment=FALSE,
+      include.rownames=FALSE,
+      size="\\fontsize{9pt}{10pt}\\selectfont")
+```
+
+##Finance.
+```{r,echo=FALSE}
+#Load RData (Example 2)
+rm(list=ls())
+load("Example2.RData")
+```
+
+In Financial Market is usually common analyze firms based on their liquidity, i.e., liquidity of a firm refers to its ability to meet short-term obligations using firm's assets can be quickly converted to cash [@audretsch2002does]. 
+
+In this example we studied how firms can be clustered based on two main factor: The firms' free float\footnote{Free float is the number of outstanding shares that are available for trading by the public.} and the negotiated volume\footnote{Volume is number of shares that traded on the trade date.}.
+
+We can approximate the volume random variable for each firm in each day as Binomial trial, since the volume should be less than free float\footnote{In fact this is just an approximation, since one share can be negotiated multiple times in the same day.} for the same firm and day.
+
+In this example we worked with all daily transactions for 46 firms of the S&P500 Index in 2015 obtained by the Reuters Terminal, the data was treated to represent the excepted value of daily transactions for a free float equal 100:
+
+```{r, eval=FALSE}
+library(Rlda)
+#Read the SP500 data
+data(sp500)
+#Create size
+spSize<-as.data.frame(matrix(100,
+                      ncol=ncol(sp500),
+                      nrow=nrow(sp500)))
+```
+
+In this cases since we are postulated a Binomial trial we should use the \code{GibbsSamplingBinomial}, for which we need to specify the follow arguments:
+
+```{r,eval=FALSE}
+#Set seed
+set.seed(5874)
+#Hyperparameters for each prior distribution
+gamma <-0.01
+alpha0<-0.01
+alpha1<-0.01
+#Execute the LDA for the Binomial entry
+res<-GibbsSamplingBinomial(sp500,spSize,10,
+                           alpha0,alpha1,gamma,
+                           5000,TRUE,FALSE)
+```
+
+The firms can be represented by the \code{Phi} matrix which presents the probability of belonging (not exclusively) by cluster.
+
+```{r,eval=TRUE}
+#Get the Phi Estimate
+Phi<-res[["Phi"]]
+#Bayes Estimation
+Phi<-colMeans(Phi)
+#Create the matrix
+Phi<-matrix(Phi,nrow =10,ncol=ncol(sp500))
+#Colnames
+colnames(Phi)<-colnames(sp500)
+#Rownames
+rownames(Phi)<-paste0("C",seq(1,10))
+```
+
+Hence, one way to summarize the results is showing which cluster has the highest probability to appear for each possible firm, in this case only for clusters with probability greater than 50%:
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+pdf("plot002.pdf", width=10, height=10)
+#Plot the log-likelihood
+sgbar<-t(Phi)
+sgbar[sgbar<0.5]<-0
+sgbar<- sgbar[rowSums(sgbar)!=0, ] 
+require(grid)
+require(lattice)
+require(latticeExtra)
+require(HH)
+library(RColorBrewer)
+myColor<-brewer.pal(n = 10, name = "RdBu")
+plot.likert(sgbar,
+       main='',
+       sub="", xlab.right="",col=myColor)
+invisible(dev.off())
+```
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics{plot002.pdf}
+  \caption{Acumulated probability of belonging.}
+  \label{figure:fig002}
+\end{figure}
+
+
+Financial investors can, for example, using the information presented in Figure \ref{figure:fig002} to construct portfolios based on these clusters aiming to diversify their assets.
+
+##Ecology.
+```{r,echo=FALSE}
+#Load RData (Example 3)
+rm(list=ls())
+load("Example3.RData")
+```
+One of the most challenge situation in study ecological data is the fact the in some applications, it is not possible to observe the total number of species in each sampled plot. However, it is possible to know if some is species is presented (i.e. overserved) or absente (i.e. not observed) [@pearce2006modelling].
+
+For this kind of data, we can use the the \code{GibbsSamplingPresence} function. Specifically, in this example we used \code{data("SPDATA")} from \pkg{PresenceAbsence} package which is referred to 13 species that could be observed (value equal 1) and not observed or absent (value equal 0) at 386 forested locations. 
+
+```{r, eval=FALSE,message=FALSE,warning=FALSE}
+library(PresenceAbsence)
+#Read the SP500 data
+data(SPDATA)
+PresAbs<-SPDATA[,1:2]
+#Location
+library(data.table)
+PresAbs <- data.table(PresAbs)
+PresAbs[, Location := sequence(.N), by = c("SPECIES")]
+#Create the binary matrix
+library(reshape2)
+mat1<-dcast(PresAbs, 
+            Location~SPECIES,  
+            value.var="OBSERVED")
+#Remove the Location variable
+matPres<-as.data.frame(mat1[,-1])
+```
+
+In this example we can postulated a Bernouli trial for each Specie and Location, and we are able to use the \code{GibbsSamplingPresence} function, for which we need to specify the follow arguments:
+
+```{r,eval=FALSE}
+#Set seed
+set.seed(9842)
+#Hyperparameters for each prior distribution
+gamma <-0.01
+alpha0<-0.01
+alpha1<-0.01
+#Execute the LDA for the Binomial entry
+res<-GibbsSamplingPresence(matPres,10,
+                           alpha0,alpha1,gamma,
+                           5000,TRUE,FALSE)
+```
+
+We can visually evaluate the cluster distribution across species, after the *burn-in phase* in Figure \ref{figure:fig003}:
+\newpage
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+#Get the Theta Estimate
+Theta<-res[["Theta"]]
+#Burnout
+Theta<-colMeans(Theta[1000:5000,])
+#Create the matrix
+Theta<-matrix(Theta,nrow = ncol(matPres),ncol=10)
+#Rownames
+rownames(Theta)<-colnames(matPres)
+colnames(Theta)<-paste("Cluster ",seq(1,ncol(Theta)))
+#Color
+library(RColorBrewer)
+myColor<-brewer.pal(n = 10, name = "RdBu")
+#Labels
+strClusters<-colnames(Theta)
+pdf("plot003.pdf", width=10, height=10)
+stars(Theta,col.segments=myColor,scale=TRUE,
+      draw.segments=TRUE,ncol=4,flip.labels=FALSE,cex=0.6)
+legend('bottomright',strClusters,ncol=5,
+       fill=myColor,cex=0.6,bty='n')
+invisible(dev.off())
+```
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics{plot003.pdf}
+  \caption{Cluster distribution across species.}
+  \label{figure:fig003}
+\end{figure}
+
+
+#Conclusion.
+The goal of this paper was describe the Bayesian LDA model for fuzzy clustering based on different types of data, specifically we demonstrated how to use the model for Multinomial entry in the Marketing example, Binomial trial using the financial dataset and Bernoulli trial using ecological data.
+  
+One of the main properties of the model presented here is the fact that this model adopts the truncated stick-breaking prior which enables the selection of the optimal number of clusters which regularizes model results. The next step in the development of the model presented here is the possibility to work with explanatory variables in the same structured described in this article, which can be useful not to model the cluster but also explain how the clusters are created.
+
+
+  
+  
+  
+#Appendix. {-}
+Here in the Appendix we will show how the Full Conditional Distributions were constructed. Consider initially the Full Conditional Distributions for $Z_{lc}=c^{*}$ in all three cases the kernel of the distribution derived is the same:
+
+\begin{equation*}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&=&\kappa\left[\phi_{c^{*}1}^{\mathbbm{1}(Y_{l1}=s,Z_{lc}=c^{*})}\times\dots\times \phi_{c^{*}S}^{\mathbbm{1}(Y_{lS}=s,Z_{lc}=c^{*})}\right]\\[.5em]
+&&\times\left[\theta_{l1}^{\mathbbm{1}(Z_{l1}=c^{*})}\times\dots\times\theta_{lC}^{\mathbbm{1}(Z_{lC}=c^{*})}\right]\\[.5em]
+&=&\kappa\phi_{c^{*}s}\theta_{lc^{*}}
+\end{array}
+\label{ap:eq0001} 
+\end{equation*}
+
+\noindent where $\mathbbm{1}(Y_{l1}=s,Z_{lc}=c^{*})$ is the indicator function which assumes one only for the $l$-th observation, $s$-th variable and has been identified as belong to cluster $c^{*}$. In a similar way, $\mathbbm{1}(Z_{lC}=c^{*})$ assumes one only for observations classified as belong to cluster $c^{*}$.
+
+Since $Z_{lc}$ is a categorical random variable with support in $\Za=(1,2,\dots,C)$ the sum of all probabilities for all elements must one, then the constant $\kappa$ is given by:
+
+\begin{equation*}
+\begin{array}{lll}
+\kappa&=&\left(\theta_{l1}\phi_{1s}+\dots+\theta_{lC}\phi_{Cs}\right)^{-1}
+\end{array}
+\label{ap:eq0002} 
+\end{equation*}
+
+Then, each category for $Z_{lc}$ can be draw from a categorical distribution with probabilities equal to $\kappa\phi_{c^{*}s}\theta_{lc^{*}}$ with $c^{*} \in \Za$. For the Binomial and Bernoulli cases we have:
+
+\begin{equation*}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&\propto&\theta_{lc^{*}}\phi_{c^{*}s}^{y_{ls}}(1-\phi_{c^{*}s})^{1-y_{ls}}
+\end{array}
+\label{ap:eq0003} 
+\end{equation*}
+
+\noindent where each cluster label can be draw from a categorical distribution with probabilities equal to:
+
+\begin{equation*}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{y_{ls}}(1-\phi_{c^{*}s})^{1-y_{ls}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{y_{ls}}(1-\phi_{cs})^{1-y_{ls}}}
+\end{array}
+\label{ap:eq0004} 
+\end{equation*}
+
+For the $\boldsymbol\phi_{c^{*}}$ its Full Conditional is given by:
+
+\begin{equation*}
+\begin{array}{lll}
+p\left(\boldsymbol\phi_{c^{*}}|\mathbf{Z}_{\cdot c^{*}},\{\mathbf{Y}_{l\cdot}|Z_{lc}=c^{*}\},\boldsymbol\beta\right)&\propto& \displaystyle\prod_{l=1}^{L}\phi_{c^{*}1}^{\mathbbm{1}(Y_{l1}=1,Z_{lc}=c^{*})}\times\dots\times\phi_{c^{*}S}^{\mathbbm{1}(Y_{l1}=S,Z_{lc}=c^{*})}\\[.5em]
+&\times&\phi_{c^{*}1}^{\beta_{1}-1}\times\dots\times\phi_{c^{*}S}^{\beta_{S}-1}\\[.5em]
+&\propto&\displaystyle\prod_{s=1}^{S}\phi_{c^{*}s}^{n_{c^{*}s}+\beta_{s}-1}
+\end{array}
+\label{ap:eq0005} 
+\end{equation*}
+
+\noindent where $n_{c^{*}s}$ is the total number of elements classified in community $c^{*}$ and independent variable $s$. In the Binomial or Bernoulli case the Full Conditional is given by:
+
+\begin{equation*}
+\begin{array}{lll}
+p\left(\phi_{c^{*}s}|\mathbf{Z}_{\cdot c^{*}},\{\mathbf{Y}_{l\cdot}|Z_{lc}=c^{*}\},\boldsymbol\beta\right)&\propto&\displaystyle\prod_{l=1}^{L}\phi_{c^{*}s}^{\mathbbm{1}(Y_{ls}=s,Z_{lc}=c^{*})}\phi_{c^{*}s}^{\alpha_{0}-1}(1-\phi_{c^{*}s})^{\alpha_{1}-1}\\[.5em]
+&\propto&\phi_{c^{*}s}^{n_{c^{*}s}+\alpha_{0}-1}(1-\phi_{c^{*}s})^{n_{-c^{*}s}+\alpha_{1}-1}
+\end{array}
+\label{ap:eq0006} 
+\end{equation*}
+
+\noindent where $n_{-c^{*}s}$ is the total number of elements that **not** belong to either community $c^{*}$ and indepenent variable $s$.
+
+The last Full Conditional described here is the Full Conditional for $p\left(V_{lc}|Z_{lc}\right)$, in this case we have:
+
+\begin{equation*}
+\begin{array}{lll}
+p\left(V_{lc}|Z_{lc}\right)&\propto& Binom(n_{lc}|n=n_{lc}+n_{l(c^{*}>c)},V_{lc})Beta(V_{lc}|1,\gamma)\\[.5em]
+&\propto&Beta(1+n_{lc},\gamma+n_{l(c^{*}>c)})\\[.5em]
+&=&\frac{\Gamma(n_{lc}+1+n_{l(c^{*}>c)}+\gamma)}{\Gamma(n_{lc}+1)\Gamma(n_{l(c^{*}>c)}+\gamma)}V_{lc}^{n_{lc}}\left(1-V_{lc}^{n_{l(c^{*}>c)}+\gamma}\right)
+\end{array}
+\label{ap:eq0007} 
+\end{equation*}
+
+#References.

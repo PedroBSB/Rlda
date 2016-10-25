@@ -39,6 +39,9 @@ preamble: >
   \usepackage{amsfonts}
   \usepackage{bbm}
   \usepackage{calrsfs}
+  \usepackage{draftwatermark}
+  \SetWatermarkText{DRAFT}
+  \SetWatermarkScale{1}
   \newcommand{\Za}{\mathcal{Z}}
 output: rticles::jss_article
 
@@ -156,7 +159,7 @@ For this model, we have $n_{ls}$ elements for each sampling unit $l$ and communi
 
 \begin{equation}
 \begin{array}{lll}
-p(Z_{lc}=c^{*}|Y_{ls}=y_{ls},\boldsymbol\phi_{s},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{y_{ls}}(1-\phi_{cs})^{1-y_{ls}}}
+p(Z_{lc}=c^{*}|Y_{ls}=y_{ls},\boldsymbol\phi_{s},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{x_{ils}}(1-\phi_{cs})^{1-x_{ils}}}
 \end{array}
 \label{eq:eq0006} 
 \end{equation}
@@ -566,9 +569,9 @@ Here in the Appendix we will show how the Full Conditional Distributions were co
 
 \begin{equation*}
 \begin{array}{lll}
-p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&=&\kappa\left[\phi_{c^{*}1}^{\mathbbm{1}(Y_{l1}=s,Z_{lc}=c^{*})}\times\dots\times \phi_{c^{*}S}^{\mathbbm{1}(Y_{lS}=s,Z_{lc}=c^{*})}\right]\\[.5em]
+p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\zeta_{c^{*}},\boldsymbol\theta_{l})&=&\kappa\left[\phi_{c^{*}1}^{\mathbbm{1}(Y_{l1}=s,Z_{lc}=c^{*})}\times\dots\times \phi_{c^{*}S}^{\mathbbm{1}(Y_{lS}=s,Z_{lc}=c^{*})}\right]\\[.5em]
 &&\times\left[\theta_{l1}^{\mathbbm{1}(Z_{l1}=c^{*})}\times\dots\times\theta_{lC}^{\mathbbm{1}(Z_{lC}=c^{*})}\right]\\[.5em]
-&=&\kappa\phi_{c^{*}s}\theta_{lc^{*}}
+&=&\kappa\zeta_{c^{*}s}\theta_{lc^{*}}
 \end{array}
 \label{ap:eq0001} 
 \end{equation*}
@@ -579,12 +582,14 @@ Since $Z_{lc}$ is a categorical random variable with support in $\Za=(1,2,\dots,
 
 \begin{equation*}
 \begin{array}{lll}
-\kappa&=&\left(\theta_{l1}\phi_{1s}+\dots+\theta_{lC}\phi_{Cs}\right)^{-1}
+\kappa&=&\left(\theta_{l1}\zeta_{1s}+\dots+\theta_{lC}\zeta_{Cs}\right)^{-1}
 \end{array}
 \label{ap:eq0002} 
 \end{equation*}
 
-Then, each category for $Z_{lc}$ can be draw from a categorical distribution with probabilities equal to $\kappa\phi_{c^{*}s}\theta_{lc^{*}}$ with $c^{*} \in \Za$. For the Binomial and Bernoulli cases we have:
+Then, each category for $Z_{lc}$ can be draw from a categorical distribution with probabilities equal to $\kappa\zeta_{c^{*}s}\theta_{lc^{*}}$ with $c^{*} \in \Za$, where $\zeta_{c^{*}s}=\phi_{sc^{*}}$ in the multinomial case and $\zeta_{c^{*}s}=\phi_{c^{*}s}^{y_{ls}}(1-\phi_{c^{*}s})^{1-y_{ls}}$ and $\zeta_{c^{*}s}=\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}$ for Bernoulli and Binomial cases respectively.
+
+For the Bernoulli and Binomial cases we have, respectively.:
 
 \begin{equation*}
 \begin{array}{lll}
@@ -593,13 +598,34 @@ p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&\propto&\
 \label{ap:eq0003} 
 \end{equation*}
 
-\noindent where each cluster label can be draw from a categorical distribution with probabilities equal to:
+\begin{equation*}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&\propto&\theta_{lc^{*}}\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}
+\end{array}
+\label{ap:eq0004} 
+\end{equation*}
+
+\noindent where each cluster label can be draw from a categorical distribution with probabilities equal to (Multinomial, Bernoulli and Binomial):
+
+\begin{equation*}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}}
+\end{array}
+\label{ap:eq0005} 
+\end{equation*}
 
 \begin{equation*}
 \begin{array}{lll}
 p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{y_{ls}}(1-\phi_{c^{*}s})^{1-y_{ls}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{y_{ls}}(1-\phi_{cs})^{1-y_{ls}}}
 \end{array}
-\label{ap:eq0004} 
+\label{ap:eq0006} 
+\end{equation*}
+
+\begin{equation*}
+\begin{array}{lll}
+p(Z_{lc}=c^{*}|Y_{ls}=s,\boldsymbol\phi_{c^{*}},\boldsymbol\theta_{l})&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{x_{ils}}(1-\phi_{cs})^{1-x_{ils}}}
+\end{array}
+\label{ap:eq0007} 
 \end{equation*}
 
 For the $\boldsymbol\phi_{c^{*}}$ its Full Conditional is given by:
@@ -629,9 +655,9 @@ The last Full Conditional described here is the Full Conditional for $p\left(V_{
 
 \begin{equation*}
 \begin{array}{lll}
-p\left(V_{lc}|Z_{lc}\right)&\propto& Binom(n_{lc}|n=n_{lc}+n_{l(c^{*}>c)},V_{lc})Beta(V_{lc}|1,\gamma)\\[.5em]
-&\propto&Beta(1+n_{lc},\gamma+n_{l(c^{*}>c)})\\[.5em]
-&=&\frac{\Gamma(n_{lc}+1+n_{l(c^{*}>c)}+\gamma)}{\Gamma(n_{lc}+1)\Gamma(n_{l(c^{*}>c)}+\gamma)}V_{lc}^{n_{lc}}\left(1-V_{lc}^{n_{l(c^{*}>c)}+\gamma}\right)
+p\left(V_{lc}|Z_{lc}\right)&\propto& Binom(n_{lc}|N=N_{lc}+N_{l(c>c^{*})},V_{lc})Beta(V_{lc}|1,\gamma)\\[.5em]
+&\propto&Beta(1+N_{lc},\gamma+N_{l(c>c^{*})})\\[.5em]
+&=&\frac{\Gamma(N_{lc}+1+N_{l(c>c^{*})}+\gamma)}{\Gamma(N_{lc}+1)\Gamma(N_{l(c>c^{*})}+\gamma)}V_{lc}^{N_{lc}}\left(1-V_{lc}^{N_{l(c>c^{*})}+\gamma}\right)
 \end{array}
 \label{ap:eq0007} 
 \end{equation*}

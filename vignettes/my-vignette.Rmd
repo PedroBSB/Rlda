@@ -1,6 +1,6 @@
 ---
 author:
-  - name: Pedro H. M. Albuquerque
+  - name: Pedro Albuquerque
     affiliation: University of Brasília
     address: >
       Faculdade de Economia, Administração e Contabilidade,
@@ -256,7 +256,7 @@ rownames(mat1)<-mat1[,1]
 mat1<-mat1[,-1]
 ```
 
-To use the \code{GibbsSamplingAbundance} method we need to specify some arguments:
+To use the \code{lda_multinomial} method we need to specify some arguments:
 
 ```{r,eval=FALSE}
 #Set seed
@@ -265,7 +265,7 @@ set.seed(9292)
 beta<-rep(1,ncol(mat1))
 gamma<-0.01
 #Execute the LDA for the Multinomial entry
-res<-GibbsSamplingAbundance(mat1,30,beta,gamma,1000,TRUE,FALSE)
+res<-lda_multinomial(mat1,30,beta,gamma,1000,TRUE,FALSE)
 ```
 
 In the above code we defined the maximum number of clusters as 30 and 1000 Gibbs Sampling iterations with the likelihood computed with priors and not showing the progress bar.
@@ -401,7 +401,7 @@ spSize<-as.data.frame(matrix(100,
                       nrow=nrow(sp500)))
 ```
 
-In this cases since we are postulated a Binomial trial we should use the \code{GibbsSamplingBinomial}, for which we need to specify the follow arguments:
+In this cases since we are postulated a Binomial trial we should use the \code{lda_binomial}, for which we need to specify the follow arguments:
 
 ```{r,eval=FALSE}
 #Set seed
@@ -411,7 +411,7 @@ gamma <-0.01
 alpha0<-0.01
 alpha1<-0.01
 #Execute the LDA for the Binomial entry
-res<-GibbsSamplingBinomial(sp500,spSize,10,
+res<-lda_binomial(sp500,spSize,10,
                            alpha0,alpha1,gamma,
                            5000,TRUE,FALSE)
 ```
@@ -469,7 +469,7 @@ load("Example3.RData")
 ```
 One of the most challenge situation in study ecological data is the fact the in some applications, it is not possible to observe the total number of species in each sampled plot. However, it is possible to know if some is species is presented (i.e. overserved) or absente (i.e. not observed) [@pearce2006modelling].
 
-For this kind of data, we can use the the \code{GibbsSamplingPresence} function. Specifically, in this example we used \code{data("SPDATA")} from \pkg{PresenceAbsence} package which is referred to 13 species that could be observed (value equal 1) and not observed or absent (value equal 0) at 386 forested locations. 
+For this kind of data, we can use the the \code{lda_bernoulli} function. Specifically, in this example we used \code{data("SPDATA")} from \pkg{PresenceAbsence} package which is referred to 13 species that could be observed (value equal 1) and not observed or absent (value equal 0) at 386 forested locations. 
 
 ```{r, eval=FALSE,message=FALSE,warning=FALSE}
 library(PresenceAbsence)
@@ -499,7 +499,7 @@ gamma <-0.01
 alpha0<-0.01
 alpha1<-0.01
 #Execute the LDA for the Binomial entry
-res<-GibbsSamplingPresence(matPres,10,
+res<-lda_bernoulli(matPres,10,
                            alpha0,alpha1,gamma,
                            5000,TRUE,FALSE)
 ```

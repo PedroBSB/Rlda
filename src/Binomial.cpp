@@ -120,9 +120,9 @@ void updateThetaAndPhiBinomial(NumericMatrix &ThetaGibbs,NumericMatrix Theta,Num
     PhiGibbs(gibbs,_) =meltBinomial(Phi);
 }
 
-NumericMatrix aggregateValuesBinomial(NumericMatrix zMat,int nLocations,int nCommunity){
+NumericMatrix aggregateValuesBinomial(NumericMatrix zMat,int nLocations,int n_community){
   //'Initialize the matrix
-  NumericMatrix sum(nLocations,nCommunity);
+  NumericMatrix sum(nLocations,n_community);
   //'Fill the sum matrix
   sum.fill(0.0);
   for(int i=0;i<zMat.nrow();i++){
@@ -137,15 +137,15 @@ NumericMatrix aggregateValuesBinomial(NumericMatrix zMat,int nLocations,int nCom
   return(sum);
 }
 
-List aggregateValuesBinomialByReflectanceBinomial(NumericMatrix zMat,int nBands,int nCommunity){
+List aggregateValuesBinomialByReflectanceBinomial(NumericMatrix zMat,int nBands,int n_community){
   //'Initialize the results
   List res(2);
   //'Initialize the matrix with Refletance
-  NumericMatrix sumRef(nBands,nCommunity);
+  NumericMatrix sumRef(nBands,n_community);
   //'Fill the sum matrix
   sumRef.fill(0.0);
   //'Initialize the matrix without Refletance
-  NumericMatrix sumNonRef(nBands,nCommunity);
+  NumericMatrix sumNonRef(nBands,n_community);
   //'Fill the sum matrix
   sumNonRef.fill(0.0);
   for(int i=0;i<zMat.nrow();i++){
@@ -280,16 +280,16 @@ NumericMatrix generateZBinomial(NumericMatrix binomMat,NumericMatrix populMat, N
   }
 }
 
-NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int nLocations,int nCommunity, double gamma) {
+NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int nLocations,int n_community, double gamma) {
   //'Intialize the Theta matrix
-  NumericMatrix Theta(nLocations,nCommunity);
+  NumericMatrix Theta(nLocations,n_community);
   //'Calculate the number of individuals in each community and locations
-  NumericMatrix sumMat = aggregateValuesBinomial(zMat, nLocations, nCommunity);
+  NumericMatrix sumMat = aggregateValuesBinomial(zMat, nLocations, n_community);
   //'For each location
   for(int l=0;l<nLocations;l++){
     //'For each community
-    for(int c=0;c<nCommunity;c++){
-      if(c<(nCommunity-1)){
+    for(int c=0;c<n_community;c++){
+      if(c<(n_community-1)){
         //'How many elements belong to community c in location l
         double nLC=sumMat(l,c);
         //'How many elements are larger than community c
@@ -305,11 +305,11 @@ NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int 
   //'Create the Theta matrix
   //'Foreach location
   for(int l=0;l<nLocations;l++){
-    NumericVector thetaVec(nCommunity);
+    NumericVector thetaVec(n_community);
     //'Update the Theta \prod_(k=1)^(c-1)(1-V_kl )
     double prod=1;
     //'For each community
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       double vNumber = vMat(l,c);
       if (c == 0) prod=1;
       if (c >  0) prod=prod*(1.0-vMat(l,c-1));
@@ -322,17 +322,17 @@ NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int 
 }
 
 
-NumericMatrix generatePhiBinomial(NumericMatrix zMat,int nBands,int nCommunity,double alpha0, double alpha1) {
+NumericMatrix generatePhiBinomial(NumericMatrix zMat,int nBands,int n_community,double alpha0, double alpha1) {
   //'Initialize the Phi matrix
-  NumericMatrix Phi(nBands,nCommunity);
+  NumericMatrix Phi(nBands,n_community);
   //'Get the sum matrices
-  List sumList = aggregateValuesBinomialByReflectanceBinomial(zMat,nBands,nCommunity);
+  List sumList = aggregateValuesBinomialByReflectanceBinomial(zMat,nBands,n_community);
   NumericMatrix sumRef= sumList(0);
   NumericMatrix sumNonRef=sumList(1);
   //'Generate the Phi
   for(int b=0;b<nBands;b++){
     //'For each community
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       Phi(b,c)=R::rbeta(alpha0+sumRef(b,c),alpha1+sumNonRef(b,c));
     }
   }
@@ -387,22 +387,22 @@ double logLikelihoodAndPriorFunctionBinomial(NumericMatrix matDATA,NumericMatrix
 //' @description Compute the Gibbs Sampling for LDA Binomial
 //' @param DATA - DataFrame with Presence and Absecence (Binomial)
 //' @param POP - DataFrame with Population Size (Binomial)
-//' @param int nCommunity - Number of communities
+//' @param int n_community - Number of communities
 //' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
 //' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
 //' @param gamma - Hyperparameter  Beta(1,gamma)
-//' @param nGibbs - Total number of Gibbs Samples
+//' @param n_gibbs - Total number of Gibbs Samples
 //' @param logLikelihoodAndPrior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
-//' @return List - With Theta(nGibbs,nCommunity*nSpecies), Phi(nGibbs,nLocations*nCommunity) and logLikelihood
+//' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
 // [[Rcpp::export]]
-List GibbsSamplingBinomial(DataFrame DATA,DataFrame POP, int nCommunity, double alpha0, double alpha1, double gamma, int nGibbs, bool logLikelihoodAndPrior=true, bool display_progress=true) {
+List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs, bool logLikelihoodAndPrior=true, bool display_progress=true) {
 
   //'Convert to matrix
-  NumericMatrix matDATA = internal::convert_using_rfunction(DATA, "as.matrix");
+  NumericMatrix matDATA = internal::convert_using_rfunction(data, "as.matrix");
 
   //'Convert to matrix
-  NumericMatrix matPOP = internal::convert_using_rfunction(POP, "as.matrix");
+  NumericMatrix matPOP = internal::convert_using_rfunction(pop, "as.matrix");
 
   //'Total number of locations
   int nLocations = matDATA.nrow();
@@ -411,37 +411,37 @@ List GibbsSamplingBinomial(DataFrame DATA,DataFrame POP, int nCommunity, double 
   int nBands = matDATA.ncol();
 
   //'Intialize Theta
-  NumericVector hyperTheta(nCommunity);
+  NumericVector hyperTheta(n_community);
   hyperTheta.fill(1);
   NumericMatrix Theta=rdirichletBinomial(nLocations,hyperTheta);
-  NumericMatrix vMat(nLocations,nCommunity);
+  NumericMatrix vMat(nLocations,n_community);
 
   //'Intialize Phi
-  NumericVector hyperPhi(nCommunity);
+  NumericVector hyperPhi(n_community);
   hyperPhi.fill(1);
   NumericMatrix Phi=rdirichletBinomial(nBands,hyperPhi);
 
   //'Initialize the ThetaGibbs
-  NumericMatrix ThetaGibbs(nGibbs,nLocations*nCommunity);
+  NumericMatrix ThetaGibbs(n_gibbs,nLocations*n_community);
 
   //'Initialize the PhiGibbs
-  NumericMatrix PhiGibbs(nGibbs,nBands*nCommunity);
+  NumericMatrix PhiGibbs(n_gibbs,nBands*n_community);
 
   //'Initialize the logLikelihood vector
-  NumericVector logLikelihoodVec(nGibbs);
+  NumericVector logLikelihoodVec(n_gibbs);
 
   //'Intialize the progressbar
-  Progress p(nGibbs, display_progress);
-  for (int g = 0; g < nGibbs; ++g) {
+  Progress p(n_gibbs, display_progress);
+  for (int g = 0; g < n_gibbs; ++g) {
     //'Verify if everything is ok
     if (Progress::check_abort()) return -1.0;
     //'Initialize the zMAt
     NumericMatrix zMat = generateZBinomial(matDATA, matPOP, Theta, Phi);
     //'Generate Theta
-    Theta =generateThetaBinomial(zMat,vMat, nLocations, nCommunity, gamma);
+    Theta =generateThetaBinomial(zMat,vMat, nLocations, n_community, gamma);
     //'Generate Phi
-    Phi = generatePhiBinomial(zMat, nBands, nCommunity, alpha0, alpha1);
-    //'Create the final Theta (nGibbs,nLocations*nCommunity) and final Phi (nGibbs,nBands*nCommunity)
+    Phi = generatePhiBinomial(zMat, nBands, n_community, alpha0, alpha1);
+    //'Create the final Theta (n_gibbs,nLocations*n_community) and final Phi (n_gibbs,nBands*n_community)
     updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Phi, g);
     //'Initialize the logLikelihood
     double logLikelihood=logLikelihoodAndPriorFunctionBinomial(matDATA,matPOP,

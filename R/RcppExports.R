@@ -4,16 +4,16 @@
 #' @name GibbsSamplingAbundance
 #' @title Gibbs Sampling for LDA Abundance with Stick-Breaking
 #' @description Compute the Gibbs Sampling for LDA Abundance with Stick-Breaking
-#' @param DATA - DataFrame with Abundance
-#' @param int nCommunity - Number of communities
+#' @param data - dataFrame with Abundance
+#' @param int n_community - Number of communities
 #' @param beta - NumericVector for beta (Sx1)
 #' @param gamma - Hyperparameter  Beta(1,gamma)
-#' @param nGibbs - Total number of Gibbs Samples
-#' @param logLikelihoodAndPrior - Likelihood compute with Priors ?
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
 #' @param bool display_progress=true - Should I Show the progressBar ?
-#' @return List - With Theta(nGibbs,nLocations*nCommunity), Phi(nGibbs,nCommunity*nSpecies) and logLikelihood
-GibbsSamplingAbundance <- function(DATA, nCommunity, beta, gamma, nGibbs, logLikelihoodAndPrior = TRUE, display_progress = TRUE) {
-    .Call('Rlda_GibbsSamplingAbundance', PACKAGE = 'Rlda', DATA, nCommunity, beta, gamma, nGibbs, logLikelihoodAndPrior, display_progress)
+#' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
+lda_multinomial <- function(data, n_community, beta, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
+    .Call('Rlda_lda_multinomial', PACKAGE = 'Rlda', data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress)
 }
 
 #' @name GibbsSamplingBinomial

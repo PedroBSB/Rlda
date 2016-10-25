@@ -123,17 +123,17 @@ void updateThetaAndPhiAbundance(NumericMatrix &ThetaGibbs,NumericMatrix Theta,Nu
 }
 
 
-NumericMatrix sumarizeCommunitiesAbundance(List zList, int nCommunity){
+NumericMatrix sumarizeCommunitiesAbundance(List zList, int n_community){
   //'Total number of locations
   int nLocations = zList.length();
   //'Intialize the mMat
-  NumericMatrix mMat(nLocations,nCommunity);
+  NumericMatrix mMat(nLocations,n_community);
   //'Foreach location
   for(int l=0;l<nLocations;l++){
     //'Get the zMat
     NumericMatrix zMat=zList[l];
     //'For each community
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       //'Sum all elements in this location
       mMat(l,c)=sum(zMat(_,c));
     }
@@ -149,16 +149,16 @@ NumericMatrix generateThetaAbundance(NumericMatrix vMat) {
   //'Total number of locations
   int nLocations = vMat.nrow();
   //'Total number of communities
-  int nCommunity = vMat.ncol();
+  int n_community = vMat.ncol();
   //'Initialize the Theta matrix
-  NumericMatrix thetaMat(nLocations,nCommunity);
+  NumericMatrix thetaMat(nLocations,n_community);
   //'Foreach location
   for(int l=0;l<nLocations;l++){
-    NumericVector Theta(nCommunity);
+    NumericVector Theta(n_community);
     //'Update the Theta \prod_(k=1)^(c-1)(1-V_kl )
     double prod=1;
     //'For each community
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       double vNumber = vMat(l,c);
       if (c == 0) prod=1;
       if (c >  0) prod=prod*(1.0-vMat(l,c-1));
@@ -178,11 +178,11 @@ List generateZAbundance(NumericMatrix size, NumericMatrix Theta, NumericMatrix P
   //'Number of Species
   int nSpecies=Phi.ncol();
   //'Number of Communities
-  int nCommunity=Phi.nrow();
+  int n_community=Phi.nrow();
   //'For each location sample from a Multinomial
   for(int l=0;l<nLocations;l++){
     //'Initialize the zMat:
-    NumericMatrix zMat(nSpecies,nCommunity);
+    NumericMatrix zMat(nSpecies,n_community);
     //'For each Specie
     for(int s=0;s<nSpecies;s++){
       //'Calculate the probability vector
@@ -205,13 +205,13 @@ List generateZAbundance(NumericMatrix size, NumericMatrix Theta, NumericMatrix P
   return zList;
 }
 
-NumericMatrix generatePhiAbundance(int nCommunity, List zList, NumericVector beta) {
+NumericMatrix generatePhiAbundance(int n_community, List zList, NumericVector beta) {
   //'Initialize the Phi matrix
-  NumericMatrix phiMat(nCommunity,beta.length());
+  NumericMatrix phiMat(n_community,beta.length());
   //'Number of Species
   int nSpecies=beta.length();
   //'For each community count
-  for(int c=0;c<nCommunity;c++){
+  for(int c=0;c<n_community;c++){
     //'How many members are from community c and specie s (s=1,...,S)?
     NumericVector nSpeciesVec = countElementsAbundance(zList,c,nSpecies);
     //'Create the parameter vector Dirichlet
@@ -224,19 +224,19 @@ NumericMatrix generatePhiAbundance(int nCommunity, List zList, NumericVector bet
   return phiMat;
 }
 
-NumericMatrix generateVAbundance(List zList,int nLocations,int nCommunity, double gamma) {
+NumericMatrix generateVAbundance(List zList,int nLocations,int n_community, double gamma) {
   //'Initialize the Phi matrix
-  NumericMatrix vMat(nLocations,nCommunity);
+  NumericMatrix vMat(nLocations,n_community);
   //'Create the mMat
-  NumericMatrix mMat = sumarizeCommunitiesAbundance(zList,nCommunity);
+  NumericMatrix mMat = sumarizeCommunitiesAbundance(zList,n_community);
   //'Foreach Specie
   for(int l=0;l<nLocations;l++){
     //'For each community:
     NumericVector nGreater = invertedCumsumAbundance(mMat(l,_));
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       //'nLC is the number of species in plot l that come from community c
       double nLC = mMat(l,c);
-      if(c<nCommunity-1){
+      if(c<n_community-1){
         //'Generate stick-breaking probabilities
         vMat(l,c)=R::rbeta(1.0+nLC,gamma+nGreater(c+1));
       }
@@ -250,10 +250,10 @@ NumericMatrix generateVAbundance(List zList,int nLocations,int nCommunity, doubl
 }
 
 
-double logLikelihoodAndPriorFunctionAbundance(List zList, int g, int nSpecies,int nCommunity, NumericMatrix vMat,NumericMatrix Theta, NumericMatrix Phi, double gamma, bool logLikelihoodAndPrior=true) {
+double ll_priorFunctionAbundance(List zList, int g, int nSpecies,int n_community, NumericMatrix vMat,NumericMatrix Theta, NumericMatrix Phi, double gamma, bool ll_prior=true) {
   double logLikelihood=0;
   //'Calculate the Loglikelihood and Prior
-  if(logLikelihoodAndPrior){
+  if(ll_prior){
     //'Initialize
     double priorV=0.0;
     double priorPhi=0.0;
@@ -261,7 +261,7 @@ double logLikelihoodAndPriorFunctionAbundance(List zList, int g, int nSpecies,in
     //'For each location
     for(int l=0;l<zList.length();l++){
       //'Compute the prior for V_{cl}
-      for(int c=0;c<nCommunity;c++){
+      for(int c=0;c<n_community;c++){
         if(vMat(l,c)<1)priorV=priorV+R::dbeta(vMat(l,c),1,gamma,1);
       }
       //'Get the zMat
@@ -269,7 +269,7 @@ double logLikelihoodAndPriorFunctionAbundance(List zList, int g, int nSpecies,in
       //'For each specie
       for(int s=0;s<nSpecies;s++){
         //'For each community
-        for(int c=0;c<nCommunity;c++){
+        for(int c=0;c<n_community;c++){
           //'Acumulate the Prior Phi
           if(zMat(s,c)>0){
             //'All elements in specie S and Community C
@@ -291,7 +291,7 @@ double logLikelihoodAndPriorFunctionAbundance(List zList, int g, int nSpecies,in
       //'For each specie
       for(int s=0;s<nSpecies;s++){
         //'For each community
-        for(int c=0;c<nCommunity;c++){
+        for(int c=0;c<n_community;c++){
           if(zMat(s,c)>0){
             //'All elements in specie S and Community C
             if(Phi(c,s)>0) logLikelihood=logLikelihood+zMat(s,c)*log(Phi(c,s));
@@ -313,53 +313,53 @@ double logLikelihoodAndPriorFunctionAbundance(List zList, int g, int nSpecies,in
 //' @name GibbsSamplingAbundance
 //' @title Gibbs Sampling for LDA Abundance with Stick-Breaking
 //' @description Compute the Gibbs Sampling for LDA Abundance with Stick-Breaking
-//' @param DATA - DataFrame with Abundance
-//' @param int nCommunity - Number of communities
+//' @param data - dataFrame with Abundance
+//' @param int n_community - Number of communities
 //' @param beta - NumericVector for beta (Sx1)
 //' @param gamma - Hyperparameter  Beta(1,gamma)
-//' @param nGibbs - Total number of Gibbs Samples
-//' @param logLikelihoodAndPrior - Likelihood compute with Priors ?
+//' @param n_gibbs - Total number of Gibbs Samples
+//' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
-//' @return List - With Theta(nGibbs,nLocations*nCommunity), Phi(nGibbs,nCommunity*nSpecies) and logLikelihood
+//' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
 // [[Rcpp::export]]
-List GibbsSamplingAbundance(DataFrame DATA, int nCommunity,NumericVector beta, double gamma, int nGibbs, bool logLikelihoodAndPrior=true, bool display_progress=true) {
+List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double gamma, int n_gibbs, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix
-  NumericMatrix matDATA = internal::convert_using_rfunction(DATA, "as.matrix");
+  NumericMatrix matdata = internal::convert_using_rfunction(data, "as.matrix");
 
   //'Total number of locations
-  int nLocations = matDATA.nrow();
+  int nLocations = matdata.nrow();
 
   //'Total number of species
-  int nSpecies = matDATA.ncol();
+  int nSpecies = matdata.ncol();
 
   //'Initialize the ThetaGibbs
-  NumericMatrix ThetaGibbs(nGibbs,nLocations*nCommunity);
+  NumericMatrix ThetaGibbs(n_gibbs,nLocations*n_community);
 
   //'Initialize the PhiGibbs
-  NumericMatrix PhiGibbs(nGibbs,nCommunity*nSpecies);
+  NumericMatrix PhiGibbs(n_gibbs,n_community*nSpecies);
 
   //'Intialize Theta
-  NumericVector hyperTheta(nCommunity);
+  NumericVector hyperTheta(n_community);
   hyperTheta.fill(1);
   NumericMatrix Theta=rdirichletAbundance(nSpecies,hyperTheta);
 
   //'Initialize Phi
   NumericVector hyperPhi(nSpecies);
   hyperPhi.fill(1);
-  NumericMatrix Phi=rdirichletAbundance(nCommunity,hyperPhi);
+  NumericMatrix Phi=rdirichletAbundance(n_community,hyperPhi);
 
   //'Intialize vMat
-  NumericVector hyperV(nCommunity);
+  NumericVector hyperV(n_community);
   hyperV.fill(1);
   NumericMatrix vMat=rdirichletAbundance(nLocations,hyperV);
 
   //'Initialize the logLikelihood vector
-  NumericVector logLikelihoodVec(nGibbs);
+  NumericVector logLikelihoodVec(n_gibbs);
 
   //'Intialize the progressbar
-  Progress p(nGibbs, display_progress);
-  for (int g = 0; g < nGibbs; ++g) {
+  Progress p(n_gibbs, display_progress);
+  for (int g = 0; g < n_gibbs; ++g) {
     //'Verify if everything is ok
     if (Progress::check_abort()) return -1.0;
 
@@ -367,20 +367,20 @@ List GibbsSamplingAbundance(DataFrame DATA, int nCommunity,NumericVector beta, d
     Theta = generateThetaAbundance(vMat);
 
     //'Generate zList
-    List zList  = generateZAbundance(matDATA, Theta, Phi);
+    List zList  = generateZAbundance(matdata, Theta, Phi);
 
     //'Generate Phi
-    Phi = generatePhiAbundance(nCommunity, zList, beta);
+    Phi = generatePhiAbundance(n_community, zList, beta);
 
     //'Generate vMat
-    vMat = generateVAbundance(zList,nLocations,nCommunity, gamma);
+    vMat = generateVAbundance(zList,nLocations,n_community, gamma);
 
-    //'Create the final ThetaGibbs (nGibbs,nLocations*nCommunity) and final PhiGibbs (nGibbs,nCommunity*nSpecies)
+    //'Create the final ThetaGibbs (n_gibbs,nLocations*n_community) and final PhiGibbs (n_gibbs,n_community*nSpecies)
     updateThetaAndPhiAbundance(ThetaGibbs, Theta, PhiGibbs, Phi, g);
 
     //'Initialize the logLikelihood
-    double logLikelihood=logLikelihoodAndPriorFunctionAbundance(zList, g, nSpecies, nCommunity,
-                                                       vMat, Theta, Phi, gamma, logLikelihoodAndPrior);
+    double logLikelihood=ll_priorFunctionAbundance(zList, g, nSpecies, n_community,
+                                                       vMat, Theta, Phi, gamma, ll_prior);
 
     //'Store the logLikelihood
     logLikelihoodVec(g)=logLikelihood;

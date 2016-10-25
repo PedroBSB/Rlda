@@ -5,20 +5,20 @@
 
 using namespace Rcpp;
 
-// GibbsSamplingAbundance
-List GibbsSamplingAbundance(DataFrame DATA, int nCommunity, NumericVector beta, double gamma, int nGibbs, bool logLikelihoodAndPrior, bool display_progress);
-RcppExport SEXP Rlda_GibbsSamplingAbundance(SEXP DATASEXP, SEXP nCommunitySEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP nGibbsSEXP, SEXP logLikelihoodAndPriorSEXP, SEXP display_progressSEXP) {
+// lda_multinomial
+List lda_multinomial(DataFrame data, int n_community, NumericVector beta, double gamma, int n_gibbs, bool ll_prior, bool display_progress);
+RcppExport SEXP Rlda_lda_multinomial(SEXP dataSEXP, SEXP n_communitySEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP n_gibbsSEXP, SEXP ll_priorSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type DATA(DATASEXP);
-    Rcpp::traits::input_parameter< int >::type nCommunity(nCommunitySEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< int >::type n_community(n_communitySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< int >::type nGibbs(nGibbsSEXP);
-    Rcpp::traits::input_parameter< bool >::type logLikelihoodAndPrior(logLikelihoodAndPriorSEXP);
+    Rcpp::traits::input_parameter< int >::type n_gibbs(n_gibbsSEXP);
+    Rcpp::traits::input_parameter< bool >::type ll_prior(ll_priorSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(GibbsSamplingAbundance(DATA, nCommunity, beta, gamma, nGibbs, logLikelihoodAndPrior, display_progress));
+    rcpp_result_gen = Rcpp::wrap(lda_multinomial(data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }

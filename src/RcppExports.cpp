@@ -41,21 +41,21 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// GibbsSamplingPresence
-List GibbsSamplingPresence(DataFrame DATA, int nCommunity, double alpha0, double alpha1, double gamma, int nGibbs, bool logLikelihoodAndPrior, bool display_progress);
-RcppExport SEXP Rlda_GibbsSamplingPresence(SEXP DATASEXP, SEXP nCommunitySEXP, SEXP alpha0SEXP, SEXP alpha1SEXP, SEXP gammaSEXP, SEXP nGibbsSEXP, SEXP logLikelihoodAndPriorSEXP, SEXP display_progressSEXP) {
+// lda_bernoulli
+List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs, bool ll_prior, bool display_progress);
+RcppExport SEXP Rlda_lda_bernoulli(SEXP dataSEXP, SEXP n_communitySEXP, SEXP alpha0SEXP, SEXP alpha1SEXP, SEXP gammaSEXP, SEXP n_gibbsSEXP, SEXP ll_priorSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type DATA(DATASEXP);
-    Rcpp::traits::input_parameter< int >::type nCommunity(nCommunitySEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< int >::type n_community(n_communitySEXP);
     Rcpp::traits::input_parameter< double >::type alpha0(alpha0SEXP);
     Rcpp::traits::input_parameter< double >::type alpha1(alpha1SEXP);
     Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
-    Rcpp::traits::input_parameter< int >::type nGibbs(nGibbsSEXP);
-    Rcpp::traits::input_parameter< bool >::type logLikelihoodAndPrior(logLikelihoodAndPriorSEXP);
+    Rcpp::traits::input_parameter< int >::type n_gibbs(n_gibbsSEXP);
+    Rcpp::traits::input_parameter< bool >::type ll_prior(ll_priorSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(GibbsSamplingPresence(DATA, nCommunity, alpha0, alpha1, gamma, nGibbs, logLikelihoodAndPrior, display_progress));
+    rcpp_result_gen = Rcpp::wrap(lda_bernoulli(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }

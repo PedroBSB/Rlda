@@ -135,20 +135,20 @@ List generateZPresence(NumericMatrix binaryMat, NumericMatrix Theta, NumericMatr
   //'Number of Species
   int nSpecies=binaryMat.ncol();
   //'Number of Communities
-  int nCommunity=Theta.ncol();
+  int n_community=Theta.ncol();
   //'Matrix N the number of locations where specie s comes from community c
-  NumericMatrix nMat(nSpecies,nCommunity);
+  NumericMatrix nMat(nSpecies,n_community);
   //'Matrix R the number of these individuals thar are observed
-  NumericMatrix rMat(nSpecies,nCommunity);
+  NumericMatrix rMat(nSpecies,n_community);
   //'Matrix M the the number of species in plot l that come from community c
-  NumericMatrix mMat(binaryMat.nrow(),nCommunity);
+  NumericMatrix mMat(binaryMat.nrow(),n_community);
   //'For each location sample from a Multinomial
   for(int l=0;l<nLocations;l++){
     //'Create Phi (Size Cx1) based on vMat V_cl \prod_(k=1)^(c-1)(1-V_kl )
-    NumericVector Phi(nCommunity);
+    NumericVector Phi(n_community);
     //'Update the Phi \prod_(k=1)^(c-1)(1-V_kl )
     double prod=1;
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       double vNumber = vMat(l,c);
       if (c == 0) prod=1;
       if (c >  0) prod=prod*(1.0-vMat(l,c-1));
@@ -195,13 +195,13 @@ NumericMatrix generateThetaPresence(List zList,double alpha0, double alpha1) {
   //'Total number of species
   int nSpecies = nMat.nrow();
   //'Total number of communities
-  int nCommunity = nMat.ncol();
+  int n_community = nMat.ncol();
   //'Initialize the Phi matrix
-  NumericMatrix thetaMat(nSpecies,nCommunity);
+  NumericMatrix thetaMat(nSpecies,n_community);
   //'For each Specie
   for(int s=0;s<nSpecies;s++){
     //'For each community:
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       double aBeta = rMat(s,c)+alpha0;
       double bBeta = nMat(s,c)-rMat(s,c)+alpha1;
       thetaMat(s,c)=R::rbeta(aBeta,bBeta);
@@ -215,17 +215,17 @@ NumericMatrix generateVPresence(List zList,int nLocations, double gamma) {
   //'Getting the M matrix
   NumericMatrix mMat = zList[2];
   //'Total number of communities
-  int nCommunity = mMat.ncol();
+  int n_community = mMat.ncol();
   //'Initialize the Phi matrix
-  NumericMatrix vMat(nLocations,nCommunity);
+  NumericMatrix vMat(nLocations,n_community);
   //'Foreach Specie
   for(int l=0;l<nLocations;l++){
     //'For each community:
     NumericVector nGreater = invertedCumsumPresence(mMat(l,_));
-    for(int c=0;c<nCommunity;c++){
+    for(int c=0;c<n_community;c++){
       //'nLC is the number of species in plot l that come from community c
       double nLC = mMat(l,c);
-      if(c<nCommunity-1){
+      if(c<n_community-1){
         //'Generate stick-breaking probabilities
         vMat(l,c)=R::rbeta(1.0+nLC,gamma+nGreater(c+1));
       }
@@ -238,11 +238,11 @@ NumericMatrix generateVPresence(List zList,int nLocations, double gamma) {
   return vMat;
 }
 
-double logLikelihoodAndPriorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpecies,int nCommunity, NumericMatrix vMat,NumericMatrix Theta, NumericMatrix Phi, double alpha0,double alpha1, double gamma, bool logLikelihoodAndPrior=true) {
+double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpecies,int n_community, NumericMatrix vMat,NumericMatrix Theta, NumericMatrix Phi, double alpha0,double alpha1, double gamma, bool ll_prior=true) {
   //'Initialize the logLikelihoodVec
   double logLikelihood=0;
   //'Calculate the Loglikelihood and Prior
-  if(logLikelihoodAndPrior){
+  if(ll_prior){
     //'Initialize the V_{cl} and Theta_{sc} prior
     double priorV=0.0;
     double priorTheta=0.0;
@@ -251,7 +251,7 @@ double logLikelihoodAndPriorFunctionPresence(NumericMatrix matDATA,int nLocation
       //'Initiate the Theta Counter
       int thetaGibbsCount=0;
       //'Compute the prior for V_{cl}
-      for(int c=0;c<nCommunity;c++){
+      for(int c=0;c<n_community;c++){
         if(vMat(l,c)<1)priorV=priorV+R::dbeta(vMat(l,c),1,gamma,1);
       }
 
@@ -263,7 +263,7 @@ double logLikelihoodAndPriorFunctionPresence(NumericMatrix matDATA,int nLocation
         //'Compute just one time the prior for Theta_{sc}
         if(l==0){
           //'Compute the prior for Theta_{sc}
-          for(int c=0;c<nCommunity;c++){
+          for(int c=0;c<n_community;c++){
             if(Theta(s,c)<1)priorTheta=priorTheta+R::dbeta(Theta(s,c),alpha0,alpha1,1);
           }
         }
@@ -271,7 +271,7 @@ double logLikelihoodAndPriorFunctionPresence(NumericMatrix matDATA,int nLocation
         //'Initialize the product between Theta and Phi
         double thetaPhi=0.0;
         //'For each community
-        for(int c=0;c<nCommunity;c++){
+        for(int c=0;c<n_community;c++){
           thetaPhi=thetaPhi+Theta(s,c)*Phi(l,c);  //'DV: mudei aqui
         }
         //'Getting the x_{ls} observation
@@ -302,7 +302,7 @@ double logLikelihoodAndPriorFunctionPresence(NumericMatrix matDATA,int nLocation
         //'Initialize the product between Theta and Phi
         double thetaPhi=0.0;
         //'For each community
-        for(int c=0;c<nCommunity;c++){
+        for(int c=0;c<n_community;c++){
           thetaPhi=thetaPhi+Theta(s,c)*Phi(l,c); //'DV: mudei aqui
         }
         //'Getting the x_{ls} observation
@@ -329,19 +329,19 @@ double logLikelihoodAndPriorFunctionPresence(NumericMatrix matDATA,int nLocation
 //' @title Gibbs Sampling for LDA Presence and Absence
 //' @description Compute the Gibbs Sampling for LDA Presence and Absence
 //' @param DATA - DataFrame with Presence and Absecence (Zeros and Ones)
-//' @param int nCommunity - Number of communities
+//' @param int n_community - Number of communities
 //' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
 //' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
 //' @param gamma - Hyperparameter  Beta(1,gamma)
-//' @param nGibbs - Total number of Gibbs Samples
-//' @param logLikelihoodAndPrior - Likelihood compute with Priors ?
+//' @param n_gibbs - Total number of Gibbs Samples
+//' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
-//' @return List - With Theta(nGibbs,nCommunity*nSpecies), Phi(nGibbs,nLocations*nCommunity) and logLikelihood
+//' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
 // [[Rcpp::export]]
-List GibbsSamplingPresence(DataFrame DATA, int nCommunity, double alpha0, double alpha1, double gamma, int nGibbs, bool logLikelihoodAndPrior=true, bool display_progress=true) {
+List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix
-  NumericMatrix matDATA = internal::convert_using_rfunction(DATA, "as.matrix");
+  NumericMatrix matDATA = internal::convert_using_rfunction(data, "as.matrix");
 
   //'Total number of locations
   int nLocations = matDATA.nrow();
@@ -350,32 +350,32 @@ List GibbsSamplingPresence(DataFrame DATA, int nCommunity, double alpha0, double
   int nSpecies = matDATA.ncol();
 
   //'Intialize Theta
-  NumericVector hyperTheta(nCommunity);
+  NumericVector hyperTheta(n_community);
   hyperTheta.fill(1);
   NumericMatrix Theta=rdirichletPresence(nSpecies,hyperTheta);
 
   //'Intialize vMat
-  NumericVector hyperV(nCommunity);
+  NumericVector hyperV(n_community);
   hyperV.fill(1);
   NumericMatrix vMat=rdirichletPresence(nLocations,hyperV);
 
   //'Initialize the ThetaGibbs
-  NumericMatrix ThetaGibbs(nGibbs,nCommunity*nSpecies);
+  NumericMatrix ThetaGibbs(n_gibbs,n_community*nSpecies);
 
   //'Initialize the PhiGibbs
-  NumericMatrix PhiGibbs(nGibbs,nLocations*nCommunity);
+  NumericMatrix PhiGibbs(n_gibbs,nLocations*n_community);
 
   //'Initialize the logLikelihood vector
-  NumericVector logLikelihoodVec(nGibbs);
+  NumericVector logLikelihoodVec(n_gibbs);
 
   //'Intialize the progressbar
-  Progress p(nGibbs, display_progress);
-  for (int g = 0; g < nGibbs; ++g) {
+  Progress p(n_gibbs, display_progress);
+  for (int g = 0; g < n_gibbs; ++g) {
     //'Verify if everything is ok
     if (Progress::check_abort()) return -1.0;
 
     //'Initialize the Phi matrix
-    NumericMatrix PhiMat(nLocations, nCommunity);
+    NumericMatrix PhiMat(nLocations, n_community);
 
     //'Generate zList
     List zList  = generateZPresence(matDATA, Theta, vMat, PhiMat);
@@ -386,15 +386,15 @@ List GibbsSamplingPresence(DataFrame DATA, int nCommunity, double alpha0, double
     //'Generate vMat
     vMat = generateVPresence(zList,nLocations, gamma);
 
-    //'Create the final Theta (nGibbs,nCommunity*nSpecies) and final Phi (PhiGibbs)
+    //'Create the final Theta (n_gibbs,n_community*nSpecies) and final Phi (PhiGibbs)
     updateThetaAndPhiPresence(ThetaGibbs, Theta, PhiGibbs, PhiMat, g);
 
     //'Initialize the logLikelihood
-    double logLikelihood=logLikelihoodAndPriorFunctionPresence(matDATA, nLocations,
-                                                       nSpecies,nCommunity,
+    double logLikelihood=ll_priorFunctionPresence(matDATA, nLocations,
+                                                       nSpecies,n_community,
                                                        vMat, Theta, PhiMat,
                                                        alpha0, alpha1, gamma,
-                                                       logLikelihoodAndPrior);
+                                                       ll_prior);
     //'Store the logLikelihood
     logLikelihoodVec(g)=logLikelihood;
 

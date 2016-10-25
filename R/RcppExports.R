@@ -37,15 +37,15 @@ lda_binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs,
 #' @title Gibbs Sampling for LDA Presence and Absence
 #' @description Compute the Gibbs Sampling for LDA Presence and Absence
 #' @param DATA - DataFrame with Presence and Absecence (Zeros and Ones)
-#' @param int nCommunity - Number of communities
+#' @param int n_community - Number of communities
 #' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
 #' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
 #' @param gamma - Hyperparameter  Beta(1,gamma)
-#' @param nGibbs - Total number of Gibbs Samples
-#' @param logLikelihoodAndPrior - Likelihood compute with Priors ?
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
 #' @param bool display_progress=true - Should I Show the progressBar ?
-#' @return List - With Theta(nGibbs,nCommunity*nSpecies), Phi(nGibbs,nLocations*nCommunity) and logLikelihood
-GibbsSamplingPresence <- function(DATA, nCommunity, alpha0, alpha1, gamma, nGibbs, logLikelihoodAndPrior = TRUE, display_progress = TRUE) {
-    .Call('Rlda_GibbsSamplingPresence', PACKAGE = 'Rlda', DATA, nCommunity, alpha0, alpha1, gamma, nGibbs, logLikelihoodAndPrior, display_progress)
+#' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
+lda_bernoulli <- function(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
+    .Call('Rlda_lda_bernoulli', PACKAGE = 'Rlda', data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
 }
 

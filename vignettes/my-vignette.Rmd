@@ -382,7 +382,7 @@ Managers of those companies can use this information to create, for example, a s
 
 Cluster 17 on the other hand is mostly represented by firms with *Closing/Cancelling account* complaints and its most representative firm is Discover which is also a financial services corporation but, differently of the firms with large participation in Cluster 7, this firm has complaints about *Closing/Cancelling account*. For these companies that belong to Cluster 17 they could focus their attention in provide easy steps to *Closing/Cancelling account* in a way to avoid more complaints and improve their Customer Relationship Management (CRM).
 
-The final cluster is represented by financial services corporation that act in most part on web, and its representative firm is PayPal Holdings, Inc. The most likely issue associated with these comapnies that belongs to Cluster 26 is *Unsolicited issuance of credit card*. 
+The final cluster is represented by financial services corporation that act in most part on web, and its representative firm is PayPal Holdings, Inc. The most likely issue associated with these companies that belongs to Cluster 26 is *Unsolicited issuance of credit card*. 
 
 <!--http://badfinance.org/review/1650668/paypal-credit-card-->
 These results can be explained by a change in the PayPal operations. The complaints are related with the type of account provided by PayPal which were converted from standard PayPal account to a revolving credit account and some consumers claims to be unaware of this change, and again, a good communication system between the company and its consumers could avoid and easily solve complaints about those issues.
@@ -422,9 +422,7 @@ gamma <-0.01
 alpha0<-0.01
 alpha1<-0.01
 #Execute the LDA for the Binomial entry
-res<-lda_binomial(sp500,spSize,10,
-                           alpha0,alpha1,gamma,
-                           5000,TRUE,FALSE)
+res<-lda_binomial(sp500,spSize,10,alpha0,alpha1,gamma,5000,TRUE,FALSE)
 ```
 
 The firms can be represented by the \code{Phi} matrix which presents the probability of belonging (not exclusively) by cluster.
@@ -443,6 +441,7 @@ rownames(Phi)<-paste0("C",seq(1,10))
 ```
 
 Hence, one way to summarize the results is showing which cluster has the highest probability to appear for each possible firm, in this case only for clusters with probability greater than 50%:
+
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 pdf("plot002.pdf", width=10, height=10)
@@ -464,13 +463,17 @@ invisible(dev.off())
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics{plot002.pdf}
+  \includegraphics[width=12cm,height=8cm,keepaspectratio]{plot002.pdf}
   \caption{Acumulated probability of belonging.}
   \label{figure:fig002}
 \end{figure}
 
 
-Financial investors can, for example, using the information presented in Figure \ref{figure:fig002} to construct portfolios based on these clusters aiming to diversify their assets.
+Financial investors can, for example, using the information presented in Figure \ref{figure:fig002} to construct portfolios based on these clusters, aiming to diversify their assets or studied the similar behavior associated with the liquidity clusters.
+
+This is another way to evaluate the results of the package's functions. In the first example we presented the results using only tables of frequency, now in this example we present the results in a more visually way, where each cluster is represented by a color and the size of the bar is associated with the probability of belonging.
+
+We can also note that for most of the firms, the probability of belonging is very similar and distributed across the clusters, but this not the general case. Usually, when data can be partitioned in a hard way, some clusters will have more probability than others.
 
 ##Ecology.
 ```{r,echo=FALSE}
@@ -480,11 +483,11 @@ load("Example3.RData")
 ```
 One of the most challenge situation in study ecological data is the fact the in some applications, it is not possible to observe the total number of species in each sampled plot. However, it is possible to know if some is species is presented (i.e. overserved) or absente (i.e. not observed) [@pearce2006modelling].
 
-For this kind of data, we can use the the \code{lda_bernoulli} function. Specifically, in this example we used \code{data("SPDATA")} from \pkg{PresenceAbsence} package which is referred to 13 species that could be observed (value equal 1) and not observed or absent (value equal 0) at 386 forested locations. 
+For this kind of data, we can use the the \code{lda_bernoulli} function. Specifically, in this example we used \code{data("SPDATA")} from \pkg{PresenceAbsence} package which is referred to 13 species that could be observed (value equal 1) and not observed or absent (value equal 0) at 386 forested locations [@moisen2006predicting]. 
 
 ```{r, eval=FALSE,message=FALSE,warning=FALSE}
 library(PresenceAbsence)
-#Read the SP500 data
+#Read SPDATA data
 data(SPDATA)
 PresAbs<-SPDATA[,1:2]
 #Location
@@ -500,7 +503,7 @@ mat1<-dcast(PresAbs,
 matPres<-as.data.frame(mat1[,-1])
 ```
 
-In this example we can postulated a Bernouli trial for each Specie and Location, and we are able to use the \code{GibbsSamplingPresence} function, for which we need to specify the follow arguments:
+In this example we can postulated a Bernouli trial for each Specie and Location, and we are able to use the \code{lda_bernoulli} function, for which we need to specify the follow arguments:
 
 ```{r,eval=FALSE}
 #Set seed
@@ -516,7 +519,7 @@ res<-lda_bernoulli(matPres,10,
 ```
 
 We can visually evaluate the cluster distribution across species, after the *burn-in phase* in Figure \ref{figure:fig003}:
-\newpage
+
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 #Get the Theta Estimate
 Theta<-res[["Theta"]]
@@ -542,20 +545,21 @@ invisible(dev.off())
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics{plot003.pdf}
+  \includegraphics[width=12cm,height=8cm,keepaspectratio]{plot003.pdf}
   \caption{Cluster distribution across species.}
   \label{figure:fig003}
 \end{figure}
 
+In this type of graph each slice size is proportional to the probability of belonging, and it is possible to note that some species of trees are more or less associated with some clusters. For example, QUGA specie is more associated with Clusters 7 and 2 as well ACGR3 specie.
 
 #Conclusion.
 The goal of this paper was describe the Bayesian LDA model for fuzzy clustering based on different types of data, specifically we demonstrated how to use the model for Multinomial entry in the Marketing example, Binomial trial using the financial dataset and Bernoulli trial using ecological data.
+
+Also, we present the results in three different ways showing the flexibility to use the results and represent the information numerically and/or visually which is important when we faced large datasets and a great number of possible clusters.
   
 One of the main properties of the model presented here is the fact that this model adopts the truncated stick-breaking prior which enables the selection of the optimal number of clusters which regularizes model results. The next step in the development of the model presented here is the possibility to work with explanatory variables in the same structured described in this article, which can be useful not to model the cluster but also explain how the clusters are created.
 
 
-  
-  
   
 #Appendix. {-}
 Here in the Appendix we will show how the Full Conditional Distributions were constructed. Consider initially the Full Conditional Distributions for $Z_{lc}=c^{*}$ in all three cases the kernel of the distribution derived is the same:

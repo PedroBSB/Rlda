@@ -270,7 +270,7 @@ res<-lda_multinomial(mat1,30,beta,gamma,1000,TRUE,FALSE)
 
 In the above code we defined the maximum number of clusters as 30 and 1000 Gibbs Sampling iterations with the likelihood computed with priors and not showing the progress bar.
 
-We can visually evaluate the convergence Figure \ref{figure:fig001}:
+We can visually evaluate the convergence analysing the Figure \ref{figure:fig001}:
 
 ```{r,eval=FALSE}
 #Get the logLikelihood
@@ -375,6 +375,17 @@ print(tab2,comment=FALSE,
       include.rownames=FALSE,
       size="\\fontsize{9pt}{10pt}\\selectfont")
 ```
+
+The results are consistent with the type of product studied, in this case *Credit card*. It is interesting to note that the Cluster 7 is mostly represented by financial services corporation such as U.S. Bancorp and Amex. This cluster is mostly represented by *Advertising and marketing* and *Rewards* issues which may represent a larger cluster of complaints, for instance *Deceptive advertising complaints*.
+
+Managers of those companies can use this information to create, for example, a specific department to solve this disputes and/or clarify their consumers about the *Advertising* and *Rewards* rules and conditions, aiming to avoid misunderstood about the programs.
+
+Cluster 17 on the other hand is mostly represented by firms with *Closing/Cancelling account* complaints and its most representative firm is Discover which is also a financial services corporation but, differently of the firms with large participation in Cluster 7, this firm has complaints about *Closing/Cancelling account*. For these companies that belong to Cluster 17 they could focus their attention in provide easy steps to *Closing/Cancelling account* in a way to avoid more complaints and improve their Customer Relationship Management (CRM).
+
+The final cluster is represented by financial services corporation that act in most part on web, and its representative firm is PayPal Holdings, Inc. The most likely issue associated with these comapnies that belongs to Cluster 26 is *Unsolicited issuance of credit card*. 
+
+<!--http://badfinance.org/review/1650668/paypal-credit-card-->
+These results can be explained by a change in the PayPal operations. The complaints are related with the type of account provided by PayPal which were converted from standard PayPal account to a revolving credit account and some consumers claims to be unaware of this change, and again, a good communication system between the company and its consumers could avoid and easily solve complaints about those issues.
 
 ##Finance.
 ```{r,echo=FALSE}

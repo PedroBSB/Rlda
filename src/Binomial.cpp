@@ -340,7 +340,7 @@ NumericMatrix generatePhiBinomial(NumericMatrix zMat,int nBands,int n_community,
 }
 
 
-double logLikelihoodAndPriorFunctionBinomial(NumericMatrix matDATA,NumericMatrix matPOP, NumericMatrix vMat, NumericMatrix Theta, NumericMatrix Phi, double alpha0,double alpha1, double gamma, bool logLikelihoodAndPrior=true) {
+double ll_priorFunctionBinomial(NumericMatrix matDATA,NumericMatrix matPOP, NumericMatrix vMat, NumericMatrix Theta, NumericMatrix Phi, double alpha0,double alpha1, double gamma, bool ll_prior=true) {
   //'Initialize the logLikelihoodVec
   double logLikelihood=0;
   //'Total number of locations
@@ -351,7 +351,7 @@ double logLikelihoodAndPriorFunctionBinomial(NumericMatrix matDATA,NumericMatrix
   NumericMatrix tPhi=Rcpp::transpose(Phi);
   NumericMatrix probs=mmultBinomial(Theta,tPhi);
   //'Calculate the Loglikelihood and Prior
-  if(logLikelihoodAndPrior){
+  if(ll_prior){
     //'Initialize the V_{cl} and Theta_{sc} prior
     double priorV=0.0;
     double priorPhi=0.0;
@@ -392,11 +392,11 @@ double logLikelihoodAndPriorFunctionBinomial(NumericMatrix matDATA,NumericMatrix
 //' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
 //' @param gamma - Hyperparameter  Beta(1,gamma)
 //' @param n_gibbs - Total number of Gibbs Samples
-//' @param logLikelihoodAndPrior - Likelihood compute with Priors ?
+//' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
 //' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
 // [[Rcpp::export]]
-List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs, bool logLikelihoodAndPrior=true, bool display_progress=true) {
+List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix
   NumericMatrix matDATA = internal::convert_using_rfunction(data, "as.matrix");
@@ -444,10 +444,10 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
     //'Create the final Theta (n_gibbs,nLocations*n_community) and final Phi (n_gibbs,nBands*n_community)
     updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Phi, g);
     //'Initialize the logLikelihood
-    double logLikelihood=logLikelihoodAndPriorFunctionBinomial(matDATA,matPOP,
+    double logLikelihood=ll_priorFunctionBinomial(matDATA,matPOP,
                                                        vMat, Theta, Phi,
                                                        alpha0, alpha1, gamma,
-                                                       logLikelihoodAndPrior);
+                                                       ll_prior);
     //'Store the logLikelihood
     logLikelihoodVec(g)=logLikelihood;
 

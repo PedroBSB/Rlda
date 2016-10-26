@@ -76,7 +76,8 @@ sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
 \seealso{\code{\link{lda_binomial}}, \code{\link{lda_bernoulli}} }
 
 \keyword{LDA}
-\keyword{Fuzzy Cluster}
+\keyword{Fuzzy}
+\keyword{Cluster}
 \keyword{Multinomial}
 
 \examples{

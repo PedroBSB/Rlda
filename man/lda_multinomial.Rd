@@ -73,10 +73,11 @@ sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
       \email{daijianglee@gmail.com}\cr
   }
 }
-\seealso{\code{\link{predict.ksvm}}, \code{\link{ksvm-class}}, \code{\link{couple}} }
+\seealso{\code{\link{lda_binomial}}, \code{\link{lda_bernoulli}} }
 
 \keyword{LDA}
 \keyword{Fuzzy Cluster}
+\keyword{Multinomial}
 
 \examples{
 #Invoke the library

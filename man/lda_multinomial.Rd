@@ -10,7 +10,7 @@
   n_gibbs, ll_prior=TRUE, display_progress=TRUE)
 }
 \arguments{
-  \item{data}{A abundance matrix where each row is a sampling unit
+  \item{data}{A abundance data.frame where each row is a sampling unit
     (i.e. Plots, Locations, Time, etc.) and each column is a categorical
     type of element (i.e. Species, Firms, Issues, etc.).}
   \item{n_community}{Total number of communities. It must be less than

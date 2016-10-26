@@ -38,7 +38,7 @@
 \details{
   \code{lda_multinomial} uses a modified Latent Dirichlet Allocation method
   to construct Fuzzy Clusters using Bayesian Inference.
-  The \code{data} must be a non-empty matrix with the frequencies for each variable
+  The \code{data} must be a non-empty data.frame with the frequencies for each variable
   (column) in each observation (row).
 }
 \note{The \code{Theta} and \code{Phi} matrix can be obtained for the i-th gibbs

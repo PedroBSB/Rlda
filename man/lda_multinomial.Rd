@@ -101,5 +101,6 @@ beta<-rep(1,ncol(mat1))
 gamma<-0.01
 
 #Execute the LDA for the Multinomial entry
-res<-lda_multinomial(mat1,30,beta,gamma,1000,TRUE,FALSE)
+res<-lda_multinomial(mat1,30,beta,gamma,
+                     1000,TRUE,FALSE)
 }

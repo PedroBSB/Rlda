@@ -1,4 +1,5 @@
 \name{lda_binomial}
+\alias{lda_binomial}
 \title{LDA with binomial entry and Stick-Breaking prior.}
 \description{
   This method implements the Latent Dirichlet Allocation with

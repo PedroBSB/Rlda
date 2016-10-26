@@ -1,4 +1,5 @@
 \name{lda_bernoulli}
+\alias{lda_bernoulli}
 \title{LDA with bernoulli entry and Stick-Breaking prior.}
 \description{
   This method implements the Latent Dirichlet Allocation with

@@ -1,4 +1,5 @@
 \name{lda_multinomial}
+\alias{lda_multinomial}
 \title{LDA with multinomial entry and Stick-Breaking prior.}
 \description{
   This method implements the Latent Dirichlet Allocation with

@@ -14,7 +14,7 @@
     (i.e. Plots, Locations, Time, etc.) and each column is a categorical
     type of element (i.e. Species, Firms, Issues, etc.).}
   \item{n_community}{Total number of communities. It must be less than
-  the total number of columns inside the \code{data} matrix.}
+  the total number of columns inside the \code{data} data.frame.}
   \item{beta}{Hyperparameter associated with the Dirichlet \code{Phi}
   matrix.}
   \item{gamma}{Hyperparameter associated with the Stick-Breaking prior.}

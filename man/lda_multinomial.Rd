@@ -3,7 +3,7 @@
 \description{
   This method implements the Latent Dirichlet Allocation with
   Stick-Breaking prior for multinomial data.
-  \code{lda_multinomial} works with frequency matrices.
+  \code{lda_multinomial} works with frequency data.frame.
 }
 \usage{
   lda_multinomial(data, n_community, beta, gamma,

@@ -3,7 +3,7 @@
 \description{
   This method implements the Latent Dirichlet Allocation with
   Stick-Breaking prior for binomial data.
-  \code{binomial} works with frequency data.frame and also a
+  \code{lda_binomial} works with frequency data.frame and also a
   population data.frame.
 }
 \usage{

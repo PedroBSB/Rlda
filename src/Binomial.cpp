@@ -225,7 +225,7 @@ NumericMatrix generateZBinomial(NumericMatrix binomMat,NumericMatrix populMat, N
           prob=prob/Rcpp::sum(prob);
         }
         prob=prob/sum(prob);
-        if(binomMat(l,b)==0){
+        if(binomMat(l,b)!=0){
           //'Presence in locatiol l and band b (always will be one draw)
           int iSize=1;
           //'Store the results
@@ -252,7 +252,7 @@ NumericMatrix generateZBinomial(NumericMatrix binomMat,NumericMatrix populMat, N
           prob=prob/Rcpp::sum(prob);
         }
 
-        if(binomMat(l,b)!=0){
+        if(populMat(l,b)-binomMat(l,b)!=0){
           //'Absence in locatiol l and band b (always will be one draw)
           int iSize=1;
           //'Store the results

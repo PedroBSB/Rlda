@@ -403,9 +403,9 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
 
   }
 
-  //'Store the results
-  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
-                                    Rcpp::Named("Phi")  = PhiGibbs,
+  //'Store the results - Order change to agree with the other functions
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = PhiGibbs,
+                                    Rcpp::Named("Phi")  = ThetaGibbs,
                                     Rcpp::Named("logLikelihood")  =logLikelihoodVec);
 
   return resTemp;

@@ -29,10 +29,10 @@
       A R List with three elements:
   \item{Theta}{The individual probability for each observation
   (ex: location) belong in each cluster (ex: community). It is a matrix
-  with dimension equal \code{n_gibbs} by \code{ncol(data)*n_community}}
+  with dimension equal \code{n_gibbs} by \code{nrow(data)*n_community}}
   \item{Phi}{The individual probability for each variable
   (ex: Specie) belong in each cluster (ex: community). It is a matrix
-  with dimension equal \code{n_gibbs} by \code{nrow(data)*n_community}}
+  with dimension equal \code{n_gibbs} by \code{ncol(data)*n_community}}
   \item{LogLikelihood}{The vector of Log-Likelihoods compute for
   each Gibbs Sample.}
 }

@@ -8,7 +8,7 @@
 }
 \usage{
   lda_binomial(data, n_community, alpha0, alpha1, gamma,
-  n_gibbs, ll_prior, display_progress=true)
+  n_gibbs, ll_prior=TRUE, display_progress=true)
 }
 \arguments{
   \item{data}{A binary data.frame where each row is a sampling unit

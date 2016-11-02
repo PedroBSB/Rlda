@@ -9,7 +9,7 @@
 }
 \usage{
   lda_binomial(data, pop, n_community, alpha0, alpha1, gamma,
-  n_gibbs, ll_prior, display_progress=true)
+  n_gibbs, ll_prior=TRUE, display_progress=true)
 }
 \arguments{
   \item{data}{A abundance data.frame where each row is a sampling unit

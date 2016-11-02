@@ -4,7 +4,7 @@ set.seed(17)
 library(gtools)
 
 #Working directory
-setwd("U:\\pedro\\binomial\\original r gibbs sampler")
+setwd("C:\\Users\\p.albuquerque\\Dropbox\\Rlda\\tests\\Binomial Denis")
 source('gibbs functions.R')
 dat=data.matrix(read.csv('fake data.csv',as.is=T)[,-1])
 

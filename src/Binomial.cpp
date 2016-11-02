@@ -480,7 +480,8 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
     //'Verify if everything is ok
-    if (Progress::check_abort()) return -1.0;
+    if (Progress::check_abort() )
+      Rcpp::stop("Operation cancelled by interrupt.");
 
     //'Initialize the zMAt
     GenericVector zMat = generateZBinomial(matDATA, matPOP, Theta, Phi);

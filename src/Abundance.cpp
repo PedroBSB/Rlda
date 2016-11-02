@@ -361,7 +361,8 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
     //'Verify if everything is ok
-    if (Progress::check_abort()) return -1.0;
+    if (Progress::check_abort() )
+      Rcpp::stop("Operation cancelled by interrupt.");
 
     //'Generate Theta
     Theta = generateThetaAbundance(vMat);

@@ -372,8 +372,8 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
     //'Verify if everything is ok
-    if (Progress::check_abort()) return -1.0;
-
+    if (Progress::check_abort() )
+      Rcpp::stop("Operation cancelled by interrupt.");
     //'Initialize the Phi matrix
     NumericMatrix PhiMat(nLocations, n_community);
 

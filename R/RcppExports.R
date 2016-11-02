@@ -26,11 +26,11 @@ lda_multinomial <- function(data, n_community, beta, gamma, n_gibbs, ll_prior = 
 #' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
 #' @param gamma - Hyperparameter  Beta(1,gamma)
 #' @param n_gibbs - Total number of Gibbs Samples
-#' @param logLikelihoodAndPrior - Likelihood compute with Priors ?
+#' @param ll_prior - Likelihood compute with Priors ?
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
-lda_binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs, logLikelihoodAndPrior = TRUE, display_progress = TRUE) {
-    .Call('Rlda_lda_binomial', PACKAGE = 'Rlda', data, pop, n_community, alpha0, alpha1, gamma, n_gibbs, logLikelihoodAndPrior, display_progress)
+lda_binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
+    .Call('Rlda_lda_binomial', PACKAGE = 'Rlda', data, pop, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
 }
 
 #' @name GibbsSamplingPresence

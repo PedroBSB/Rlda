@@ -10,13 +10,39 @@ using namespace Rcpp;
 /*********************************                      UTILS          *****************************************************/
 /***************************************************************************************************************************/
 
-double matchBinomial(double value,NumericVector vec){
+NumericVector matchBinomialResult(double value,NumericVector vec){
+  int cont=0;
   for(int i=0;i<vec.length();i++){
-    if(value==vec(i)){
-      return(i);
+    if(vec(i)!=value){
+      cont=cont+1;
     }
   }
-  return(-1);
+  NumericVector res(cont);
+  cont=0;
+  for(int i=0;i<vec.length();i++){
+    if(vec(i)!=value){
+      res(cont) = vec(i);
+      cont=cont+1;
+    }
+  }
+  return(res);
+}
+NumericVector matchBinomialIndex(double value,NumericVector vec){
+  int cont=0;
+  for(int i=0;i<vec.length();i++){
+    if(vec(i)!=value){
+      cont=cont+1;
+    }
+  }
+  NumericVector res(cont);
+  cont=0;
+  for(int i=0;i<vec.length();i++){
+    if(vec(i)!=value){
+      res(cont) = i;
+      cont=cont+1;
+    }
+  }
+  return(res);
 }
 
 NumericVector rdirichletBinomial(Rcpp::NumericVector parms) {
@@ -115,29 +141,37 @@ NumericVector meltBinomial(NumericMatrix mat){
 }
 
 void updateThetaAndPhiBinomial(NumericMatrix &ThetaGibbs,NumericMatrix Theta,NumericMatrix &PhiGibbs, NumericMatrix Phi,int gibbs){
-    //'meltBinomial the Theta and Phi matrix
-    ThetaGibbs(gibbs,_)=meltBinomial(Theta);
-    PhiGibbs(gibbs,_) =meltBinomial(Phi);
+  //'meltBinomial the Theta and Phi matrix
+  ThetaGibbs(gibbs,_)=meltBinomial(Theta);
+  PhiGibbs(gibbs,_) =meltBinomial(Phi);
 }
 
-NumericMatrix aggregateValuesBinomial(NumericMatrix zMat,int nLocations,int n_community){
+NumericMatrix aggregateValuesBinomial(GenericVector zMat,int nLocations,int n_community){
   //'Initialize the matrix
   NumericMatrix sum(nLocations,n_community);
   //'Fill the sum matrix
   sum.fill(0.0);
-  for(int i=0;i<zMat.nrow();i++){
+  for(int i=0;i<zMat.size();i++){
+    //Get the List
+    List zMatTemp =  zMat(i);
+
     //'Get the community
-    int iCommunity = zMat(i,3);
+    NumericVector iCommunity = zMatTemp[3];
+    NumericVector iResults = zMatTemp[4];
+
     //'Get the location
-    int iLocation = zMat(i,1);
+    int iLocation = zMatTemp[1];
+
     //'Agregate
-    sum(iLocation,iCommunity)=sum(iLocation,iCommunity)+zMat(i,4);
+    for(int l=0;l<iCommunity.size();l++){
+      sum(iLocation,iCommunity(l))=sum(iLocation,iCommunity(l))+iResults(l);
+    }
   }
   //'Return the results
   return(sum);
 }
 
-List aggregateValuesBinomialByReflectanceBinomial(NumericMatrix zMat,int nBands,int n_community){
+List aggregateValuesBinomialByReflectanceBinomial(GenericVector zMat,int nBands,int n_community){
   //'Initialize the results
   List res(2);
   //'Initialize the matrix with Refletance
@@ -148,20 +182,27 @@ List aggregateValuesBinomialByReflectanceBinomial(NumericMatrix zMat,int nBands,
   NumericMatrix sumNonRef(nBands,n_community);
   //'Fill the sum matrix
   sumNonRef.fill(0.0);
-  for(int i=0;i<zMat.nrow();i++){
+  for(int i=0;i<zMat.size();i++){
+    //Get the List
+    List zMatTemp = zMat[i];
     //'Get the community
-    int iCommunity = zMat(i,3);
+    NumericVector iCommunity = zMatTemp[3];
+    NumericVector iResults = zMatTemp[4];
     //'Get the band
-    int iBand = zMat(i,0);
+    int iBand = zMatTemp[0];
     //'Get the reflectance
-    int iRefletance = zMat(i,2);
+    int iRefletance = zMatTemp[2];
     if(iRefletance==1){
-      //'Agregate
-      sumRef(iBand,iCommunity)=sumRef(iBand,iCommunity)+zMat(i,4);
+      for(int l=0;l<iCommunity.size();l++){
+        //'Agregate
+        sumRef(iBand,iCommunity(l))=sumRef(iBand,iCommunity(l))+iResults(l);
+      }
     }
     else{
-      //'Agregate
-      sumNonRef(iBand,iCommunity)=sumNonRef(iBand,iCommunity)+zMat(i,4);
+      for(int l=0;l<iCommunity.size();l++){
+        //'Agregate
+        sumNonRef(iBand,iCommunity(l))=sumNonRef(iBand,iCommunity(l))+iResults(l);
+      }
     }
   }
   //'Return the results
@@ -201,73 +242,77 @@ NumericMatrix mmultBinomial(const NumericMatrix& m1, const NumericMatrix& m2){
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
 
-NumericMatrix generateZBinomial(NumericMatrix binomMat,NumericMatrix populMat, NumericMatrix Theta, NumericMatrix Phi) {
+GenericVector generateZBinomial(NumericMatrix binomMat,NumericMatrix populMat, NumericMatrix Theta, NumericMatrix Phi) {
   try{
     //'Number of locations
     int nLocations=binomMat.nrow();
     //'Number of Bands
     int nBands=binomMat.ncol();
     //'Create the Z matrix
-    NumericMatrix zMat(2*nLocations*nBands,5);
-    //'Counter
-    int iCount=0;
+    GenericVector zMat;
     //'For each band
     for(int b=0;b<nBands;b++){
       //'For each location
       for(int l=0;l<nLocations;l++){
+
+        //Create the Temporary List
+        List zMatTemp = Rcpp::List::create(Rcpp::Named("Band"),
+                                           Rcpp::Named("Location"),
+                                           Rcpp::Named("Reflectance"),
+                                           Rcpp::Named("Community"),
+                                           Rcpp::Named("Latent"));
+
         //'Two cases: Reflectance and Not Reflectance
         //'Calculate the probability of belonging to each community:
         NumericVector prob=Phi(b,_)*Theta(l,_);
-        if(Rcpp::sum(prob)==0){
-          prob = Rcpp::rep(1.0/Phi.ncol(),Phi.ncol());
-        }
-        else{
-          prob=prob/Rcpp::sum(prob);
-        }
-        prob=prob/sum(prob);
+        prob=prob/Rcpp::sum(prob);
+
         if(binomMat(l,b)!=0){
-          //'Presence in locatiol l and band b (always will be one draw)
-          int iSize=1;
+          //'Size
+          int iSize=binomMat(l,b);
           //'Store the results
           NumericVector tmp = rmultinomialDVBinomial(iSize, prob);
-          //PrintObjectLine(prob);
 
           //'Find the community
-          int iCommunity = (int) matchBinomial(1.0,tmp);
+          NumericVector iCommunity = matchBinomialIndex(0.0,tmp);
+          NumericVector iResults =   matchBinomialResult(0.0,tmp);
 
           //'Store the results
-          zMat(iCount,0)=b;             //'Store the band
-          zMat(iCount,1)=l;             //'Store the location
-          zMat(iCount,2)=1;             //'Store the reflectance
-          zMat(iCount,3)=iCommunity;    //'Store the community
-          zMat(iCount,4)=binomMat(l,b); //'Store the size presence
-          iCount=iCount+1;
+          zMatTemp["Band"]=b;             //'Store the band
+          zMatTemp["Location"]=l;         //'Store the location
+          zMatTemp["Reflectance"]=1;      //'Store the reflectance
+          zMatTemp["Community"]=iCommunity;    //'Store the community
+          zMatTemp["Latent"]=iResults; //'Store the size presence
+          zMat.push_back(zMatTemp);
         }
         //'Calculate the probability of belonging to each community:
         prob=(1.0-Phi(b,_))*Theta(l,_);
-        if(Rcpp::sum(prob)==0){
-          prob = Rcpp::rep(1.0/Phi.ncol(),Phi.ncol());
-        }
-        else{
-          prob=prob/Rcpp::sum(prob);
-        }
+        prob=prob/Rcpp::sum(prob);
+
+        //Create the Temporary List
+        List zMatTemp2 = Rcpp::List::create(Rcpp::Named("Band"),
+                                           Rcpp::Named("Location"),
+                                           Rcpp::Named("Reflectance"),
+                                           Rcpp::Named("Community"),
+                                           Rcpp::Named("Latent"));
 
         if(populMat(l,b)-binomMat(l,b)!=0){
-          //'Absence in locatiol l and band b (always will be one draw)
-          int iSize=1;
+          //'Size
+          int iSize=populMat(l,b)-binomMat(l,b);
           //'Store the results
           NumericVector tmp = rmultinomialDVBinomial(iSize, prob);
 
           //'Find the community
-          int iCommunity = (int) matchBinomial(1.0,tmp);
+          NumericVector iCommunity = matchBinomialIndex(0.0,tmp);
+          NumericVector iResults =   matchBinomialResult(0.0,tmp);
 
           //'Store the results
-          zMat(iCount,0)=b;             //'Store the band
-          zMat(iCount,1)=l;             //'Store the location
-          zMat(iCount,2)=0;             //'Store the not reflectance
-          zMat(iCount,3)=iCommunity;    //'Store the community
-          zMat(iCount,4)=populMat(l,b)-binomMat(l,b); //'Store the size absence
-          iCount=iCount+1;
+          zMatTemp2["Band"]=b;             //'Store the band
+          zMatTemp2["Location"]=l;             //'Store the location
+          zMatTemp2["Reflectance"]=0;             //'Store the not reflectance
+          zMatTemp2["Community"]=iCommunity;    //'Store the community
+          zMatTemp2["Latent"]=iResults; //'Store the size absence
+          zMat.push_back(zMatTemp2);
         }
       }
     }
@@ -280,11 +325,12 @@ NumericMatrix generateZBinomial(NumericMatrix binomMat,NumericMatrix populMat, N
   }
 }
 
-NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int nLocations,int n_community, double gamma) {
+NumericMatrix generateThetaBinomial(GenericVector zMat, NumericMatrix& vMat, int nLocations,int n_community, double gamma) {
   //'Intialize the Theta matrix
   NumericMatrix Theta(nLocations,n_community);
   //'Calculate the number of individuals in each community and locations
   NumericMatrix sumMat = aggregateValuesBinomial(zMat, nLocations, n_community);
+
   //'For each location
   for(int l=0;l<nLocations;l++){
     //'For each community
@@ -294,7 +340,7 @@ NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int 
         double nLC=sumMat(l,c);
         //'How many elements are larger than community c
         double nLCgreter=sumLargestBinomial(sumMat, c);
-        vMat(l,c)=R::beta(nLC+1.0,nLCgreter+gamma);
+        vMat(l,c)=R::rbeta(nLC+1.0,nLCgreter+gamma);
       }
       else{
         //'All locations for the last community are one
@@ -306,7 +352,7 @@ NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int 
   //'Foreach location
   for(int l=0;l<nLocations;l++){
     NumericVector thetaVec(n_community);
-    //'Update the Theta \prod_(k=1)^(c-1)(1-V_kl )
+    //'Update the Theta prod_(k=1)^(c-1)(1-V_kl )
     double prod=1;
     //'For each community
     for(int c=0;c<n_community;c++){
@@ -322,13 +368,13 @@ NumericMatrix generateThetaBinomial(NumericMatrix zMat,NumericMatrix& vMat, int 
 }
 
 
-NumericMatrix generatePhiBinomial(NumericMatrix zMat,int nBands,int n_community,double alpha0, double alpha1) {
+NumericMatrix generatePhiBinomial(GenericVector zMat,int nBands,int n_community,double alpha0, double alpha1) {
   //'Initialize the Phi matrix
   NumericMatrix Phi(nBands,n_community);
   //'Get the sum matrices
   List sumList = aggregateValuesBinomialByReflectanceBinomial(zMat,nBands,n_community);
-  NumericMatrix sumRef= sumList(0);
-  NumericMatrix sumNonRef=sumList(1);
+  NumericMatrix sumRef= sumList[0];
+  NumericMatrix sumNonRef=sumList[1];
   //'Generate the Phi
   for(int b=0;b<nBands;b++){
     //'For each community
@@ -435,19 +481,24 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
   for (int g = 0; g < n_gibbs; ++g) {
     //'Verify if everything is ok
     if (Progress::check_abort()) return -1.0;
+
     //'Initialize the zMAt
-    NumericMatrix zMat = generateZBinomial(matDATA, matPOP, Theta, Phi);
+    GenericVector zMat = generateZBinomial(matDATA, matPOP, Theta, Phi);
+
     //'Generate Theta
-    Theta =generateThetaBinomial(zMat,vMat, nLocations, n_community, gamma);
+    Theta = generateThetaBinomial(zMat,vMat, nLocations, n_community, gamma);
+
     //'Generate Phi
     Phi = generatePhiBinomial(zMat, nBands, n_community, alpha0, alpha1);
+
     //'Create the final Theta (n_gibbs,nLocations*n_community) and final Phi (n_gibbs,nBands*n_community)
     updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Phi, g);
+
     //'Initialize the logLikelihood
     double logLikelihood=ll_priorFunctionBinomial(matDATA,matPOP,
-                                                       vMat, Theta, Phi,
-                                                       alpha0, alpha1, gamma,
-                                                       ll_prior);
+                                                  vMat, Theta, Phi,
+                                                  alpha0, alpha1, gamma,
+                                                  ll_prior);
     //'Store the logLikelihood
     logLikelihoodVec(g)=logLikelihood;
 

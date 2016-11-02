@@ -9,7 +9,7 @@
 }
 \usage{
   lda_binomial(data, pop, n_community, alpha0, alpha1, gamma,
-  n_gibbs, ll_prior=TRUE, display_progress=true)
+  n_gibbs, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{
   \item{data}{A abundance data.frame where each row is a sampling unit
@@ -20,15 +20,15 @@
   type of element (i.e. Species, Firms, Issues, etc.). The elements inside
   this data.frame must all be greater than the elements inside the \code{data}
   data.frame.}
-  \item{n_community}{Total number of communities. It must be less than
+  \item{n_community}{Total number of communities to return. It must be less than
   the total number of columns inside the \code{data} and \code{pop} data.frame.}
-  \item{alpha0}{Hyperparameter associated with the Beta prior Beta(alpha0,alpha1).}
-  \item{alpha1}{Hyperparameter associated with the Beta prior Beta(alpha0,alpha1).}
+  \item{alpha0}{Hyperparameter associated with the Beta prior Beta(alpha0, alpha1).}
+  \item{alpha1}{Hyperparameter associated with the Beta prior Beta(alpha0, alpha1).}
   \item{gamma}{Hyperparameter associated with the Stick-Breaking prior.}
   \item{n_gibbs}{Total number of Gibbs Samples.}
-  \item{ll_prior}{boolean scalar indicating \code{TRUE} if the log-likelihood
+  \item{ll_prior}{boolean scalar, \code{TRUE} if the log-likelihood
   must be computed using also the priors or \code{FALSE} otherwise.}
-  \item{display_progress}{boolean scalar indicating \code{TRUE} if the
+  \item{display_progress}{boolean scalar, \code{TRUE} if the
   Progress Bar must be showed and \code{FALSE} otherwise.}
       }
     \value{
@@ -51,8 +51,8 @@
   entries inside \code{data} data.frame.
 }
 \note{The \code{Theta} and \code{Phi} matrix can be obtained for the i-th gibbs
-sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
-\code{matrix(Phi,nrow=n_community,ncol=ncol(data))}, respectively.}
+sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} and
+\code{matrix(Phi[i,], nrow = n_community, ncol = ncol(data))}, respectively.}
 \references{
   \itemize{
     \item
@@ -80,6 +80,7 @@ sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
    \item
       Daijiang Li.\cr
       \email{daijianglee@gmail.com}\cr
+      \url{http://daijiang.name}
   }
 }
 \seealso{\code{\link{lda_multinomial}}, \code{\link{lda_bernoulli}} }
@@ -91,20 +92,20 @@ sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
 
 \examples{
 library(Rlda)
-#Read the SP500 data
+# Read the SP500 data
 data(sp500)
-#Create size
-spSize<-as.data.frame(matrix(100,
-                      ncol=ncol(sp500),
-                      nrow=nrow(sp500)))
-#Set seed
+# Create size
+spSize <- as.data.frame(matrix(100,
+                      ncol = ncol(sp500),
+                      nrow = nrow(sp500)))
+# Set seed
 set.seed(5874)
-#Hyperparameters for each prior distribution
-gamma <-0.01
-alpha0<-0.01
-alpha1<-0.01
-#Execute the LDA for the Binomial entry
-res<-lda_binomial(sp500,spSize,10,
-                  alpha0,alpha1,gamma,
-                  5000,TRUE,FALSE)
+# Hyperparameters for each prior distribution
+gamma  <- 0.01
+alpha0 <- 0.01
+alpha1 <- 0.01
+# Execute the LDA for the Binomial entry
+res <- lda_binomial(data = sp500, pop = spSize, n_community = 10,
+                    alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
+                    n_gibbs = 500, ll_prior = TRUE, display_progress = TRUE)
 }

@@ -14,15 +14,15 @@
   \item{data}{A abundance data.frame where each row is a sampling unit
     (i.e. Plots, Locations, Time, etc.) and each column is a categorical
     type of element (i.e. Species, Firms, Issues, etc.).}
-  \item{n_community}{Total number of communities. It must be less than
+  \item{n_community}{Total number of communities to return. It must be less than
   the total number of columns inside the \code{data} data.frame.}
   \item{beta}{Hyperparameter associated with the Dirichlet \code{Phi}
   matrix.}
   \item{gamma}{Hyperparameter associated with the Stick-Breaking prior.}
   \item{n_gibbs}{Total number of Gibbs Samples.}
-  \item{ll_prior}{boolean scalar indicating \code{TRUE} if the log-likelihood
+  \item{ll_prior}{boolean scalar, \code{TRUE} if the log-likelihood
   must be computed using also the priors or \code{FALSE} otherwise.}
-  \item{display_progress}{boolean scalar indicating \code{TRUE} if the
+  \item{display_progress}{boolean scalar, \code{TRUE} if the
   Progress Bar must be showed and \code{FALSE} otherwise.}
       }
     \value{
@@ -43,8 +43,8 @@
   (column) in each observation (row).
 }
 \note{The \code{Theta} and \code{Phi} matrix can be obtained for the i-th gibbs
-sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
-\code{matrix(Phi,nrow=n_community,ncol=ncol(data))}, respectively.}
+sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} and
+\code{matrix(Phi[i,], nrow = n_community, ncol = ncol(data))}, respectively.}
 \references{
   \itemize{
     \item
@@ -82,28 +82,28 @@ sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
 \keyword{Multinomial}
 
 \examples{
-#Invoke the library
+# Invoke the library
 library(Rlda)
-#Read the Complaints data
+# Read the Complaints data
 data(complaints)
 
-#Create the abundance matrix
+# Create the abundance matrix
 library(reshape2)
-mat1<-dcast(complaints[,c("Company","Issue")],
-            Company~Issue, length,
-            value.var="Issue")
-#Create the rowname
-rownames(mat1)<-mat1[,1]
-#Remove the ID variable
-mat1<-mat1[,-1]
+mat1 <- dcast(complaints[, c("Company","Issue")],
+            Company ~ Issue, fun.aggregate = length,
+            value.var = "Issue")
+# Create the rowname
+rownames(mat1) <- mat1[,1]
+# Remove the ID variable
+mat1 <- mat1[,-1]
 
-#Set seed
+# Set seed
 set.seed(9292)
-#Hyperparameters for each prior distribution
-beta<-rep(1,ncol(mat1))
-gamma<-0.01
+# Hyperparameters for each prior distribution
+beta <- rep(1,ncol(mat1))
+gamma <- 0.01
 
 #Execute the LDA for the Multinomial entry
-res<-lda_multinomial(mat1,30,beta,gamma,
-                     1000,TRUE,FALSE)
+res<-lda_multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
+                       n_gibbs = 1000, ll_prior = TRUE, display_progress = TRUE)
 }

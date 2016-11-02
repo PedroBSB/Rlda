@@ -3,7 +3,7 @@
 #include <ctime>
 #include <fstream>
 // [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
+#include "progress.hpp"
 using namespace Rcpp;
 
 /***************************************************************************************************************************/

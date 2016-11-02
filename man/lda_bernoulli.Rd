@@ -8,22 +8,22 @@
 }
 \usage{
   lda_binomial(data, n_community, alpha0, alpha1, gamma,
-  n_gibbs, ll_prior=TRUE, display_progress=true)
+  n_gibbs, ll_prior=TRUE, display_progress=TRUE)
 }
 \arguments{
   \item{data}{A binary data.frame where each row is a sampling unit
     (i.e. Plots, Locations, Time, etc.) and each column is a categorical
     type of element (i.e. Species, Firms, Issues, etc.). The elements inside
-    yhis data.frame must be Zeros and Ones.}
-  \item{n_community}{Total number of communities. It must be less than
+    this data.frame must be Zeros and Ones.}
+  \item{n_community}{Total number of communities to return. It must be less than
   the total number of columns inside the \code{data} data.frame.}
-  \item{alpha0}{Hyperparameter associated with the Beta prior Beta(alpha0,alpha1).}
-  \item{alpha1}{Hyperparameter associated with the Beta prior Beta(alpha0,alpha1).}
+  \item{alpha0}{Hyperparameter associated with the Beta prior Beta(alpha0, alpha1).}
+  \item{alpha1}{Hyperparameter associated with the Beta prior Beta(alpha0, alpha1).}
   \item{gamma}{Hyperparameter associated with the Stick-Breaking prior.}
   \item{n_gibbs}{Total number of Gibbs Samples.}
   \item{ll_prior}{boolean scalar indicating \code{TRUE} if the log-likelihood
   must be computed using also the priors or \code{FALSE} otherwise.}
-  \item{display_progress}{boolean scalar indicating \code{TRUE} if the
+  \item{display_progress}{boolean scalar \code{TRUE} if the
   Progress Bar must be showed and \code{FALSE} otherwise.}
       }
     \value{
@@ -44,8 +44,8 @@
   Zero or Ones for each variable (column) in each observation (row).
 }
 \note{The \code{Theta} and \code{Phi} matrix can be obtained for the i-th gibbs
-sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
-\code{matrix(Phi,nrow=n_community,ncol=ncol(data))}, respectively.}
+sampling using \code{matrix(Theta[i,],nrow = nrow(data), ncol = n_community)} and
+\code{matrix(Phi[i,], nrow = n_community, ncol = ncol(data))}, respectively.}
 \references{
   \itemize{
     \item
@@ -73,6 +73,7 @@ sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
    \item
       Daijiang Li.\cr
       \email{daijianglee@gmail.com}\cr
+      \url{http://daijiang.name/}
   }
 }
 \seealso{\code{\link{lda_multinomial}}, \code{\link{lda_bernoulli}} }
@@ -85,30 +86,30 @@ sampling doing \code{matrix(Theta,nrow=nrow(data),ncol=n_community)} and
 \examples{
 library(Rlda)
 library(PresenceAbsence)
-#Read SPDATA data
+# Read SPDATA data
 data(SPDATA)
-PresAbs<-SPDATA[,1:2]
-#Location
+PresAbs <- SPDATA[,1:2]
+# Location
 library(data.table)
 PresAbs <- data.table(PresAbs)
 PresAbs[, Location := sequence(.N), by = c("SPECIES")]
 
-#Create the binary matrix
+# Create the binary matrix
 library(reshape2)
-mat1<-dcast(PresAbs,
-            Location~SPECIES,
-            value.var="OBSERVED")
-#Remove the Location variable
-matPres<-as.data.frame(mat1[,-1])
+mat1 <- dcast(PresAbs,
+            Location ~ SPECIES,
+            value.var = "OBSERVED")
+# Remove the Location variable
+matPres <- as.data.frame(mat1[,-1])
 
-#Set seed
+# Set seed
 set.seed(9842)
-#Hyperparameters for each prior distribution
-gamma <-0.01
-alpha0<-0.01
-alpha1<-0.01
-#Execute the LDA for the Binomial entry
-res<-lda_bernoulli(matPres,10,
-                   alpha0,alpha1,gamma,
-                   5000,TRUE,FALSE)
+# Hyperparameters for each prior distribution
+gamma <- 0.01
+alpha0 <- 0.01
+alpha1 <- 0.01
+# Execute the LDA for the Binomial entry
+res <- lda_bernoulli(data = matPres, n_community = 10,
+                   alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
+                   n_gibbs = 5000,ll_prior = TRUE, display_progress = TRUE)
 }

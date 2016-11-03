@@ -449,9 +449,8 @@ Hence, one way to summarize the results is showing which cluster has the highest
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 pdf("plot002.pdf", width=10, height=10)
-#Plot the log-likelihood
 sgbar<-t(Phi)
-sgbar[sgbar<0.5]<-0
+sgbar[sgbar<1e-2]<-0
 sgbar<- sgbar[rowSums(sgbar)!=0, ] 
 require(grid)
 require(lattice)

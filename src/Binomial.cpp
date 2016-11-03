@@ -153,7 +153,7 @@ NumericMatrix aggregateValuesBinomial(GenericVector zMat,int nLocations,int n_co
   sum.fill(0.0);
   for(int i=0;i<zMat.size();i++){
     //Get the List
-    List zMatTemp =  zMat(i);
+    List zMatTemp =  zMat[i];
 
     //'Get the community
     NumericVector iCommunity = zMatTemp[3];
@@ -212,14 +212,11 @@ List aggregateValuesBinomialByReflectanceBinomial(GenericVector zMat,int nBands,
 
 }
 
-double sumLargestBinomial(NumericMatrix nSum, int iCommunity){
+double sumLargestBinomial(NumericMatrix nSum, int iCommunity, int iLocation){
   double sum=0.0;
-  //'For each location
-  for(int l=0;l<nSum.nrow();l++){
-    //'For each community
-    for(int c=(iCommunity+1);c<nSum.ncol();c++){
-      sum=sum+nSum(l,c);
-    }
+  //'For each community
+  for(int c=(iCommunity+1);c<nSum.ncol();c++){
+      sum=sum+nSum(iLocation,c);
   }
   return(sum);
 }
@@ -339,7 +336,7 @@ NumericMatrix generateThetaBinomial(GenericVector zMat, NumericMatrix& vMat, int
         //'How many elements belong to community c in location l
         double nLC=sumMat(l,c);
         //'How many elements are larger than community c
-        double nLCgreter=sumLargestBinomial(sumMat, c);
+        double nLCgreter=sumLargestBinomial(sumMat, c, l);
         vMat(l,c)=R::rbeta(nLC+1.0,nLCgreter+gamma);
       }
       else{

@@ -30,7 +30,7 @@ title:
   plain:     "Bayesian LDA for categorical mixture model clustering."
   short:     "\\pkg{Rlda}: Bayesian LDA for categorical clustering."
 abstract: >
-  The goal of this paper is to describe the Bayesian LDA model for fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries) and provide some examples of the use of this model in R. These types of data frequently emerge in fields likeas disparate as ecology, remote sensing, marketing, and finance and others fields and, as a result, we believe this package will be of broad interest for pattern recognition, especially fuzzy clustering for categorical data.
+  The goal of this paper is to describe the Bayesian LDA model for fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries) and provide some examples of the use of this model in R. These types of data frequently emerge in fields like as disparate as ecology, remote sensing, marketing, and finance and others fields and, as a result, we believe this package will be of broad interest for pattern recognition, especially fuzzy clustering for categorical data.
 keywords:
   # at least one keyword must be supplied
   formatted: [LDA, fuzzy clustering]
@@ -52,7 +52,7 @@ bibliography: bibliography.bib
 ---
 
 #Introduction.
-The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to study the tag pattern representation in blogs to construct clusters of tags that represents the most common topics. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis and the correlated topic model. The authors described the limitations of each method, asserting that the LDA limitations were essentially two: the method does not consider relationships between topics and cannot allocate a word to multiple topics . However, beside these limitations the LDA continues to be used in multiple disciplines. For instance, @griffiths2004finding used LDA to identify the main scientific topics in a large corpus of Proceedings of the National Academy of Science (PNAS) articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. In finance, a stock market analysis system based on LDA is used to analyze financial news items together with market data to identify and characterize major events that impact the market. This system is then used to predict whether the stock market will fall or rise, based on news items identified by LDA [@mahajan2008mining]. 
+The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to study the tag pattern representation in blogs to construct clusters of tags that represents the most common topics. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis and the correlated topic model. The authors described the limitations of each method, asserting that the LDA limitations were essentially two: the method does not consider relationships between topics and cannot allocate a word to multiple topics. However, beside these limitations the LDA continues to be used in multiple disciplines. For instance, @griffiths2004finding used LDA to identify the main scientific topics in a large corpus of Proceedings of the National Academy of Science (PNAS) articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. In finance, a stock market analysis system based on LDA is used to analyze financial news items together with market data to identify and characterize major events that impact the market. This system is then used to predict whether the stock market will fall or rise, based on news items identified by LDA [@mahajan2008mining]. 
 
 Despite its success in text mining across multiple fields, LDA is a model that need not be restricted to text-mining. More specifically, LDA can be viewed as a mixture model since each element in the sample can belong to more than one cluster (or state) simultaneously. There are a few examples of LDA being used for other purposes than text-mining. For instance, a modified version of LDA has been extensively used on genetic data to identify populations and admixture probabilities of individuals [@pritchard2000inference]. Similarly, LDA has been used in Ecology to identify plant communities from tree data for the eastern United States and from a tropical forest chronosequence [@valle2014decomposing]. 
 
@@ -126,7 +126,7 @@ $$
 
 In the last step, we specify the priors for $\phi_{cs}$. For the multinomial model, we adopt a Dirichlet prior (i.e. $\boldsymbol\phi_{c}\sim Dirichlet(\boldsymbol\beta)$ where $\boldsymbol\beta=(\beta_{1},\dots,\beta_{S})$ is the hyperparameter vector). For the Bernoulli and Binomial representations, we assume that $\phi_{cs}$ comes from a Beta distribution, (i.e., $\phi_{cs}\sim Beta(\alpha_{0},\alpha_{1})$).
 
-These models are fit using Gibbs Sampling where parameters draws are iteratively made from each full conditional distribution. From a conceptual perspective, all of these models assume the following matrix decomposition:
+These models are fit using Gibbs Sampling where parameters draw are iteratively made from each full conditional distribution. From a conceptual perspective, all of these models assume the following matrix decomposition:
 
 \begin{equation}
 \mathbb{E}[\mathbf{Y}_{L\times S}]=\mathbf{K}\circ[\Theta_{L\times C}\Phi_{C\times S}]
@@ -215,7 +215,7 @@ Finally, the FCD for $V_{lc^{*}}$ is given by:
 #The package.
 The package is not the only one package that can be able to perform the Latent Dirichlet Allocation model. We found four packages that propose model a Latent Dirichlet Allocation structure in R. @hornik2011topicmodels developed the \pkg{topicmodels} package for which there are two LDA implementations, one using the variational inference (as described in @blei2003latent) and the other implementation using Gibbs Sampling based on @phan2013gibbslda. Similarly, @jones2016 proposed the \pkg{textmineR} which has a Gibbs Sampling method to estimate the topics in a corpus structure.
 
-@chang2012lda developed the \pkg{lda} package which includes the  mixed-membership stochastic blockmodel [@airoldi2008mixed], supervised Latent Dirichlet Allocation - sLDA [@mcauliffe2008supervised] and Correspondence-Latent Dirichlet Allocation - corrLDA[@blei2003modeling].
+@chang2012lda developed the \pkg{lda} package which includes the mixed-membership stochastic blockmodel [@airoldi2008mixed], supervised Latent Dirichlet Allocation - sLDA [@mcauliffe2008supervised] and Correspondence-Latent Dirichlet Allocation - corrLDA[@blei2003modeling].
 
 More recently, @roberts2014stm created the \pkg{stm} which has some unsupervised functions to determine the optimal number of clusters. This unsupervised method is based on likelihood metrics obtained by the EM Algorithm, which are then used for a backward model selection approach.
 
@@ -235,10 +235,10 @@ load("Example1.RData")
 
 The first application considers the classical LDA for a Multinomial entry in the field of Marketing. More specifically, we are interested in characterizing firms based on their consumers' complaints.
 
-It is well known that attracting a new customer is often considerably more costly than keeping current customer [@kotler2006principles]. For this reason, firms can better retain their customers if they pay careful attention to their consumers' complaints and work to solve them in a satisfactory way. 
+It is well known that attracting a new customer is often considerably costlier than keeping current customer [@kotler2006principles]. For this reason, firms can better retain their customers if they pay careful attention to their consumers' complaints and work to solve them in a satisfactory way. 
 
 The data used is from the 2015 [Consumer Complaint Database](http://catalog.data.gov/dataset/consumer-complaint-database) 
-which are complaints received for the **Bureau of Consumer Financial Protection** in US about financial products and services. Specifically in this example we work with only credit card complaint's and it contains information on the number of complaints for each firm ($L=$ `r length(unique(complaints$Company))`), categorized according to the specific type of issue ($S=$ `r length(unique(complaints$Issue))`). Examples of issues include: Billing disputes, Identity theft / Fraud, Unsolicited issuance of credit card and so on.  Each sampling unit in this case represents a firm and each variable the total number of complaints'complaints associated with each issue. 
+which are complaints received for the **Bureau of Consumer Financial Protection** in US about financial products and services. Specifically in this example we work with only credit card complaint's and it contains information on the number of complaints for each firm ($L=$ `r length(unique(complaints$Company))`), categorized according to the specific type of issue ($S=$ `r length(unique(complaints$Issue))`). Examples of issues include: Billing disputes, Identity theft / Fraud, Unsolicited issuance of credit card and so on.  Each sampling unit in this case represents a firm and each variable the total number of complaints associated with each issue. 
 
 The characterization of firms provided by our analysis can be useful to reveal communalities and differences across different firms. This can then be used by managers to identify and potentially adopt the solutions that are employed by other firms to deal with these issues.
 
@@ -274,7 +274,7 @@ res<-lda_multinomial(mat1,30,beta,gamma,1000,TRUE,FALSE)
 
 In the above code we defined the maximum number of clusters as 30 and 1000 Gibbs Sampling iterations with the likelihood computed with priors and not showing the progress bar.
 
-We can visually evaluate the convergence analysing the Figure \ref{figure:fig001}:
+We can visually evaluate the convergence analyzing the Figure \ref{figure:fig001}:
 
 ```{r,eval=FALSE}
 #Get the logLikelihood
@@ -506,7 +506,7 @@ mat1<-dcast(PresAbs,
 matPres<-as.data.frame(mat1[,-1])
 ```
 
-In this example we can postulated a Bernouli trial for each Specie and Location, and we are able to use the \code{lda_bernoulli} function, for which we need to specify the follow arguments:
+In this example we can postulated a Bernoulli trial for each Specie and Location, and we are able to use the \code{lda_bernoulli} function, for which we need to specify the follow arguments:
 
 ```{r,eval=FALSE}
 #Set seed
@@ -589,7 +589,7 @@ Since $Z_{lc}$ is a categorical random variable with support in $\Za=(1,2,\dots,
 
 Then, each category for $Z_{lc}$ can be draw from a categorical distribution with probabilities equal to $\kappa\zeta_{c^{*}s}\theta_{lc^{*}}$ with $c^{*} \in \Za$, where $\zeta_{c^{*}s}=\phi_{sc^{*}}$ in the multinomial case and $\zeta_{c^{*}s}=\phi_{c^{*}s}^{y_{ls}}(1-\phi_{c^{*}s})^{1-y_{ls}}$ and $\zeta_{c^{*}s}=\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}$ for Bernoulli and Binomial cases respectively.
 
-For the Bernoulli and Binomial cases we have, respectively.:
+For the Bernoulli and Binomial cases, we have, respectively.:
 
 \begin{equation*}
 \begin{array}{lll}
@@ -649,7 +649,7 @@ p\left(\phi_{c^{*}s}|\mathbf{Z}_{\cdot c^{*}},\{\mathbf{Y}_{l\cdot}|Z_{lc}=c^{*}
 \label{ap:eq0006} 
 \end{equation*}
 
-\noindent where $n_{-c^{*}s}$ is the total number of elements that **not** belong to either community $c^{*}$ and indepenent variable $s$.
+\noindent where $n_{-c^{*}s}$ is the total number of elements that **not** belong to either community $c^{*}$ and independent variable $s$.
 
 The last Full Conditional described here is the Full Conditional for $p\left(V_{lc}|Z_{lc}\right)$, in this case we have:
 

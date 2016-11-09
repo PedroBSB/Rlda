@@ -9,10 +9,13 @@ Description: The goal of this packageis to describe the Bayesian LDA model for
     and Binomial entries).
 License: What license is it under?
 LazyData: TRUE
-LinkingTo: Rcpp
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
 Imports:
     Rcpp,
-    RcppProgress
+    RcppProgress,
+    RcppArmadillo
 SystemRequirements: GNU make
 Suggests:
     knitr,

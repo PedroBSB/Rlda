@@ -16,6 +16,21 @@ lda_multinomial <- function(data, n_community, beta, gamma, n_gibbs, ll_prior = 
     .Call('Rlda_lda_multinomial', PACKAGE = 'Rlda', data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress)
 }
 
+#' @name GibbsSamplingAbundanceCovariate
+#' @title Gibbs Sampling for LDA AbundanceCovariate with Stick-Breaking
+#' @description Compute the Gibbs Sampling for LDA AbundanceCovariate with Stick-Breaking
+#' @param data - dataFrame with AbundanceCovariate
+#' @param int n_community - Number of communities
+#' @param beta - NumericVector for beta (Sx1)
+#' @param gamma - Hyperparameter  Beta(1,gamma)
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
+#' @param bool display_progress=true - Should I Show the progressBar ?
+#' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
+lda_covariate <- function(data, n_community, beta, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
+    .Call('Rlda_lda_covariate', PACKAGE = 'Rlda', data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress)
+}
+
 #' @name GibbsSamplingBinomial
 #' @title Compute the Gibbs Sampling for LDA Binomial
 #' @description Compute the Gibbs Sampling for LDA Binomial
@@ -47,5 +62,78 @@ lda_binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs,
 #' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
 lda_bernoulli <- function(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
     .Call('Rlda_lda_bernoulli', PACKAGE = 'Rlda', data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
+}
+
+#' @title Generate Random Multivariate Normal Distribution
+#' @description Creates a random Multivariate Normal when given number of obs, mean, and sigma.
+#' @param n An \code{int}, which gives the number of observations.  (> 0)
+#' @param mu A \code{vector} length m that represents the means of the normals.
+#' @param S A \code{matrix} with dimensions m x m that provides Sigma, the covariance matrix.
+#' @return A \code{matrix} that is a Multivariate Normal distribution
+#' @seealso \code{\link{TwoPLChoicemcmc}} and \code{\link{probitHLM}}
+#' @author James J Balamuta
+#' @examples
+#' #Call with the following data:
+#' rmvnorm(2, c(0,0), diag(2))
+#'
+rmvnorm <- function(n, mu, S) {
+    .Call('Rlda_rmvnorm', PACKAGE = 'Rlda', n, mu, S)
+}
+
+#' @title Generate Random Wishart Distribution
+#' @description Creates a random wishart distribution when given degrees of freedom and a sigma matrix.
+#' @param df An \code{int}, which gives the degrees of freedom of the Wishart.  (> 0)
+#' @param S A \code{matrix} with dimensions m x m that provides Sigma, the covariance matrix.
+#' @return A \code{matrix} that is a Wishart distribution, aka the sample covariance matrix of a Multivariate Normal Distribution
+#' @seealso \code{\link{riwishart}} and \code{\link{probitHLM}}
+#' @author James J Balamuta
+#' @examples
+#' #Call with the following data:
+#' rwishart(3, diag(2))
+#'
+#' # Validation
+#' set.seed(1337)
+#' S = toeplitz((10:1)/10)
+#' n = 10000
+#' o = array(dim = c(10,10,n))
+#' for(i in 1:n){
+#' o[,,i] = rwishart(20, S)
+#' }
+#' mR = apply(o, 1:2, mean)
+#' Va = 20*(S^2 + tcrossprod(diag(S)))
+#' vR = apply(o, 1:2, var)
+#' stopifnot(all.equal(vR, Va, tolerance = 1/16))
+#'
+rwishart <- function(df, S) {
+    .Call('Rlda_rwishart', PACKAGE = 'Rlda', df, S)
+}
+
+#' @title Generate Random Inverse Wishart Distribution
+#' @description Creates a random inverse wishart distribution when given degrees of freedom and a sigma matrix.
+#' @param df An \code{int} that represents the degrees of freedom.  (> 0)
+#' @param S A \code{matrix} with dimensions m x m that provides Sigma, the covariance matrix.
+#' @return A \code{matrix} that is an inverse wishart distribution.
+#' @seealso \code{\link{rwishart}} and \code{\link{TwoPLChoicemcmc}}
+#' @author James J Balamuta
+#' @examples
+#' #Call with the following data:
+#' riwishart(3, diag(2))
+riwishart <- function(df, S) {
+    .Call('Rlda_riwishart', PACKAGE = 'Rlda', df, S)
+}
+
+#' @name GibbsSamplingPresence
+#' @title Gibbs Sampling for LDA Presence and Absence
+#' @description Compute the Gibbs Sampling for LDA Presence and Absence
+#' @param DATA - DataFrame with Presence and Absecence (Zeros and Ones)
+#' @param int n_community - Number of communities
+#' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
+#' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
+#' @param bool display_progress=true - Should I Show the progressBar ?
+#' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
+lda_bernoulli_sparseness <- function(data, n_community, alpha0, alpha1, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
+    .Call('Rlda_lda_bernoulli_sparseness', PACKAGE = 'Rlda', data, n_community, alpha0, alpha1, n_gibbs, ll_prior, display_progress)
 }
 

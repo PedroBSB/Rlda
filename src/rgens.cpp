@@ -7,8 +7,6 @@ using namespace Rcpp;
 //' @param mu A \code{vector} length m that represents the means of the normals.
 //' @param S A \code{matrix} with dimensions m x m that provides Sigma, the covariance matrix.
 //' @return A \code{matrix} that is a Multivariate Normal distribution
-//' @seealso \code{\link{TwoPLChoicemcmc}} and \code{\link{probitHLM}}
-//' @author James J Balamuta
 //' @examples
 //' #Call with the following data:
 //' rmvnorm(2, c(0,0), diag(2))
@@ -26,8 +24,6 @@ arma::mat rmvnorm(unsigned int n, const arma::vec& mu, const arma::mat& S){
 //' @param df An \code{int}, which gives the degrees of freedom of the Wishart.  (> 0)
 //' @param S A \code{matrix} with dimensions m x m that provides Sigma, the covariance matrix.
 //' @return A \code{matrix} that is a Wishart distribution, aka the sample covariance matrix of a Multivariate Normal Distribution
-//' @seealso \code{\link{riwishart}} and \code{\link{probitHLM}}
-//' @author James J Balamuta
 //' @examples
 //' #Call with the following data:
 //' rwishart(3, diag(2))
@@ -81,8 +77,6 @@ arma::mat rwishart(unsigned int df, const arma::mat& S){
 //' @param df An \code{int} that represents the degrees of freedom.  (> 0)
 //' @param S A \code{matrix} with dimensions m x m that provides Sigma, the covariance matrix.
 //' @return A \code{matrix} that is an inverse wishart distribution.
-//' @seealso \code{\link{rwishart}} and \code{\link{TwoPLChoicemcmc}}
-//' @author James J Balamuta
 //' @examples
 //' #Call with the following data:
 //' riwishart(3, diag(2))

@@ -22,13 +22,12 @@ lda_multinomial <- function(data, n_community, beta, gamma, n_gibbs, ll_prior = 
 #' @param data - dataFrame with AbundanceCovariate
 #' @param int n_community - Number of communities
 #' @param beta - NumericVector for beta (Sx1)
-#' @param gamma - Hyperparameter  Beta(1,gamma)
 #' @param n_gibbs - Total number of Gibbs Samples
 #' @param ll_prior - Likelihood compute with Priors ?
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
-lda_covariate <- function(data, n_community, beta, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
-    .Call('Rlda_lda_covariate', PACKAGE = 'Rlda', data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress)
+lda_covariate <- function(data, design, n_community, beta, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
+    .Call('Rlda_lda_covariate', PACKAGE = 'Rlda', data, design, n_community, beta, n_gibbs, ll_prior, display_progress)
 }
 
 #' @name GibbsSamplingBinomial

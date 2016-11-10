@@ -24,19 +24,19 @@ BEGIN_RCPP
 END_RCPP
 }
 // lda_covariate
-List lda_covariate(DataFrame data, int n_community, NumericVector beta, double gamma, int n_gibbs, bool ll_prior, bool display_progress);
-RcppExport SEXP Rlda_lda_covariate(SEXP dataSEXP, SEXP n_communitySEXP, SEXP betaSEXP, SEXP gammaSEXP, SEXP n_gibbsSEXP, SEXP ll_priorSEXP, SEXP display_progressSEXP) {
+List lda_covariate(DataFrame data, DataFrame design, int n_community, NumericVector beta, int n_gibbs, bool ll_prior, bool display_progress);
+RcppExport SEXP Rlda_lda_covariate(SEXP dataSEXP, SEXP designSEXP, SEXP n_communitySEXP, SEXP betaSEXP, SEXP n_gibbsSEXP, SEXP ll_priorSEXP, SEXP display_progressSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
+    Rcpp::traits::input_parameter< DataFrame >::type design(designSEXP);
     Rcpp::traits::input_parameter< int >::type n_community(n_communitySEXP);
     Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< double >::type gamma(gammaSEXP);
     Rcpp::traits::input_parameter< int >::type n_gibbs(n_gibbsSEXP);
     Rcpp::traits::input_parameter< bool >::type ll_prior(ll_priorSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(lda_covariate(data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress));
+    rcpp_result_gen = Rcpp::wrap(lda_covariate(data, design, n_community, beta, n_gibbs, ll_prior, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }

@@ -30,7 +30,7 @@ title:
   plain:     "Bayesian LDA for categorical mixture model clustering."
   short:     "\\pkg{Rlda}: Bayesian LDA for categorical clustering."
 abstract: >
-  The goal of this paper is to describe the Bayesian LDA model for fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries) and provide some examples of the use of this model in R. These types of data frequently emerge in fields like as disparate as ecology, remote sensing, marketing, and finance and others fields and, as a result, we believe this package will be of broad interest for pattern recognition, especially fuzzy clustering for categorical data.
+  The goal of this paper is to describe the Bayesian LDA model for fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries) and provide some examples of the use of this model in R and to introduce a new R package, Rlda. These types of data frequently emerge in fields like as disparate as ecology, remote sensing, marketing, and finance and others fields and, as a result, we believe this package will be of broad interest for pattern recognition, especially fuzzy clustering for categorical data.
 keywords:
   # at least one keyword must be supplied
   formatted: [LDA, fuzzy clustering]
@@ -219,8 +219,7 @@ The package is not the only one package that can be able to perform the Latent D
 
 More recently, @roberts2014stm created the \pkg{stm} which has some unsupervised functions to determine the optimal number of clusters. This unsupervised method is based on likelihood metrics obtained by the EM Algorithm, which are then used for a backward model selection approach.
 
-None of these packages adopt the truncated stick-breaking prior and none of them use others distributions besides the Multinomial outcome for the dependent variable. Thus, our package complements current LDA approaches already available in R. 
-
+None of these packages adopt the truncated stick-breaking prior which enables the selection of the optimal number of clusters and regularizes model results, also none of them use others distributions besides the Multinomial outcome for the dependent variable. Thus, our package complements current LDA approaches already available in R. 
 
 #Examples.
 In this section we present some applications for Latent Dirichlet Allocation in marketing, finance and ecology.
@@ -475,8 +474,6 @@ invisible(dev.off())
 Financial investors can, for example, using the information presented in Figure \ref{figure:fig002} to construct portfolios based on these clusters, aiming to diversify their assets or studied the similar behavior associated with the liquidity clusters.
 
 This is another way to evaluate the results of the package's functions. In the first example we presented the results using only tables of frequency, now in this example we present the results in a more visually way, where each cluster is represented by a color and the size of the bar is associated with the probability of belonging.
-
-We can also note that for most of the firms, the probability of belonging is very similar and distributed across the clusters, but this not the general case. Usually, when data can be partitioned in a hard way, some clusters will have more probability than others.
 
 ##Ecology.
 ```{r,echo=FALSE}

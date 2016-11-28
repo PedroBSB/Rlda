@@ -390,34 +390,36 @@ double ll_priorFunctionBinomial(NumericMatrix matDATA,NumericMatrix matPOP, Nume
   int nLocations=matDATA.nrow();
   //'Number of bands
   int nBands=matDATA.ncol();
+  //Number of communities
+  int n_community = Theta.ncol();
   //'Matrix of probabilities
-  NumericMatrix tPhi=Rcpp::transpose(Phi);
+  NumericMatrix tPhi = Rcpp::transpose(Phi);
   NumericMatrix probs=mmultBinomial(Theta,tPhi);
   //'Calculate the Loglikelihood and Prior
+
+  double priorV=0.0;
+  double priorPhi=0.0;
+
   if(ll_prior){
     //'Initialize the V_{cl} and Theta_{sc} prior
-    double priorV=0.0;
-    double priorPhi=0.0;
-    //'For each location
-    for(int l=0;l<nLocations;l++){
-      //'For each band
-      for(int b=0;b<nBands;b++){
-        if(Phi(l,b)>0 && Phi(l,b)<1) priorPhi=R::dbeta(Phi(l,b),alpha0,alpha1,true);
-        if(vMat(l,b)>0 && vMat(l,b)<1)  priorV=R::dbeta(vMat(l,b),1,gamma,true);
-        logLikelihood=logLikelihood+R::dbinom(matDATA(l,b),matPOP(l,b),probs(l,b),true)+priorV+priorPhi;
+    for(int c=0;c<n_community;c++){
+      for(int l=0;l<nLocations;l++){
+        if(vMat(l,c)>0 && vMat(l,c)<1)  priorV=priorV+R::dbeta(vMat(l,c),1,gamma,true);
+      }
+
+      for (int b=0;b<nBands;b++){
+        if(Phi(b,c)>0 && Phi(b,c)<1) priorPhi=priorPhi+R::dbeta(Phi(b,c),alpha0,alpha1,true);
       }
     }
   }
-  else{
-    //'For each location
-    for(int l=0;l<nLocations;l++){
-      //'For each band
-      for(int b=0;b<nBands;b++){
-        logLikelihood=logLikelihood+R::dbinom(matDATA(l,b),matPOP(l,b),probs(l,b),true);
-      }
+
+  for(int l=0;l<nLocations;l++){
+    for (int b=0;b<nBands;b++){
+      logLikelihood=logLikelihood+R::dbinom(matDATA(l,b),matPOP(l,b),probs(l,b),true);
     }
   }
-  return(logLikelihood);
+
+  return(logLikelihood+priorV+priorPhi);
 }
 
 

@@ -412,3 +412,94 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
 }
 
 
+
+//' @name GibbsSamplingPresence
+//' @title Gibbs Sampling for LDA Presence and Absence
+//' @description Compute the Gibbs Sampling for LDA Presence and Absence
+//' @param DATA - DataFrame with Presence and Absecence (Zeros and Ones)
+//' @param int n_community - Number of communities
+//' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
+//' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
+//' @param gamma - Hyperparameter  Beta(1,gamma)
+//' @param n_gibbs - Total number of Gibbs Samples
+//' @param n_burn - Number of elements to burn-in
+//' @param ll_prior - Likelihood compute with Priors ?
+//' @param bool display_progress=true - Should I Show the progressBar ?
+//' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
+// [[Rcpp::export]]
+List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs,int n_burn, bool ll_prior=true, bool display_progress=true) {
+
+  //'Convert to matrix
+  NumericMatrix matDATA = internal::convert_using_rfunction(data, "as.matrix");
+
+  //'Total number of locations
+  int nLocations = matDATA.nrow();
+
+  //'Total number of species
+  int nSpecies = matDATA.ncol();
+
+  //'Intialize Theta
+  NumericVector hyperTheta(n_community);
+  hyperTheta.fill(1);
+  NumericMatrix Theta=rdirichletPresence(nSpecies,hyperTheta);
+
+  //'Intialize vMat
+  NumericVector hyperV(n_community);
+  hyperV.fill(1);
+  NumericMatrix vMat=rdirichletPresence(nLocations,hyperV);
+
+  //'Initialize the ThetaGibbs
+  NumericMatrix ThetaGibbs(n_gibbs-n_burn,n_community*nSpecies);
+
+  //'Initialize the PhiGibbs
+  NumericMatrix PhiGibbs(n_gibbs-n_burn,nLocations*n_community);
+
+  //'Initialize the logLikelihood vector
+  NumericVector logLikelihoodVec(n_gibbs-n_burn);
+  int cont=0;
+
+  //'Intialize the progressbar
+  Progress p(n_gibbs, display_progress);
+  for (int g = 0; g < n_gibbs; ++g) {
+    //'Verify if everything is ok
+    if (Progress::check_abort() )
+      Rcpp::stop("Operation cancelled by interrupt.");
+    //'Initialize the Phi matrix
+    NumericMatrix PhiMat(nLocations, n_community);
+
+    //'Generate zList
+    List zList  = generateZPresence(matDATA, Theta, vMat, PhiMat);
+
+    //'Generate Theta
+    Theta = generateThetaPresence(zList,alpha0,alpha1);
+
+    //'Generate vMat
+    vMat = generateVPresence(zList,nLocations, gamma);
+    if(g>n_burn){
+
+      //'Create the final Theta (n_gibbs,n_community*nSpecies) and final Phi (PhiGibbs)
+      updateThetaAndPhiPresence(ThetaGibbs, Theta, PhiGibbs, PhiMat, cont);
+
+      //'Initialize the logLikelihood
+      double logLikelihood=ll_priorFunctionPresence(matDATA, nLocations,
+                                                    nSpecies,n_community,
+                                                    vMat, Theta, PhiMat,
+                                                    alpha0, alpha1, gamma,
+                                                    ll_prior);
+      //'Store the logLikelihood
+      logLikelihoodVec(cont)=logLikelihood;
+      cont=cont+1;
+    }
+
+    //'Increment the progress bar
+    p.increment();
+
+  }
+
+  //'Store the results - Order change to agree with the other functions
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = PhiGibbs,
+                                    Rcpp::Named("Phi")  = ThetaGibbs,
+                                    Rcpp::Named("logLikelihood")  =logLikelihoodVec);
+
+  return resTemp;
+}

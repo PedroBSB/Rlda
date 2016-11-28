@@ -514,3 +514,95 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
 }
 
 
+
+//' @name GibbsSamplingBinomial
+//' @title Compute the Gibbs Sampling for LDA Binomial
+//' @description Compute the Gibbs Sampling for LDA Binomial
+//' @param DATA - DataFrame with Presence and Absecence (Binomial)
+//' @param POP - DataFrame with Population Size (Binomial)
+//' @param int n_community - Number of communities
+//' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
+//' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
+//' @param gamma - Hyperparameter  Beta(1,gamma)
+//' @param n_gibbs - Total number of Gibbs Samples
+//' @param n_burn - Number of elements to burn-in
+//' @param ll_prior - Likelihood compute with Priors ?
+//' @param bool display_progress=true - Should I Show the progressBar ?
+//' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
+// [[Rcpp::export]]
+List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs,int n_burn, bool ll_prior=true, bool display_progress=true) {
+
+  //'Convert to matrix
+  NumericMatrix matDATA = internal::convert_using_rfunction(data, "as.matrix");
+
+  //'Convert to matrix
+  NumericMatrix matPOP = internal::convert_using_rfunction(pop, "as.matrix");
+
+  //'Total number of locations
+  int nLocations = matDATA.nrow();
+
+  //'Total number of bands
+  int nBands = matDATA.ncol();
+
+  //'Intialize Theta
+  NumericVector hyperTheta(n_community);
+  hyperTheta.fill(1);
+  NumericMatrix Theta=rdirichletBinomial(nLocations,hyperTheta);
+  NumericMatrix vMat(nLocations,n_community);
+
+  //'Intialize Phi
+  NumericVector hyperPhi(n_community);
+  hyperPhi.fill(1);
+  NumericMatrix Phi=rdirichletBinomial(nBands,hyperPhi);
+
+  //'Initialize the ThetaGibbs
+  NumericMatrix ThetaGibbs(n_gibbs-n_burn,nLocations*n_community);
+
+  //'Initialize the PhiGibbs
+  NumericMatrix PhiGibbs(n_gibbs-n_burn,nBands*n_community);
+
+  //'Initialize the logLikelihood vector
+  NumericVector logLikelihoodVec(n_gibbs-n_burn);
+  int cont=0;
+
+  //'Intialize the progressbar
+  Progress p(n_gibbs, display_progress);
+  for (int g = 0; g < n_gibbs; ++g) {
+    //'Verify if everything is ok
+    if (Progress::check_abort() )
+      Rcpp::stop("Operation cancelled by interrupt.");
+
+    //'Initialize the zMAt
+    GenericVector zMat = generateZBinomial(matDATA, matPOP, Theta, Phi);
+
+    //'Generate Theta
+    Theta = generateThetaBinomial(zMat,vMat, nLocations, n_community, gamma);
+
+    //'Generate Phi
+    Phi = generatePhiBinomial(zMat, nBands, n_community, alpha0, alpha1);
+    if(g>n_burn){
+      //'Create the final Theta (n_gibbs,nLocations*n_community) and final Phi (n_gibbs,nBands*n_community)
+      updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Phi, cont);
+
+      //'Initialize the logLikelihood
+      double logLikelihood=ll_priorFunctionBinomial(matDATA,matPOP,
+                                                    vMat, Theta, Phi,
+                                                    alpha0, alpha1, gamma,
+                                                    ll_prior);
+      //'Store the logLikelihood
+      logLikelihoodVec(cont)=logLikelihood;
+      cont=cont+1;
+    }
+    //'Increment the progress bar
+    p.increment();
+
+  }
+
+  //'Store the results
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
+                                    Rcpp::Named("Phi")  = PhiGibbs,
+                                    Rcpp::Named("logLikelihood")  =logLikelihoodVec);
+
+  return resTemp;
+}
+

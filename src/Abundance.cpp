@@ -399,3 +399,98 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
   return resTemp;
 }
 
+
+
+//' @name GibbsSamplingAbundance
+//' @title Gibbs Sampling for LDA Abundance with Stick-Breaking
+//' @description Compute the Gibbs Sampling for LDA Abundance with Stick-Breaking
+//' @param data - dataFrame with Abundance
+//' @param int n_community - Number of communities
+//' @param beta - NumericVector for beta (Sx1)
+//' @param gamma - Hyperparameter  Beta(1,gamma)
+//' @param n_gibbs - Total number of Gibbs Samples
+//' @param n_burn - Number of elements to burn-in
+//' @param ll_prior - Likelihood compute with Priors ?
+//' @param bool display_progress=true - Should I Show the progressBar ?
+//' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
+// [[Rcpp::export]]
+List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, double gamma, int n_gibbs,int n_burn, bool ll_prior=true, bool display_progress=true) {
+
+  //'Convert to matrix
+  NumericMatrix matdata = internal::convert_using_rfunction(data, "as.matrix");
+
+  //'Total number of locations
+  int nLocations = matdata.nrow();
+
+  //'Total number of species
+  int nSpecies = matdata.ncol();
+
+  //'Initialize the ThetaGibbs
+  NumericMatrix ThetaGibbs(n_gibbs-n_burn,nLocations*n_community);
+
+  //'Initialize the PhiGibbs
+  NumericMatrix PhiGibbs(n_gibbs-n_burn,n_community*nSpecies);
+
+  //'Intialize Theta
+  NumericVector hyperTheta(n_community);
+  hyperTheta.fill(1);
+  NumericMatrix Theta=rdirichletAbundance(nSpecies,hyperTheta);
+
+  //'Initialize Phi
+  NumericVector hyperPhi(nSpecies);
+  hyperPhi.fill(1);
+  NumericMatrix Phi=rdirichletAbundance(n_community,hyperPhi);
+
+  //'Intialize vMat
+  NumericVector hyperV(n_community);
+  hyperV.fill(1);
+  NumericMatrix vMat=rdirichletAbundance(nLocations,hyperV);
+
+  //'Initialize the logLikelihood vector
+  NumericVector logLikelihoodVec(n_gibbs-n_burn);
+  int cont=0;
+
+  //'Intialize the progressbar
+  Progress p(n_gibbs, display_progress);
+  for (int g = 0; g < n_gibbs; ++g) {
+    //'Verify if everything is ok
+    if (Progress::check_abort() )
+      Rcpp::stop("Operation cancelled by interrupt.");
+
+    //'Generate Theta
+    Theta = generateThetaAbundance(vMat);
+
+    //'Generate zList
+    List zList  = generateZAbundance(matdata, Theta, Phi);
+
+    //'Generate Phi
+    Phi = generatePhiAbundance(n_community, zList, beta);
+
+    //'Generate vMat
+    vMat = generateVAbundance(zList,nLocations,n_community, gamma);
+
+    if(g>n_burn){
+      //'Create the final ThetaGibbs (n_gibbs,nLocations*n_community) and final PhiGibbs (n_gibbs,n_community*nSpecies)
+      updateThetaAndPhiAbundance(ThetaGibbs, Theta, PhiGibbs, Phi, cont);
+
+      //'Initialize the logLikelihood
+      double logLikelihood=ll_priorFunctionAbundance(zList, cont, nSpecies, n_community,
+                                                     vMat, Theta, Phi, gamma, ll_prior);
+
+      //'Store the logLikelihood
+      logLikelihoodVec(cont)=logLikelihood;
+      cont=cont+1;
+    }
+
+    //'Increment the progress bar
+    p.increment();
+
+  }
+
+  //'Store the results
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
+                                    Rcpp::Named("Phi")  = PhiGibbs,
+                                    Rcpp::Named("logLikelihood")  = logLikelihoodVec);
+
+  return resTemp;
+}

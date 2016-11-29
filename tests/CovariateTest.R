@@ -20,6 +20,7 @@ size<-rpois(locations,40)
 
 #Define the Hyperparameters
 beta<-rep(1,species)
+gamma<-0.01
 
 #Generate Phi
 Phi<-rdirichlet(community,beta)
@@ -61,6 +62,14 @@ for(l in 1:locations){
 #Create rownames colnames
 rownames(FIA)<-paste0("Location ",seq(1,nrow(FIA)))
 colnames(FIA)<-paste0("Specie ",seq(1,ncol(FIA)))
+
+res <- lda_multinomial_cov(FIA,as.data.frame(designMat), community, beta, gamma, 100,TRUE,TRUE )
+
+
+Beta <- matrix(res$Beta[100,],nrow= community,ncol= nCovariates)
+
+
+
 
 
 res<-lda_covariate(FIA,as.data.frame(designMat), community, beta, 100,TRUE,TRUE )

@@ -1,56 +1,19 @@
 #include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
 #include <iostream>
 #include <ctime>
 #include <fstream>
-#include <cmath>
-#include "progress.hpp"
-#include "rgens.h"
+// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
+#include "progress.hpp"
 using namespace Rcpp;
-
-
-/***************************************************************************************************************************/
-/*********************************                      HEADER            **************************************************/
-/***************************************************************************************************************************/
-
-arma::mat rmvnorm(unsigned int n, const arma::vec& mu, const arma::mat& S);
-arma::mat rwishart(unsigned int df, const arma::mat& S);
-arma::mat riwishart(unsigned int df, const arma::mat& S);
 
 /***************************************************************************************************************************/
 /*********************************                      UTILS          *****************************************************/
 /***************************************************************************************************************************/
 
-void convertRcpptoARMA(NumericMatrix matIn, arma::mat& matOut){
-  for(int r=0;r<matIn.nrow();r++){
-    for(int c=0;c<matIn.ncol();c++){
-      matOut(r,c)=matIn(r,c);
-    }
-  }
-}
 
-void convertRcpptoARMA(NumericVector vetIn, arma::vec& vetOut){
-  for(int r=0;r<vetIn.size();r++){
-    vetOut(r)=vetIn(r);
-  }
-}
 
-void convertARMAtoRcpp(arma::mat matIn, NumericMatrix& matOut){
-  for(int r=0;r<matIn.n_rows;r++){
-    for(int c=0;c<matIn.n_cols;c++){
-      matOut(r,c)=matIn(r,c);
-    }
-  }
-}
-
-void convertARMAtoRcpp(arma::vec vetIn, NumericVector& vetOut){
-  for(int r=0;r<vetIn.n_elem ;r++){
-    vetOut(r)=vetIn(r);
-  }
-}
-
-int whichLessAbundanceCovariate(double value, NumericVector vector) {
+int whichLessCovariate(double value, NumericVector vector) {
   int res = -1;
   for (int i = 0; i < vector.size(); i++) {
     if (value < vector(i)) {
@@ -61,7 +24,7 @@ int whichLessAbundanceCovariate(double value, NumericVector vector) {
   return res;
 }
 
-NumericVector rmultinomialAbundanceCovariate(int size, NumericVector prob) {
+NumericVector rmultinomialCovariate(int size, NumericVector prob) {
   //'Initialize the NumericMatrix result
   NumericVector res(prob.length());
   //'Create the categorical table
@@ -78,7 +41,7 @@ NumericVector rmultinomialAbundanceCovariate(int size, NumericVector prob) {
     //'Draw a uniform
     double random = R::runif(0,1);
     //'Which category was draw ?
-    int iPos=whichLessAbundanceCovariate(random,table);
+    int iPos=whichLessCovariate(random,table);
     //'Increment the matrix
     res(iPos)=res(iPos)+1;
     //'Increment the counter
@@ -88,7 +51,7 @@ NumericVector rmultinomialAbundanceCovariate(int size, NumericVector prob) {
   return res;
 }
 
-NumericVector rdirichletAbundanceCovariate(Rcpp::NumericVector parms) {
+NumericVector rdirichletCovariate(Rcpp::NumericVector parms) {
   NumericVector res(parms.size());
   double sample_sum = 0;
   for(int j=0;j<parms.size();j++){
@@ -101,7 +64,7 @@ NumericVector rdirichletAbundanceCovariate(Rcpp::NumericVector parms) {
   return (res);
 }
 
-NumericMatrix rdirichletAbundanceCovariate(int n, Rcpp::NumericVector parms) {
+NumericMatrix rdirichletCovariate(int n, Rcpp::NumericVector parms) {
   NumericMatrix res(n, parms.size());
   for(int i=0;i<n;i++){
     double sample_sum = 0;
@@ -116,7 +79,7 @@ NumericMatrix rdirichletAbundanceCovariate(int n, Rcpp::NumericVector parms) {
   return (res);
 }
 
-NumericVector invertedCumsumAbundanceCovariate(NumericVector n){
+NumericVector invertedCumsumCovariate(NumericVector n){
   NumericVector table(n.length());
   table(n.length()-1)=n(n.length()-1);
   for(int i=(n.length()-2);i>-1;i--){
@@ -126,7 +89,7 @@ NumericVector invertedCumsumAbundanceCovariate(NumericVector n){
 }
 
 
-NumericVector countElementsAbundanceCovariate(List zList,int c,int nSpecies){
+NumericVector countElementsCovariate(List zList,int c,int nSpecies){
   //'Size of the list
   int nSize=zList.length();
   //'Initialize the vector with count
@@ -138,14 +101,14 @@ NumericVector countElementsAbundanceCovariate(List zList,int c,int nSpecies){
   return(vecSpecie);
 }
 
-NumericVector meltAbundanceCovariate(NumericMatrix mat){
+NumericVector meltCovariate(NumericMatrix mat){
   //'Initialize the NumericVector
   NumericVector vec(mat.nrow()*mat.ncol());
   //'Initialize the position
   int pos=0;
   for(int col=0;col<mat.ncol();col++){
     for(int row=0;row<mat.nrow();row++){
-      //'meltAbundanceCovariate the matrix
+      //'meltCovariate the matrix
       vec(pos)=mat(row,col);
       //'Increment the position
       pos=pos+1;
@@ -154,14 +117,15 @@ NumericVector meltAbundanceCovariate(NumericMatrix mat){
   return(vec);
 }
 
-void updateThetaAndPhiAbundanceCovariate(NumericMatrix &ThetaGibbs,NumericMatrix Theta,NumericMatrix &PhiGibbs, NumericMatrix Phi,int gibbs){
-    //'meltAbundanceCovariate the Theta and Phi matrix
-    ThetaGibbs(gibbs,_)=meltAbundanceCovariate(Theta);
-    PhiGibbs(gibbs,_) =meltAbundanceCovariate(Phi);
+void updateThetaAndPhiCovariate(NumericMatrix &ThetaGibbs,NumericMatrix Theta,NumericMatrix &PhiGibbs, NumericMatrix Phi,NumericMatrix &BetaGibbs, NumericMatrix Beta,int gibbs){
+  //'meltCovariate the Theta and Phi matrix
+  ThetaGibbs(gibbs,_)=meltCovariate(Theta);
+  PhiGibbs(gibbs,_) =meltCovariate(Phi);
+  BetaGibbs(gibbs,_) =meltCovariate(Beta);
 }
 
 
-NumericMatrix sumarizeCommunitiesAbundanceCovariate(List zList, int n_community){
+NumericMatrix sumarizeCommunitiesCovariate(List zList, int n_community){
   //'Total number of locations
   int nLocations = zList.length();
   //'Intialize the mMat
@@ -180,105 +144,37 @@ NumericMatrix sumarizeCommunitiesAbundanceCovariate(List zList, int n_community)
 }
 
 
-double pdfMultivariateNormal(arma::vec x,arma::vec mu, arma::mat Sigma){
-  double k = mu.n_elem;
-  double part1 = std::pow(M_2_PI,-k/2.0);
-  double part2 = std::pow(arma::det(Sigma),-0.5);
-  arma::mat part3 = arma::exp(-0.5*((x-mu).t()*arma::inv(Sigma)*(x-mu)));
-  return(part1*part2*part3(0,0));
-}
-
-//Calculate the acceptance probability
-double acceptanceProbability(arma::mat betaNew, arma::mat betaOld,NumericVector xVec,double n, arma::mat Sigma){
-  //Casting
-  arma::vec xVecArma(xVec.size());
-  convertRcpptoARMA(xVec,xVecArma);
-  //Numerator
-  arma::mat part1 = xVecArma.t()*betaNew;
-  arma::mat part2 = arma::exp(-0.5*((betaNew).t()*arma::inv(Sigma)*(betaNew)));
-  double num = std::pow(std::exp(part1(0,0)),n)*part2(0,0);
-
-  //Denominator
-  part1 = xVecArma.t()*betaOld;
-  part2 = arma::exp(-0.5*((betaOld).t()*arma::inv(Sigma)*(betaOld)));
-  double den = std::pow(std::exp(part1(0,0)),n)*part2(0,0);
-
-  return(num/den);
-}
 
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
 
-
-List generateThetaAbundanceCovariate(List zList,NumericMatrix xMat, int nLocations,int n_community, NumericMatrix Sigma) {
-  //Do the casting
-  arma::mat matSigma(Sigma.nrow(),Sigma.ncol());
-  convertRcpptoARMA(Sigma, matSigma);
-  //'Initialize the Phi matrix
+NumericMatrix generateThetaCovariate(NumericMatrix vMat) {
+  //'Total number of locations
+  int nLocations = vMat.nrow();
+  //'Total number of communities
+  int n_community = vMat.ncol();
+  //'Initialize the Theta matrix
   NumericMatrix thetaMat(nLocations,n_community);
-  //'Initialize the Beta matrix
-  List betaList(nLocations);
-
-  //'Create the mMat
-  NumericMatrix mMat = sumarizeCommunitiesAbundanceCovariate(zList,n_community);
-
-  //'Foreach Specie
+  //'Foreach location
   for(int l=0;l<nLocations;l++){
-    //'Initialize the Beta matrix
-    NumericMatrix betaMat(n_community,xMat.ncol());
-    //Initialize the denominator
-    double denom = 0.0;
+    NumericVector Theta(n_community);
+    //'Update the Theta \prod_(k=1)^(c-1)(1-V_kl )
+    double prod=1;
+    //'For each community
     for(int c=0;c<n_community;c++){
-      //Initialize the beta vector
-      arma::vec betaVec(xMat.ncol());
-      betaVec.fill(0.0);
-      //'nLC is the number of species in plot l that come from community c
-      double nLC = mMat(l,c);
-      //Do the Metropolis Hatsing
-      for(int it=0;it<100;it++){
-        //Store the old state
-        arma::vec betaVecOld(xMat.ncol());
-        betaVecOld = betaVec;
-
-        //Generate a proposal state
-        arma::mat rNorm = rmvnorm(1, betaVecOld, matSigma);
-        for(int k=0;k<rNorm.n_cols;k++){
-          betaVec(k) = rNorm(0,k);
-        }
-
-        //Calculate the proposal correction factor
-        double c = pdfMultivariateNormal(betaVecOld,betaVec,matSigma)/pdfMultivariateNormal(betaVec,betaVecOld,matSigma);
-
-        //Calculate the acceptance probability
-        double alpha = acceptanceProbability(betaVec,betaVecOld,xMat(l,_),nLC , matSigma)*c;
-
-        //Draw a random number
-        double u = R::runif(0,1);
-        if(u>alpha){
-          betaVec=betaVecOld;
-        }
-      }
-      //Casting
-      NumericVector betaRes(betaVec.n_elem);
-      convertARMAtoRcpp(betaVec,betaRes);
-      betaMat(c,_)=betaRes;
-      thetaMat(l,c)=exp(sum(xMat(l,_)*betaRes));
+      double vNumber = vMat(l,c);
+      if (c == 0) prod=1;
+      if (c >  0) prod=prod*(1.0-vMat(l,c-1));
+      Theta(c)=vNumber*prod;
     }
-    thetaMat(l,_)=thetaMat(l,_)/sum(thetaMat(l,_));
-    betaList[l]=betaMat;
+    //'Store each row
+    thetaMat(l,_)=Theta;
   }
-  //'Store the results
-  List resTemp = Rcpp::List::create(Rcpp::Named("Beta") = betaList,
-                                    Rcpp::Named("Theta")  = thetaMat);
-  return resTemp;
+  return thetaMat;
 }
 
-
-
-List generateZAbundanceCovariate(NumericMatrix size, List listTheta, NumericMatrix Phi) {
-  //Pass the Theta Matrix
-  NumericMatrix Theta = listTheta[1];
+List generateZCovariate(NumericMatrix size, NumericMatrix Theta, NumericMatrix Phi) {
   //'Initialize the Z List
   List zList(Theta.nrow());
   //'Number of locations
@@ -303,7 +199,7 @@ List generateZAbundanceCovariate(NumericMatrix size, List listTheta, NumericMatr
       //'Number of elements in location l and specie s
       int iSize=size(l,s);
       //'Store the results
-      NumericVector tmp = rmultinomialAbundanceCovariate(iSize, probability);
+      NumericVector tmp = rmultinomialCovariate(iSize, probability);
       //'PrintObjectLine(probability);
       zMat(s,_)=tmp;
     }
@@ -313,7 +209,7 @@ List generateZAbundanceCovariate(NumericMatrix size, List listTheta, NumericMatr
   return zList;
 }
 
-NumericMatrix generatePhiAbundanceCovariate(int n_community, List zList, NumericVector beta) {
+NumericMatrix generatePhiCovariate(int n_community, List zList, NumericVector beta) {
   //'Initialize the Phi matrix
   NumericMatrix phiMat(n_community,beta.length());
   //'Number of Species
@@ -321,36 +217,116 @@ NumericMatrix generatePhiAbundanceCovariate(int n_community, List zList, Numeric
   //'For each community count
   for(int c=0;c<n_community;c++){
     //'How many members are from community c and specie s (s=1,...,S)?
-    NumericVector nSpeciesVec = countElementsAbundanceCovariate(zList,c,nSpecies);
+    NumericVector nSpeciesVec = countElementsCovariate(zList,c,nSpecies);
     //'Create the parameter vector Dirichlet
     NumericVector parms = nSpeciesVec+beta+1;
     //'Generate the c-th phi
-    NumericVector res = rdirichletAbundanceCovariate(parms);
+    NumericVector res = rdirichletCovariate(parms);
     //'Store the results
     phiMat(c,_)=res;
   }
   return phiMat;
 }
 
+NumericMatrix generateVCovariate(List zList,int nLocations,int n_community, double gamma) {
+  //'Initialize the Phi matrix
+  NumericMatrix vMat(nLocations,n_community);
+  //'Create the mMat
+  NumericMatrix mMat = sumarizeCommunitiesCovariate(zList,n_community);
+  //'Foreach Specie
+  for(int l=0;l<nLocations;l++){
+    //'For each community:
+    NumericVector nGreater = invertedCumsumCovariate(mMat(l,_));
+    for(int c=0;c<n_community;c++){
+      //'nLC is the number of species in plot l that come from community c
+      double nLC = mMat(l,c);
+      if(c<n_community-1){
+        //'Generate stick-breaking probabilities
+        vMat(l,c)=R::rbeta(1.0+nLC,gamma+nGreater(c+1));
+      }
+      else{
+        //'Ensure that the last community has 1
+        vMat(l,c)=1.0;
+      }
+    }
+  }
+  return vMat;
+}
+
+
+double ll_priorFunctionCovariate(List zList, int g, int nSpecies,int n_community, NumericMatrix vMat,NumericMatrix Theta, NumericMatrix Phi, double gamma, bool ll_prior=true) {
+  double logLikelihood=0;
+  //'Calculate the Loglikelihood and Prior
+  if(ll_prior){
+    //'Initialize
+    double priorV=0.0;
+    double priorPhi=0.0;
+    //'Calculate the likelihood based on data
+    //'For each location
+    for(int l=0;l<zList.length();l++){
+      //'Compute the prior for V_{cl}
+      for(int c=0;c<n_community;c++){
+        if(vMat(l,c)<1)priorV=priorV+R::dbeta(vMat(l,c),1,gamma,1);
+      }
+      //'Get the zMat
+      NumericMatrix zMat = zList[l];
+      //'For each specie
+      for(int s=0;s<nSpecies;s++){
+        //'For each community
+        for(int c=0;c<n_community;c++){
+          //'Acumulate the Prior Phi
+          if(zMat(s,c)>0){
+            //'All elements in specie S and Community C
+            if(Phi(c,s)>0) logLikelihood=logLikelihood+zMat(s,c)*log(Phi(c,s));
+            //'All elements in location L and community C
+            if(Theta(l,c)>0)logLikelihood=logLikelihood+sum(zMat(_,c))*log(Theta(l,c));
+          }
+        }
+      }
+    }
+    logLikelihood=logLikelihood+priorV+priorPhi;
+  }
+  else{
+    //'Calculate the likelihood based on data
+    //'For each location
+    for(int l=0;l<zList.length();l++){
+      //'Get the zMat
+      NumericMatrix zMat = zList[l];
+      //'For each specie
+      for(int s=0;s<nSpecies;s++){
+        //'For each community
+        for(int c=0;c<n_community;c++){
+          if(zMat(s,c)>0){
+            //'All elements in specie S and Community C
+            if(Phi(c,s)>0) logLikelihood=logLikelihood+zMat(s,c)*log(Phi(c,s));
+            //'All elements in location L and community C
+            if(Theta(l,c)>0)logLikelihood=logLikelihood+sum(zMat(_,c))*log(Theta(l,c));
+          }
+        }
+      }
+    }
+  }
+  return(logLikelihood);
+}
 
 
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING PROCEDURE                  ************************************/
 /***************************************************************************************************************************/
 
-
-//' @name GibbsSamplingAbundanceCovariate
-//' @title Gibbs Sampling for LDA AbundanceCovariate with Stick-Breaking
-//' @description Compute the Gibbs Sampling for LDA AbundanceCovariate with Stick-Breaking
-//' @param data - dataFrame with AbundanceCovariate
+//' @name GibbsSamplingCovariate
+//' @title Gibbs Sampling for LDA Covariate with Stick-Breaking
+//' @description Compute the Gibbs Sampling for LDA Covariate with Stick-Breaking
+//' @param data - dataFrame with Covariate
 //' @param int n_community - Number of communities
 //' @param beta - NumericVector for beta (Sx1)
+//' @param gamma - Hyperparameter  Beta(1,gamma)
 //' @param n_gibbs - Total number of Gibbs Samples
 //' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
 //' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
 // [[Rcpp::export]]
-List lda_covariate(DataFrame data, DataFrame design, int n_community,NumericVector beta, int n_gibbs, bool ll_prior=true, bool display_progress=true) {
+List lda_multinomial_cov(DataFrame data, DataFrame design, int n_community, NumericVector beta, double gamma, int n_gibbs, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix
   NumericMatrix matdata = internal::convert_using_rfunction(data, "as.matrix");
@@ -364,45 +340,32 @@ List lda_covariate(DataFrame data, DataFrame design, int n_community,NumericVect
   //'Total number of species
   int nSpecies = matdata.ncol();
 
-  //Number of covariates
-  int nCovariates = matDesign.ncol();
+  //'Initialize the ThetaGibbs
+  NumericMatrix ThetaGibbs(n_gibbs,nLocations*n_community);
+
+  //'Initialize the PhiGibbs
+  NumericMatrix PhiGibbs(n_gibbs,n_community*nSpecies);
+
+  //'Initialize the BetaGibbs
+  NumericMatrix BetaGibbs(n_gibbs,n_community*matDesign.ncol());
 
   //'Intialize Theta
   NumericVector hyperTheta(n_community);
   hyperTheta.fill(1);
-  NumericMatrix Theta = rdirichletAbundanceCovariate(nSpecies,hyperTheta);
-
-  //'Initialize the Beta matrix
-  NumericMatrix betaMat(n_community,matDesign.ncol());
-  betaMat.fill(0.0);
-
-  //'Initialize the Beta matrix
-  List betaList(nLocations);
-
-  //Initialize the betas
-  for(int l=0;l<nLocations;l++){
-    betaList[l]=betaMat;
-  }
-
-  //Initialize Sigma
-  NumericMatrix Sigma(matDesign.ncol(),matDesign.ncol());
-  Sigma.fill(0.0);
-  Sigma.fill_diag(1.0);
-
-  //'Store the results
-  List listTheta = Rcpp::List::create(Rcpp::Named("Beta") = betaList,
-                                    Rcpp::Named("Theta")  = Theta);
+  NumericMatrix Theta=rdirichletCovariate(nSpecies,hyperTheta);
 
   //'Initialize Phi
   NumericVector hyperPhi(nSpecies);
   hyperPhi.fill(1);
-  NumericMatrix Phi=rdirichletAbundanceCovariate(n_community,hyperPhi);
+  NumericMatrix Phi=rdirichletCovariate(n_community,hyperPhi);
+
+  //'Intialize vMat
+  NumericVector hyperV(n_community);
+  hyperV.fill(1);
+  NumericMatrix vMat=rdirichletCovariate(nLocations,hyperV);
 
   //'Initialize the logLikelihood vector
   NumericVector logLikelihoodVec(n_gibbs);
-
-  //List with betas, Theta and Phi
-  List res(n_gibbs);
 
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
@@ -411,35 +374,93 @@ List lda_covariate(DataFrame data, DataFrame design, int n_community,NumericVect
     if (Progress::check_abort() )
       Rcpp::stop("Operation cancelled by interrupt.");
 
-    //'Generate zList
-    List zList  = generateZAbundanceCovariate(matdata, listTheta, Phi);
-
     //'Generate Theta
-    listTheta =  generateThetaAbundanceCovariate(zList, matDesign, nLocations, n_community, Sigma);
+    Theta = generateThetaCovariate(vMat);
+
+    //'Generate zList
+    List zList  = generateZCovariate(matdata, Theta, Phi);
 
     //'Generate Phi
-    Phi = generatePhiAbundanceCovariate(n_community, zList, beta);
+    Phi = generatePhiCovariate(n_community, zList, beta);
+
+    //'Generate vMat
+    vMat = generateVCovariate(zList,nLocations,n_community, gamma);
+
+    //Beta coefficientes
+    NumericMatrix betasCoef(n_community,matDesign.ncol());
+    for(int c=0;c<n_community;c++){
+
+      //Create the logistic constants
+      NumericVector logistic = Rcpp::log(Theta(_,c))/Rcpp::log(1.0-Theta(_,c));
+
+
+      int count =0;
+      //Count number of noniformative
+      for(int e=0;e<logistic.size();e++){
+        if(!std::isinf(logistic(e))){
+          count=count+1;
+        }
+      }
+
+      //Create only informative data
+      arma::mat Xmat(count,matDesign.ncol());
+      arma::vec bVec(count);
+      count =0;
+      for(int e=0;e<logistic.size();e++){
+        if(!std::isinf(logistic(e))){
+          //Convert the row
+          for(int cc=0;cc<matDesign.ncol();cc++){
+            Xmat(count,cc) = matDesign(e,cc);
+          }
+          bVec(count) = logistic(e);
+          count=count+1;
+        }
+      }
+
+/*
+      //Replace extreme values
+      for(int e=0;e<logistic.size();e++){
+        if(logistic(e)<0 && std::isinf(logistic(e))){
+          logistic(e)=1e-10;
+        }
+        else if(std::isinf(logistic(e)>0 && logistic(e))){
+          logistic(e)=1e+10;
+        }
+      }
+     //Solve the logistic link function
+     arma::mat Xmat = as<arma::mat>(wrap(matDesign));
+     arma::vec bVec = as<arma::vec>(wrap(logistic));
+*/
+
+      arma::vec betasVec = arma::solve(Xmat,bVec);
+
+      //Store the solution
+      for(int e=0;e< betasVec.n_elem;e++){
+        betasCoef(c,e) = betasVec(e);
+      }
+    }
+
+    //'Create the final ThetaGibbs (n_gibbs,nLocations*n_community) and final PhiGibbs (n_gibbs,n_community*nSpecies)
+    //'Create the final BetaGibbs (n_gibbs,n_community*n_covar )
+    updateThetaAndPhiCovariate(ThetaGibbs, Theta, PhiGibbs, Phi,BetaGibbs, betasCoef, g);
 
     //'Initialize the logLikelihood
-    double logLikelihood=0.0;
-    //    double logLikelihood=ll_priorFunctionAbundanceCovariate(zList, g, nSpecies, n_community,
-    //                                                       vMat, Theta, Phi, gamma, ll_prior);
+    double logLikelihood=ll_priorFunctionCovariate(zList, g, nSpecies, n_community,
+                                                   vMat, Theta, Phi, gamma, ll_prior);
 
-    //'Store the results
-    List resGibbs = Rcpp::List::create(Rcpp::Named("Theta") = listTheta,
-                                      Rcpp::Named("Phi")  = Phi,
-                                      Rcpp::Named("logLikelihood")  = logLikelihood);
-
-
-    res[g] = resGibbs;
     //'Store the logLikelihood
-//    logLikelihoodVec(g)=logLikelihood;
+    logLikelihoodVec(g)=logLikelihood;
 
     //'Increment the progress bar
     p.increment();
 
   }
 
-  return res;
-}
+  //'Store the results
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
+                                    Rcpp::Named("Phi")  = PhiGibbs,
+                                    Rcpp::Named("Beta")  = BetaGibbs,
+                                    Rcpp::Named("logLikelihood")  = logLikelihoodVec);
 
+  return resTemp;
+}

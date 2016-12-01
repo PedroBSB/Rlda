@@ -1,7 +1,8 @@
-#include <Rcpp.h>
+#include <RcppArmadillo.h>
 #include <iostream>
 #include <ctime>
 #include <fstream>
+// [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
 #include "progress.hpp"
 using namespace Rcpp;
@@ -117,9 +118,9 @@ NumericVector meltAbundance(NumericMatrix mat){
 }
 
 void updateThetaAndPhiAbundance(NumericMatrix &ThetaGibbs,NumericMatrix Theta,NumericMatrix &PhiGibbs, NumericMatrix Phi,int gibbs){
-    //'meltAbundance the Theta and Phi matrix
-    ThetaGibbs(gibbs,_)=meltAbundance(Theta);
-    PhiGibbs(gibbs,_) =meltAbundance(Phi);
+  //'meltAbundance the Theta and Phi matrix
+  ThetaGibbs(gibbs,_)=meltAbundance(Theta);
+  PhiGibbs(gibbs,_) =meltAbundance(Phi);
 }
 
 
@@ -140,6 +141,8 @@ NumericMatrix sumarizeCommunitiesAbundance(List zList, int n_community){
   }
   return(mMat);
 }
+
+
 
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
@@ -381,7 +384,7 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
 
     //'Initialize the logLikelihood
     double logLikelihood=ll_priorFunctionAbundance(zList, g, nSpecies, n_community,
-                                                       vMat, Theta, Phi, gamma, ll_prior);
+                                                   vMat, Theta, Phi, gamma, ll_prior);
 
     //'Store the logLikelihood
     logLikelihoodVec(g)=logLikelihood;

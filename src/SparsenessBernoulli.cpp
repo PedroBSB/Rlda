@@ -3,7 +3,7 @@
 #include <ctime>
 #include <fstream>
 // [[Rcpp::depends(RcppProgress)]]
-#include <progress.hpp>
+#include "progress.hpp" // Within MacOS, one needs quote.
 using namespace Rcpp;
 
 /***************************************************************************************************************************/

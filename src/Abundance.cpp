@@ -503,6 +503,7 @@ List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, do
   bool bgamma = false;
   if(std::isnan(gamma)){
     bgamma=true;
+    gamma = 0.01;
   }
 
   //'Intialize the progressbar

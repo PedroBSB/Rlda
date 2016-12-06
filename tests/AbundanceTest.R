@@ -73,7 +73,7 @@ set.seed(9292)
 start.time <- Sys.time()
 
 #res<-lda_multinomial(FIA, 4, beta, gamma, 500,  TRUE, TRUE)
-res<-lda_multinomial_burn(FIA, 4, beta, gamma, 500, 50,  TRUE, TRUE)
+res<-lda_multinomial_burn(FIA, 4, beta, NA, 500, 50,  FALSE, TRUE)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time

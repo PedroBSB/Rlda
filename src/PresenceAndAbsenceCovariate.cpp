@@ -145,7 +145,7 @@ double fixMHPresence(double lo, double hi,double old1,double new1,double jump){
 /***************************************************************************************************************************/
 
 double gammaMHPresence(NumericMatrix vMat, double gamma, double jump){
-  double newGamma = tnormBinomial(0.0,1.0,gamma,jump);
+  double newGamma = tnormPresence(0.0,1.0,gamma,jump);
   double pold = 0.0;
   double pnew = 0.0;
   for(int r=0;r<vMat.nrow();r++){
@@ -154,7 +154,7 @@ double gammaMHPresence(NumericMatrix vMat, double gamma, double jump){
       pnew=pnew+R::dbeta(vMat(r,c),1.0,newGamma,1);
     }
   }
-  double pcorrection = fixMHBinomial(0,1,gamma,newGamma,jump);
+  double pcorrection = fixMHPresence(0,1,gamma,newGamma,jump);
   //Acceptance
   double a = std::exp(pnew+pcorrection-pold);
   double z = R::unif_rand();

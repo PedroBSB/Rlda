@@ -142,11 +142,47 @@ NumericMatrix sumarizeCommunitiesAbundance(List zList, int n_community){
   return(mMat);
 }
 
+double tnormAbundance(double lo, double hi,double mu, double sig){
+  double q1 = R::pnorm5(lo,mu,sig,1,0);
+  double q2 = R::pnorm5(hi,mu,sig,1,0);
+  double z = R::runif(q1,q2);
+  z = R::qnorm5(z,mu,sig,1,0);
+  return(z);
+}
 
+double fixMHAbundance(double lo, double hi,double old1,double new1,double jump){
+  double jold=R::pnorm5(hi,old1,jump,1,0)-R::pnorm5(lo,old1,jump,1,0);
+  double jnew=R::pnorm5(hi,new1,jump,1,0)-R::pnorm5(lo,new1,jump,1,0);
+  return(std::log(jold)-std::log(jnew));
+}
 
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
+
+double gammaMHAbundance(NumericMatrix vMat, double gamma, double jump){
+  double newGamma = tnormAbundance(0.0,1.0,gamma,jump);
+  double pold = 0.0;
+  double pnew = 0.0;
+  for(int r=0;r<vMat.nrow();r++){
+    for(int c=0;c<(vMat.ncol()-1);c++){
+      pold=pold+R::dbeta(vMat(r,c),1.0,gamma,1);
+      pnew=pnew+R::dbeta(vMat(r,c),1.0,newGamma,1);
+    }
+  }
+  double pcorrection = fixMHAbundance(0,1,gamma,newGamma,jump);
+  //Acceptance
+  double a = std::exp(pnew+pcorrection-pold);
+  double z = R::unif_rand();
+  if(z<a){
+    return(newGamma);
+  }
+  else{
+    return(gamma);
+  }
+  return(0);
+}
+
 
 NumericMatrix generateThetaAbundance(NumericMatrix vMat) {
   //'Total number of locations
@@ -360,6 +396,12 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
   //'Initialize the logLikelihood vector
   NumericVector logLikelihoodVec(n_gibbs);
 
+  //Check if gamma existis
+  bool bgamma = false;
+  if(std::isnan(gamma)){
+    bgamma=true;
+  }
+
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -376,6 +418,10 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
     //'Generate Phi
     Phi = generatePhiAbundance(n_community, zList, beta);
 
+    //Generate gamma MH
+    if(bgamma){
+      gamma = gammaMHAbundance(vMat, gamma, 0.5);
+    }
     //'Generate vMat
     vMat = generateVAbundance(zList,nLocations,n_community, gamma);
 
@@ -453,6 +499,12 @@ List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, do
   NumericVector logLikelihoodVec(n_gibbs-n_burn);
   int cont=0;
 
+  //Check if gamma existis
+  bool bgamma = false;
+  if(std::isnan(gamma)){
+    bgamma=true;
+  }
+
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -468,6 +520,11 @@ List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, do
 
     //'Generate Phi
     Phi = generatePhiAbundance(n_community, zList, beta);
+
+    //Generate gamma MH
+    if(bgamma){
+      gamma = gammaMHAbundance(vMat, gamma, 0.5);
+    }
 
     //'Generate vMat
     vMat = generateVAbundance(zList,nLocations,n_community, gamma);

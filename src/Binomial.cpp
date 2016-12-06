@@ -235,9 +235,46 @@ NumericMatrix mmultBinomial(const NumericMatrix& m1, const NumericMatrix& m2){
   return out;
 }
 
+double tnormBinomial(double lo, double hi,double mu, double sig){
+  double q1 = R::pnorm5(lo,mu,sig,1,0);
+  double q2 = R::pnorm5(hi,mu,sig,1,0);
+  double z = R::runif(q1,q2);
+  z = R::qnorm5(z,mu,sig,1,0);
+  return(z);
+}
+
+double fixMHBinomial(double lo, double hi,double old1,double new1,double jump){
+  double jold=R::pnorm5(hi,old1,jump,1,0)-R::pnorm5(lo,old1,jump,1,0);
+  double jnew=R::pnorm5(hi,new1,jump,1,0)-R::pnorm5(lo,new1,jump,1,0);
+  return(std::log(jold)-std::log(jnew));
+}
+
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
+
+double gammaMHBinomial(NumericMatrix vMat, double gamma, double jump){
+  double newGamma = tnormBinomial(0.0,1.0,gamma,jump);
+  double pold = 0.0;
+  double pnew = 0.0;
+  for(int r=0;r<vMat.nrow();r++){
+    for(int c=0;c<(vMat.ncol()-1);c++){
+      pold=pold+R::dbeta(vMat(r,c),1.0,gamma,1);
+      pnew=pnew+R::dbeta(vMat(r,c),1.0,newGamma,1);
+    }
+  }
+  double pcorrection = fixMHBinomial(0,1,gamma,newGamma,jump);
+  //Acceptance
+  double a = std::exp(pnew+pcorrection-pold);
+  double z = R::unif_rand();
+  if(z<a){
+    return(newGamma);
+  }
+  else{
+    return(gamma);
+  }
+  return(0);
+}
 
 GenericVector generateZBinomial(NumericMatrix binomMat,NumericMatrix populMat, NumericMatrix Theta, NumericMatrix Phi) {
   try{
@@ -475,6 +512,12 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
   //'Initialize the logLikelihood vector
   NumericVector logLikelihoodVec(n_gibbs);
 
+  //Check if gamma existis
+  bool bgamma = false;
+  if(std::isnan(gamma)){
+    bgamma=true;
+  }
+
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -484,6 +527,11 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
 
     //'Initialize the zMAt
     GenericVector zMat = generateZBinomial(matDATA, matPOP, Theta, Phi);
+
+    //Generate gamma MH
+    if(bgamma){
+      gamma = gammaMHBinomial(vMat, gamma, 0.5);
+    }
 
     //'Generate Theta
     Theta = generateThetaBinomial(zMat,vMat, nLocations, n_community, gamma);
@@ -567,6 +615,12 @@ List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alp
   NumericVector logLikelihoodVec(n_gibbs-n_burn);
   int cont=0;
 
+  //Check if gamma existis
+  bool bgamma = false;
+  if(std::isnan(gamma)){
+    bgamma=true;
+  }
+
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -576,6 +630,11 @@ List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alp
 
     //'Initialize the zMAt
     GenericVector zMat = generateZBinomial(matDATA, matPOP, Theta, Phi);
+
+    //Generate gamma MH
+    if(bgamma){
+      gamma = gammaMHBinomial(vMat, gamma, 0.5);
+    }
 
     //'Generate Theta
     Theta = generateThetaBinomial(zMat,vMat, nLocations, n_community, gamma);

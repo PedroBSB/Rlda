@@ -126,9 +126,46 @@ void updateThetaAndPhiPresenceCova(NumericMatrix &ThetaGibbs,NumericMatrix Theta
 }
 
 
+double tnormPresence(double lo, double hi,double mu, double sig){
+  double q1 = R::pnorm5(lo,mu,sig,1,0);
+  double q2 = R::pnorm5(hi,mu,sig,1,0);
+  double z = R::runif(q1,q2);
+  z = R::qnorm5(z,mu,sig,1,0);
+  return(z);
+}
+
+double fixMHPresence(double lo, double hi,double old1,double new1,double jump){
+  double jold=R::pnorm5(hi,old1,jump,1,0)-R::pnorm5(lo,old1,jump,1,0);
+  double jnew=R::pnorm5(hi,new1,jump,1,0)-R::pnorm5(lo,new1,jump,1,0);
+  return(std::log(jold)-std::log(jnew));
+}
+
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
+
+double gammaMHPresence(NumericMatrix vMat, double gamma, double jump){
+  double newGamma = tnormBinomial(0.0,1.0,gamma,jump);
+  double pold = 0.0;
+  double pnew = 0.0;
+  for(int r=0;r<vMat.nrow();r++){
+    for(int c=0;c<(vMat.ncol()-1);c++){
+      pold=pold+R::dbeta(vMat(r,c),1.0,gamma,1);
+      pnew=pnew+R::dbeta(vMat(r,c),1.0,newGamma,1);
+    }
+  }
+  double pcorrection = fixMHBinomial(0,1,gamma,newGamma,jump);
+  //Acceptance
+  double a = std::exp(pnew+pcorrection-pold);
+  double z = R::unif_rand();
+  if(z<a){
+    return(newGamma);
+  }
+  else{
+    return(gamma);
+  }
+  return(0);
+}
 
 
 List generateZPresenceCova(NumericMatrix binaryMat, NumericMatrix Theta, NumericMatrix vMat, NumericMatrix &PhiMat) {
@@ -377,6 +414,12 @@ List lda_bernoulli_cov(DataFrame data,DataFrame design,  int n_community, double
   //'Initialize the logLikelihood vector
   NumericVector logLikelihoodVec(n_gibbs);
 
+  //Check if gamma existis
+  bool bgamma = false;
+  if(std::isnan(gamma)){
+    bgamma=true;
+  }
+
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -391,6 +434,11 @@ List lda_bernoulli_cov(DataFrame data,DataFrame design,  int n_community, double
 
     //'Generate Theta
     Theta = generateThetaPresenceCova(zList,alpha0,alpha1);
+
+    //Generate gamma MH
+    if(bgamma){
+      gamma = gammaMHPresence(vMat, gamma, 0.5);
+    }
 
     //'Generate vMat
     vMat = generateVPresenceCova(zList,nLocations, gamma);

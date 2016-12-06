@@ -8,7 +8,7 @@
 }
 \usage{
   lda_multinomial(data, n_community, beta, gamma,
-  n_gibbs, ll_prior=TRUE, display_progress=TRUE)
+  n_gibbs, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{
   \item{data}{A abundance data.frame where each row is a sampling unit
@@ -29,10 +29,10 @@
       A R List with three elements:
   \item{Theta}{The individual probability for each observation
   (ex: location) belong in each cluster (ex: community). It is a matrix
-  with dimension equal \code{n_gibbs} by \code{nrow(data)*n_community}}
+  with dimension equal \code{n_gibbs} by \code{nrow(data) * n_community}}
   \item{Phi}{The individual probability for each variable
   (ex: Specie) belong in each cluster (ex: community). It is a matrix
-  with dimension equal \code{n_gibbs} by \code{ncol(data)*n_community}}
+  with dimension equal \code{n_gibbs} by \code{ncol(data) * n_community}}
   \item{LogLikelihood}{The vector of Log-Likelihoods compute for
   each Gibbs Sample.}
 }
@@ -93,9 +93,9 @@ mat1 <- dcast(complaints[, c("Company","Issue")],
             Company ~ Issue, fun.aggregate = length,
             value.var = "Issue")
 # Create the rowname
-rownames(mat1) <- mat1[,1]
+rownames(mat1) <- mat1[, 1]
 # Remove the ID variable
-mat1 <- mat1[,-1]
+mat1 <- mat1[, -1]
 
 # Set seed
 set.seed(9292)
@@ -104,6 +104,6 @@ beta <- rep(1,ncol(mat1))
 gamma <- 0.01
 
 #Execute the LDA for the Multinomial entry
-res<-lda_multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
+res <- lda_multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
                        n_gibbs = 1000, ll_prior = TRUE, display_progress = TRUE)
 }

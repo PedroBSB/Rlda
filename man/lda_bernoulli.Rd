@@ -8,7 +8,7 @@
 }
 \usage{
   lda_binomial(data, n_community, alpha0, alpha1, gamma,
-  n_gibbs, ll_prior=TRUE, display_progress=TRUE)
+  n_gibbs, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{
   \item{data}{A binary data.frame where each row is a sampling unit
@@ -30,10 +30,10 @@
       A R List with three elements:
   \item{Theta}{The individual probability for each observation
   (ex: location) belong in each cluster (ex: community). It is a matrix
-  with dimension equal \code{n_gibbs} by \code{nrow(data)*n_community}}
+  with dimension equal \code{n_gibbs} by \code{nrow(data) * n_community}}
   \item{Phi}{The individual probability for each variable
   (ex: Specie) belong in each cluster (ex: community). It is a matrix
-  with dimension equal \code{n_gibbs} by \code{ncol(data)*n_community}}
+  with dimension equal \code{n_gibbs} by \code{ncol(data) * n_community}}
   \item{LogLikelihood}{The vector of Log-Likelihoods compute for
   each Gibbs Sample.}
 }
@@ -44,7 +44,7 @@
   Zero or Ones for each variable (column) in each observation (row).
 }
 \note{The \code{Theta} and \code{Phi} matrix can be obtained for the i-th gibbs
-sampling using \code{matrix(Theta[i,],nrow = nrow(data), ncol = n_community)} and
+sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} and
 \code{matrix(Phi[i,], nrow = n_community, ncol = ncol(data))}, respectively.}
 \references{
   \itemize{

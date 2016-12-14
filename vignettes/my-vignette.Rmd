@@ -521,15 +521,15 @@ res<-lda_bernoulli(matPres,10,
 We can visually evaluate the cluster distribution across species, after the *burn-in phase* in Figure \ref{figure:fig003}:
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
-#Get the Phi Estimate
-Phi<-res[["Phi"]]
+#Get the Theta Estimate
+Theta<-res[["Theta"]]
 #Burnout
-Phi<-colMeans(Phi[1000:5000,])
+Theta<-colMeans(Theta[1000:5000,])
 #Create the matrix
-Phi<-matrix(Phi,nrow = ncol(matPres),ncol=10)
+Theta<-matrix(Theta,nrow = ncol(matPres),ncol=10)
 #Rownames
-rownames(Phi)<-colnames(matPres)
-colnames(Phi)<-paste("Cluster ",seq(1,ncol(Phi)))
+rownames(Theta)<-colnames(matPres)
+colnames(Theta)<-paste("Cluster ",seq(1,ncol(Phi)))
 #Color
 library(RColorBrewer)
 myColor<-brewer.pal(n = 10, name = "RdBu")

@@ -117,10 +117,10 @@ NumericVector meltPresence(NumericMatrix mat){
   return(vec);
 }
 
-void updateThetaAndPhiPresence(NumericMatrix &ThetaGibbs,NumericMatrix Theta,NumericMatrix &PhiGibbs, NumericMatrix Phi,int gibbs){
-    //'meltPresence the Theta and Phi matrix
-    ThetaGibbs(gibbs,_)=meltPresence(Theta);
-    PhiGibbs(gibbs,_) =meltPresence(Phi);
+void updatePhiAndThetaPresence(NumericMatrix &PhiGibbs,NumericMatrix Phi,NumericMatrix &ThetaGibbs, NumericMatrix Theta,int gibbs){
+    //'meltPresence the Phi and Theta matrix
+    PhiGibbs(gibbs,_)=meltPresence(Phi);
+    ThetaGibbs(gibbs,_) =meltPresence(Theta);
 }
 
 
@@ -129,13 +129,13 @@ void updateThetaAndPhiPresence(NumericMatrix &ThetaGibbs,NumericMatrix Theta,Num
 /***************************************************************************************************************************/
 
 
-List generateZPresence(NumericMatrix binaryMat, NumericMatrix Theta, NumericMatrix vMat, NumericMatrix &PhiMat) {
+List generateZPresence(NumericMatrix binaryMat, NumericMatrix Phi, NumericMatrix vMat, NumericMatrix &ThetaMat) {
   //'Number of locations
   int nLocations=binaryMat.nrow();
   //'Number of Species
   int nSpecies=binaryMat.ncol();
   //'Number of Communities
-  int n_community=Theta.ncol();
+  int n_community=Phi.ncol();
   //'Matrix N the number of locations where specie s comes from community c
   NumericMatrix nMat(nSpecies,n_community);
   //'Matrix R the number of these individuals thar are observed
@@ -144,23 +144,23 @@ List generateZPresence(NumericMatrix binaryMat, NumericMatrix Theta, NumericMatr
   NumericMatrix mMat(binaryMat.nrow(),n_community);
   //'For each location sample from a Multinomial
   for(int l=0;l<nLocations;l++){
-    //'Create Phi (Size Cx1) based on vMat V_cl \prod_(k=1)^(c-1)(1-V_kl )
-    NumericVector Phi(n_community);
-    //'Update the Phi \prod_(k=1)^(c-1)(1-V_kl )
+    //'Create Theta (Size Cx1) based on vMat V_cl \prod_(k=1)^(c-1)(1-V_kl )
+    NumericVector Theta(n_community);
+    //'Update the Theta \prod_(k=1)^(c-1)(1-V_kl )
     double prod=1;
     for(int c=0;c<n_community;c++){
       double vNumber = vMat(l,c);
       if (c == 0) prod=1;
       if (c >  0) prod=prod*(1.0-vMat(l,c-1));
-      Phi(c)=vNumber*prod;
+      Theta(c)=vNumber*prod;
     }
-    //'Update the Phi Matrix by reference
-    PhiMat(l,_)=Phi;
+    //'Update the Theta Matrix by reference
+    ThetaMat(l,_)=Theta;
     //'For each Specie
     for(int s=0;s<nSpecies;s++){
       //'Calculate the probability vector
       double sumVec=0;
-      NumericVector probability = pow(Theta(s,_),binaryMat(l,s))*pow(1.0-Theta(s,_),1.0-binaryMat(l,s))*Phi;
+      NumericVector probability = pow(Phi(s,_),binaryMat(l,s))*pow(1.0-Phi(s,_),1.0-binaryMat(l,s))*Theta;
       //'Find the sum
       sumVec=sum(probability);
       //'Normalize the probability
@@ -187,7 +187,7 @@ List generateZPresence(NumericMatrix binaryMat, NumericMatrix Theta, NumericMatr
   return resZ;
 }
 
-NumericMatrix generateThetaPresence(List zList,double alpha0, double alpha1) {
+NumericMatrix generatePhiPresence(List zList,double alpha0, double alpha1) {
   //'Getting the N matrix
   NumericMatrix nMat = zList[0];
   //'Getting the R matrix
@@ -196,18 +196,18 @@ NumericMatrix generateThetaPresence(List zList,double alpha0, double alpha1) {
   int nSpecies = nMat.nrow();
   //'Total number of communities
   int n_community = nMat.ncol();
-  //'Initialize the Phi matrix
-  NumericMatrix thetaMat(nSpecies,n_community);
+  //'Initialize the Theta matrix
+  NumericMatrix PhiMat(nSpecies,n_community);
   //'For each Specie
   for(int s=0;s<nSpecies;s++){
     //'For each community:
     for(int c=0;c<n_community;c++){
       double aBeta = rMat(s,c)+alpha0;
       double bBeta = nMat(s,c)-rMat(s,c)+alpha1;
-      thetaMat(s,c)=R::rbeta(aBeta,bBeta);
+      PhiMat(s,c)=R::rbeta(aBeta,bBeta);
     }
   }
-  return thetaMat;
+  return PhiMat;
 }
 
 
@@ -216,7 +216,7 @@ NumericMatrix generateVPresence(List zList,int nLocations, double gamma) {
   NumericMatrix mMat = zList[2];
   //'Total number of communities
   int n_community = mMat.ncol();
-  //'Initialize the Phi matrix
+  //'Initialize the Theta matrix
   NumericMatrix vMat(nLocations,n_community);
   //'Foreach Specie
   for(int l=0;l<nLocations;l++){
@@ -238,18 +238,18 @@ NumericMatrix generateVPresence(List zList,int nLocations, double gamma) {
   return vMat;
 }
 
-double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpecies,int n_community, NumericMatrix vMat,NumericMatrix Theta, NumericMatrix Phi, double alpha0,double alpha1, double gamma, bool ll_prior=true) {
+double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpecies,int n_community, NumericMatrix vMat,NumericMatrix Phi, NumericMatrix Theta, double alpha0,double alpha1, double gamma, bool ll_prior=true) {
   //'Initialize the logLikelihoodVec
   double logLikelihood=0;
   //'Calculate the Loglikelihood and Prior
   if(ll_prior){
-    //'Initialize the V_{cl} and Theta_{sc} prior
+    //'Initialize the V_{cl} and Phi_{sc} prior
     double priorV=0.0;
-    double priorTheta=0.0;
+    double priorPhi=0.0;
     //'For each location
     for(int l=0;l<nLocations;l++){
-      //'Initiate the Theta Counter
-      int thetaGibbsCount=0;
+      //'Initiate the Phi Counter
+      int PhiGibbsCount=0;
       //'Compute the prior for V_{cl}
       for(int c=0;c<n_community;c++){
         if(vMat(l,c)<1)priorV=priorV+R::dbeta(vMat(l,c),1,gamma,1);
@@ -258,61 +258,61 @@ double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpeci
       //'For each Specie
       for(int s=0;s<nSpecies;s++){
         //'Initiate the Gibbs Counter
-        int phiGibbsCount=0;
+        int ThetaGibbsCount=0;
 
-        //'Compute just one time the prior for Theta_{sc}
+        //'Compute just one time the prior for Phi_{sc}
         if(l==0){
-          //'Compute the prior for Theta_{sc}
+          //'Compute the prior for Phi_{sc}
           for(int c=0;c<n_community;c++){
-            if(Theta(s,c)<1)priorTheta=priorTheta+R::dbeta(Theta(s,c),alpha0,alpha1,1);
+            if(Phi(s,c)<1)priorPhi=priorPhi+R::dbeta(Phi(s,c),alpha0,alpha1,1);
           }
         }
 
-        //'Initialize the product between Theta and Phi
-        double thetaPhi=0.0;
+        //'Initialize the product between Phi and Theta
+        double PhiTheta=0.0;
         //'For each community
         for(int c=0;c<n_community;c++){
-          thetaPhi=thetaPhi+Theta(s,c)*Phi(l,c);  //'DV: mudei aqui
+          PhiTheta=PhiTheta+Phi(s,c)*Theta(l,c);  //'DV: mudei aqui
         }
         //'Getting the x_{ls} observation
         double xLS=matDATA(l,s);
         if(xLS==1.0){
-          logLikelihood=logLikelihood+log(thetaPhi);
+          logLikelihood=logLikelihood+log(PhiTheta);
         }
         else{
-          if(thetaPhi<1){//'Otherwise a large thetaPhi>1 represents low likelihood, then we don't compute this value.
-            logLikelihood=logLikelihood+log(1.0-thetaPhi);
+          if(PhiTheta<1){//'Otherwise a large PhiTheta>1 represents low likelihood, then we don't compute this value.
+            logLikelihood=logLikelihood+log(1.0-PhiTheta);
           }
         }
       }
     }
 
     //'Update the logLikelihood
-    logLikelihood=logLikelihood+priorTheta+priorV;
+    logLikelihood=logLikelihood+priorPhi+priorV;
   }
   else{
     //'For each location
     for(int l=0;l<nLocations;l++){
-      //'Initiate the Theta Counter
-      int thetaGibbsCount=0;
+      //'Initiate the Phi Counter
+      int PhiGibbsCount=0;
       //'For each Specie
       for(int s=0;s<nSpecies;s++){
         //'Initiate the Gibbs Counter
-        int phiGibbsCount=0;
-        //'Initialize the product between Theta and Phi
-        double thetaPhi=0.0;
+        int ThetaGibbsCount=0;
+        //'Initialize the product between Phi and Theta
+        double PhiTheta=0.0;
         //'For each community
         for(int c=0;c<n_community;c++){
-          thetaPhi=thetaPhi+Theta(s,c)*Phi(l,c); //'DV: mudei aqui
+          PhiTheta=PhiTheta+Phi(s,c)*Theta(l,c); //'DV: mudei aqui
         }
         //'Getting the x_{ls} observation
         double xLS=matDATA(l,s);
         if(xLS==1.0){
-          logLikelihood=logLikelihood+log(thetaPhi);
+          logLikelihood=logLikelihood+log(PhiTheta);
         }
         else{
-          if(thetaPhi<1){//'Otherwise a large thetaPhi>1 represents low likelihood, then we don't compute this value.
-            logLikelihood=logLikelihood+log(1.0-thetaPhi);
+          if(PhiTheta<1){//'Otherwise a large PhiTheta>1 represents low likelihood, then we don't compute this value.
+            logLikelihood=logLikelihood+log(1.0-PhiTheta);
           }
         }
       }
@@ -336,7 +336,7 @@ double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpeci
 //' @param n_gibbs - Total number of Gibbs Samples
 //' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
-//' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
+//' @return List - With Phi(n_gibbs,n_community*nSpecies), Theta(n_gibbs,nLocations*n_community) and logLikelihood
 // [[Rcpp::export]]
 List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs, bool ll_prior=true, bool display_progress=true) {
 
@@ -349,21 +349,21 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
   //'Total number of species
   int nSpecies = matDATA.ncol();
 
-  //'Intialize Theta
-  NumericVector hyperTheta(n_community);
-  hyperTheta.fill(1);
-  NumericMatrix Theta=rdirichletPresence(nSpecies,hyperTheta);
+  //'Intialize Phi
+  NumericVector hyperPhi(n_community);
+  hyperPhi.fill(1);
+  NumericMatrix Phi=rdirichletPresence(nSpecies,hyperPhi);
 
   //'Intialize vMat
   NumericVector hyperV(n_community);
   hyperV.fill(1);
   NumericMatrix vMat=rdirichletPresence(nLocations,hyperV);
 
-  //'Initialize the ThetaGibbs
-  NumericMatrix ThetaGibbs(n_gibbs,n_community*nSpecies);
-
   //'Initialize the PhiGibbs
-  NumericMatrix PhiGibbs(n_gibbs,nLocations*n_community);
+  NumericMatrix PhiGibbs(n_gibbs,n_community*nSpecies);
+
+  //'Initialize the ThetaGibbs
+  NumericMatrix ThetaGibbs(n_gibbs,nLocations*n_community);
 
   //'Initialize the logLikelihood vector
   NumericVector logLikelihoodVec(n_gibbs);
@@ -374,25 +374,25 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
     //'Verify if everything is ok
     if (Progress::check_abort() )
       Rcpp::stop("Operation cancelled by interrupt.");
-    //'Initialize the Phi matrix
-    NumericMatrix PhiMat(nLocations, n_community);
+    //'Initialize the Theta matrix
+    NumericMatrix ThetaMat(nLocations, n_community);
 
     //'Generate zList
-    List zList  = generateZPresence(matDATA, Theta, vMat, PhiMat);
+    List zList  = generateZPresence(matDATA, Phi, vMat, ThetaMat);
 
-    //'Generate Theta
-    Theta = generateThetaPresence(zList,alpha0,alpha1);
+    //'Generate Phi
+    Phi = generatePhiPresence(zList,alpha0,alpha1);
 
     //'Generate vMat
     vMat = generateVPresence(zList,nLocations, gamma);
 
-    //'Create the final Theta (n_gibbs,n_community*nSpecies) and final Phi (PhiGibbs)
-    updateThetaAndPhiPresence(ThetaGibbs, Theta, PhiGibbs, PhiMat, g);
+    //'Create the final Phi (n_gibbs,n_community*nSpecies) and final Theta (ThetaGibbs)
+    updatePhiAndThetaPresence(PhiGibbs, Phi, ThetaGibbs, ThetaMat, g);
 
     //'Initialize the logLikelihood
     double logLikelihood=ll_priorFunctionPresence(matDATA, nLocations,
                                                        nSpecies,n_community,
-                                                       vMat, Theta, PhiMat,
+                                                       vMat, Phi, ThetaMat,
                                                        alpha0, alpha1, gamma,
                                                        ll_prior);
     //'Store the logLikelihood
@@ -403,9 +403,9 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
 
   }
 
-  //'Store the results - Order change to agree with the other functions
-  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = PhiGibbs,
-                                    Rcpp::Named("Phi")  = ThetaGibbs,
+  //'Store the results
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
+                                    Rcpp::Named("Phi")  = PhiGibbs,
                                     Rcpp::Named("logLikelihood")  =logLikelihoodVec);
 
   return resTemp;
@@ -425,7 +425,7 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
 //' @param n_burn - Number of elements to burn-in
 //' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
-//' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
+//' @return List - With Phi(n_gibbs,n_community*nSpecies), Theta(n_gibbs,nLocations*n_community) and logLikelihood
 // [[Rcpp::export]]
 List lda_bernoulli_burn(DataFrame data, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs,int n_burn, bool ll_prior=true, bool display_progress=true) {
 
@@ -438,21 +438,21 @@ List lda_bernoulli_burn(DataFrame data, int n_community, double alpha0, double a
   //'Total number of species
   int nSpecies = matDATA.ncol();
 
-  //'Intialize Theta
-  NumericVector hyperTheta(n_community);
-  hyperTheta.fill(1);
-  NumericMatrix Theta=rdirichletPresence(nSpecies,hyperTheta);
+  //'Intialize Phi
+  NumericVector hyperPhi(n_community);
+  hyperPhi.fill(1);
+  NumericMatrix Phi=rdirichletPresence(nSpecies,hyperPhi);
 
   //'Intialize vMat
   NumericVector hyperV(n_community);
   hyperV.fill(1);
   NumericMatrix vMat=rdirichletPresence(nLocations,hyperV);
 
-  //'Initialize the ThetaGibbs
-  NumericMatrix ThetaGibbs(n_gibbs-n_burn,n_community*nSpecies);
-
   //'Initialize the PhiGibbs
-  NumericMatrix PhiGibbs(n_gibbs-n_burn,nLocations*n_community);
+  NumericMatrix PhiGibbs(n_gibbs-n_burn,n_community*nSpecies);
+
+  //'Initialize the ThetaGibbs
+  NumericMatrix ThetaGibbs(n_gibbs-n_burn,nLocations*n_community);
 
   //'Initialize the logLikelihood vector
   NumericVector logLikelihoodVec(n_gibbs-n_burn);
@@ -464,26 +464,26 @@ List lda_bernoulli_burn(DataFrame data, int n_community, double alpha0, double a
     //'Verify if everything is ok
     if (Progress::check_abort() )
       Rcpp::stop("Operation cancelled by interrupt.");
-    //'Initialize the Phi matrix
-    NumericMatrix PhiMat(nLocations, n_community);
+    //'Initialize the Theta matrix
+    NumericMatrix ThetaMat(nLocations, n_community);
 
     //'Generate zList
-    List zList  = generateZPresence(matDATA, Theta, vMat, PhiMat);
+    List zList  = generateZPresence(matDATA, Phi, vMat, ThetaMat);
 
-    //'Generate Theta
-    Theta = generateThetaPresence(zList,alpha0,alpha1);
+    //'Generate Phi
+    Phi = generatePhiPresence(zList,alpha0,alpha1);
 
     //'Generate vMat
     vMat = generateVPresence(zList,nLocations, gamma);
     if(g>n_burn){
 
-      //'Create the final Theta (n_gibbs,n_community*nSpecies) and final Phi (PhiGibbs)
-      updateThetaAndPhiPresence(ThetaGibbs, Theta, PhiGibbs, PhiMat, cont);
+      //'Create the final Phi (n_gibbs,n_community*nSpecies) and final Theta (ThetaGibbs)
+      updatePhiAndThetaPresence(PhiGibbs, Phi, ThetaGibbs, ThetaMat, cont);
 
       //'Initialize the logLikelihood
       double logLikelihood=ll_priorFunctionPresence(matDATA, nLocations,
                                                     nSpecies,n_community,
-                                                    vMat, Theta, PhiMat,
+                                                    vMat, Phi, ThetaMat,
                                                     alpha0, alpha1, gamma,
                                                     ll_prior);
       //'Store the logLikelihood
@@ -496,9 +496,9 @@ List lda_bernoulli_burn(DataFrame data, int n_community, double alpha0, double a
 
   }
 
-  //'Store the results - Order change to agree with the other functions
-  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = PhiGibbs,
-                                    Rcpp::Named("Phi")  = ThetaGibbs,
+  //'Store the results
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
+                                    Rcpp::Named("Theta")  = PhiGibbs ,
                                     Rcpp::Named("logLikelihood")  =logLikelihoodVec);
 
   return resTemp;

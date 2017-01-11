@@ -8,3 +8,4 @@ src/*.dll
 .DS_Store
 >>>>>>> dacf3e41ea5b845682d00e846faad7be2b1b952d
 .Rhistory
+.RData

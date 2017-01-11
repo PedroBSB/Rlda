@@ -253,7 +253,7 @@ double fixMHBinomial(double lo, double hi,double old1,double new1,double jump){
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
 
-double gammaMHBinomial(NumericMatrix vMat, double gamma, double jump){
+double gammaMHBinomial(NumericMatrix vMat, double gamma, double jump, int &acept){
   double newGamma = tnormBinomial(0.0,1.0,gamma,jump);
   double pold = 0.0;
   double pnew = 0.0;
@@ -268,9 +268,11 @@ double gammaMHBinomial(NumericMatrix vMat, double gamma, double jump){
   double a = std::exp(pnew+pcorrection-pold);
   double z = R::unif_rand();
   if(z<a){
+    acept = 1;
     return(newGamma);
   }
   else{
+    acept = 0;
     return(gamma);
   }
   return(0);
@@ -516,8 +518,11 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
   bool bgamma = false;
   if(std::isnan(gamma)){
     bgamma=true;
+    gamma = 0.01;
   }
-
+  //Define the initial jump
+  double jump = 0.5;
+  int acept = 0;
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -530,7 +535,12 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
 
     //Generate gamma MH
     if(bgamma){
-      gamma = gammaMHBinomial(vMat, gamma, 0.5);
+      if (g%50==0 & g<500){
+        double z = acept/50;
+        if (z>0.4 & jump<100)   jump=jump*2;
+        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        gamma = gammaMHBinomial(vMat, gamma, jump,acept);
+      }
     }
 
     //'Generate Theta
@@ -619,8 +629,11 @@ List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alp
   bool bgamma = false;
   if(std::isnan(gamma)){
     bgamma=true;
+    gamma = 0.01;
   }
-
+  //Define the initial jump
+  double jump = 0.5;
+  int acept = 0;
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -633,7 +646,12 @@ List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alp
 
     //Generate gamma MH
     if(bgamma){
-      gamma = gammaMHBinomial(vMat, gamma, 0.5);
+      if (g%50==0 & g<500){
+        double z = acept/50;
+        if (z>0.4 & jump<100)   jump=jump*2;
+        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        gamma = gammaMHBinomial(vMat, gamma, jump,acept);
+      }
     }
 
     //'Generate Theta

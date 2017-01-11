@@ -160,7 +160,7 @@ double fixMHAbundance(double lo, double hi,double old1,double new1,double jump){
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
 
-double gammaMHAbundance(NumericMatrix vMat, double gamma, double jump){
+double gammaMHAbundance(NumericMatrix vMat, double gamma, double jump, int &acept){
   double newGamma = tnormAbundance(0.0,1.0,gamma,jump);
   double pold = 0.0;
   double pnew = 0.0;
@@ -175,9 +175,11 @@ double gammaMHAbundance(NumericMatrix vMat, double gamma, double jump){
   double a = std::exp(pnew+pcorrection-pold);
   double z = R::unif_rand();
   if(z<a){
+    acept = 1;
     return(newGamma);
   }
   else{
+    acept = 0;
     return(gamma);
   }
   return(0);
@@ -400,7 +402,11 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
   bool bgamma = false;
   if(std::isnan(gamma)){
     bgamma=true;
+    gamma = 0.01;
   }
+  //Define the initial jump
+  double jump = 0.5;
+  int acept = 0;
 
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
@@ -420,7 +426,12 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
 
     //Generate gamma MH
     if(bgamma){
-      gamma = gammaMHAbundance(vMat, gamma, 0.5);
+      if (g%50==0 & g<500){
+        double z = acept/50;
+        if (z>0.4 & jump<100)   jump=jump*2;
+        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        gamma = gammaMHAbundance(vMat, gamma, jump,acept);
+      }
     }
     //'Generate vMat
     vMat = generateVAbundance(zList,nLocations,n_community, gamma);
@@ -506,6 +517,10 @@ List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, do
     gamma = 0.01;
   }
 
+  //Define the initial jump
+  double jump = 0.5;
+  int acept = 0;
+
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -524,7 +539,12 @@ List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, do
 
     //Generate gamma MH
     if(bgamma){
-      gamma = gammaMHAbundance(vMat, gamma, 0.5);
+      if (g%50==0 & g<500){
+        double z = acept/50;
+        if (z>0.4 & jump<100)   jump=jump*2;
+        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        gamma = gammaMHAbundance(vMat, gamma, jump,acept);
+      }
     }
 
     //'Generate vMat

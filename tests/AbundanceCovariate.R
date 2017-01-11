@@ -91,7 +91,7 @@ betasMat<-generateBetas(listYZW, xMat, varBetas)
 
 ###Lista
 phiMat<-phi
-listYZW<-generateZ(resYZW, xMat, betasMat, phiMat)
+listYZW<-generateZ(listYZW, xMat, betasMat, phiMat)
 
 ###Phi
 phiMat<-generatePhi(listYZW, xMat, gamma, n_specie)

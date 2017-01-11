@@ -151,8 +151,6 @@ List generateZ(List resYZW, arma::mat xMat, arma::mat betasMat, arma::mat phiMat
   IntegerVector zOld = resYZW(1);
   //Get the wVector
   IntegerVector wVector = resYZW(2);
-
-
   //Get the total number of elements
   int nElements = yMat.n_rows;
   //Number of columns
@@ -173,10 +171,10 @@ List generateZ(List resYZW, arma::mat xMat, arma::mat betasMat, arma::mat phiMat
   IntegerVector zNew = getznew(newY, nElements, nCol);
 
   //Log-Phi
-  arma::mat logPhi = arma::log(phiMat) ;
+  arma::mat logPhi = arma::log(phiMat);
 
   //Acept ou Reject the Y's and Z's
-  IntegerVector zVec = generatezz(logPhi, nElements, zNew, zOld,wVector, vecUnif);
+  IntegerVector zVec = generatezz(logPhi, nElements, zNew, zOld, wVector, vecUnif);
   //Compare the results
   for(int i=0;i<zVec.length();i++){
     if(zVec(i)!=zNew(i)){
@@ -239,6 +237,7 @@ List lda_multinomial_cov(DataFrame yData, DataFrame xData, IntegerVector specVec
 
   //Initialize the Community Vector
   IntegerVector comVector(yMat.n_rows);
+  comVector.fill(1);
 
   //Create the list object
   List listYZW = Rcpp::List::create(Rcpp::Named("Y")  = yMat,
@@ -257,6 +256,8 @@ List lda_multinomial_cov(DataFrame yData, DataFrame xData, IntegerVector specVec
   //'Initialize the logLikelihood vector
   NumericVector logLikelihoodVec(n_gibbs);
 
+  //'Initialize the results
+  List listResults(n_gibbs);
 
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
@@ -274,13 +275,16 @@ List lda_multinomial_cov(DataFrame yData, DataFrame xData, IntegerVector specVec
     //Generate Phi
     generatePhi(listYZW, xMat, gamma, n_specie);
 
+    List resObjects = Rcpp::List::create(Rcpp::Named("Betas") = Betas,
+                                         Rcpp::Named("Phi")  = Phi );
+
+    //Store the objects
+    listResults(g) = resObjects;
 
     //'Increment the progress bar
     p.increment();
 
   }
 
-  //'Store the results
-
-  return 0;
+  return listResults;
 }

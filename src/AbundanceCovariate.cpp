@@ -192,11 +192,11 @@ List generateZ(List resYZW, arma::mat xMat, arma::mat betasMat, arma::mat phiMat
 // [[Rcpp::export]]
 arma::mat generatePhi(List resYZW, arma::mat xMat, double gamma, int nSpecies){
   //Get the yMat
-  arma::mat yMat = resYZW["Y"];
+  arma::mat yMat = resYZW(0);
   //Get the zOld
-  IntegerVector zVector = resYZW["Z"];
+  IntegerVector zVector = resYZW(1);
   //Get the wVector
-  IntegerVector wVector = resYZW["W"];
+  IntegerVector wVector = resYZW(2);
   //Number of communities
   int nCommunity = yMat.n_cols;
   //Initialize the Phi matrix

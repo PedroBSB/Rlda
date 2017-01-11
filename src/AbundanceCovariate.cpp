@@ -37,7 +37,7 @@ IntegerVector getznew(arma::mat ynew, int n, int ncomm){
   return znew;
 }
 
-IntegerVector generatez(arma::mat logphi, int n, IntegerVector znew, IntegerVector zold,
+IntegerVector generatezz(arma::mat logphi, int n, IntegerVector znew, IntegerVector zold,
                         IntegerVector w, NumericVector unifs) {
   double pnew=0;
   double pold=0;
@@ -151,6 +151,8 @@ List generateZ(List resYZW, arma::mat xMat, arma::mat betasMat, arma::mat phiMat
   IntegerVector zOld = resYZW(1);
   //Get the wVector
   IntegerVector wVector = resYZW(2);
+
+
   //Get the total number of elements
   int nElements = yMat.n_rows;
   //Number of columns
@@ -169,10 +171,12 @@ List generateZ(List resYZW, arma::mat xMat, arma::mat betasMat, arma::mat phiMat
 
   //Get the Z matrix
   IntegerVector zNew = getznew(newY, nElements, nCol);
+
   //Log-Phi
   arma::mat logPhi = arma::log(phiMat) ;
+
   //Acept ou Reject the Y's and Z's
-  IntegerVector zVec = generatez(logPhi, nElements, zNew, zOld,wVector, vecUnif);
+  IntegerVector zVec = generatezz(logPhi, nElements, zNew, zOld,wVector, vecUnif);
   //Compare the results
   for(int i=0;i<zVec.length();i++){
     if(zVec(i)!=zNew(i)){

@@ -74,3 +74,28 @@ for (i in 1:nloc){
 #######################################################################################################################
 ############################################     GIBBS SAMPLING          ##############################################
 #######################################################################################################################
+
+yData<-as.data.frame(y[,c("y1","y2","y3","y4")])
+xData<-as.data.frame(xmat1)
+specVector<-y$w
+gamma<-0.1
+varBetas<-c(10,rep(1,np-1))
+n_community<-ncomm
+n_specie<-nspp
+
+listYZW<-list(Y=as.matrix(yData),Z=rep(1,nrow(yData)),W=specVector)
+xMat<-as.matrix(xData)
+
+###Betas
+betasMat<-generateBetas(listYZW, xMat, varBetas)
+
+###Lista
+phiMat<-phi
+listYZW<-generateZ(resYZW, xMat, betasMat, phiMat)
+
+###Phi
+phiMat<-generatePhi(listYZW, xMat, gamma, n_specie)
+
+###Gibbs
+teste <- lda_multinomial_cov(yData, xData, specVector, varBetas, n_community, n_specie, gamma, 100, TRUE, TRUE)
+

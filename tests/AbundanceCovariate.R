@@ -97,5 +97,4 @@ listYZW<-generateZ(listYZW, xMat, betasMat, phiMat)
 phiMat<-generatePhi(listYZW, xMat, gamma, n_specie)
 
 ###Gibbs
-teste <- lda_multinomial_cov(yData, xData, specVector, varBetas, n_community, n_specie, gamma, 100, TRUE, TRUE)
-
+teste <- lda_multinomial_cov(yData, xData, specVector, varBetas, n_community, n_specie, gamma, 10000, TRUE, TRUE)

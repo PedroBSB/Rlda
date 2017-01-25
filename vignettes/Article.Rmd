@@ -1,9 +1,9 @@
 ---
 author:
   - name: Pedro Albuquerque
-    affiliation: University of Brasília
+    affiliation: University of Brasilia
     address: >
-      Faculdade de Economia, Administração e Contabilidade,
+      Faculdade de Economia, Administracao e Contabilidade,
       Building A-2 - Office A1-54/7,
       Brasilia, DF 70910-900.
     email: pedroa@unb.br
@@ -33,8 +33,8 @@ abstract: >
   The goal of this paper is to describe the Bayesian LDA model for fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries), provide some examples of the use of this model in R, and to introduce a new R package called Rlda. These types of data frequently emerge in fields as disparate as ecology, remote sensing, marketing, and finance. As result, we believe this package will be of broad interest for pattern recognition, particularly fuzzy clustering for categorical data.
 keywords:
   # at least one keyword must be supplied
-  formatted: [LDA, fuzzy clustering]
-  plain:     [LDA, fuzzy clustering]
+  formatted: [LDA, fuzzy clustering, categorical data, pattern recognition]
+  plain:     [LDA, fuzzy clustering, categorical data, pattern recognition]
 preamble: >
   \usepackage{amsmath}
   \usepackage{amsfonts}
@@ -52,9 +52,9 @@ bibliography: bibliography.bib
 ---
 
 #Introduction.
-The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to construct clusters of tags that represents the most common topics in blogs. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis, and the correlated topic model. The limitations of LDA, as identified by these authors, were that the method does not consider relationship between topics and cannot allocate a given word to multiple topics. Despite these limitations, however, LDA continues to be used in multiple disciplines. For instance, @griffiths2004finding used LDA to identify the main scientific topics in a large corpus of the Proceedings of the National Academy of Science (PNAS) articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. Finally, in finance, a stock market analysis system based on LDA was used to combine financial news items together with stock market data to identify and characterize major events that impact the market. This system was then used to make predictions regarding stock market behaviour based on news items identified by LDA [@mahajan2008mining]. 
+The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to construct clusters of tags that represent the most common topics in blogs. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis, and the correlated topic model. The limitations of LDA, as identified by these authors, were that the method does not consider relationship between topics and cannot allocate a given word to multiple topics simultaneously as a fuzzy clustering approach does. Despite these limitations, however, LDA continues to be used in multiple disciplines. For instance, @griffiths2004finding used LDA to identify the main scientific topics in a large corpus of the Proceedings of the National Academy of Science articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. Finally, in finance, a stock market analysis system based on LDA was used to combine financial news items together with stock market data to identify and characterize major events that impact the market. This system was then used to make predictions regarding stock market behaviour based on news items identified by LDA [@mahajan2008mining]. 
 
-Despite its success in text mining across multiple fields, LDA is a model that need not be restricted to text-mining. More specifically, LDA can be viewed as a mixture model since each element in the sample can belong to more than one cluster (or state) simultaneously. There are a few examples of LDA being used for other purposes than text-mining. For instance, a modified version of LDA has been extensively used on genetic data to identify populations and admixture probabilities of individuals [@pritchard2000inference]. Similarly, LDA has been used in Ecology to identify plant communities from tree data for the eastern United States and from a tropical forest chronosequence [@valle2014decomposing]. 
+Despite its success in text mining across multiple fields, LDA is a model that need not be restricted to text-mining. More specifically, LDA can be viewed as a mixture model since each element in the sample can belong to more than one cluster (or state) simultaneously. There are a few examples of LDA being used for other purposes than text-mining. For instance, a modified version of LDA has been extensively used on genetic data to identify populations and admixture probabilities of individuals [@pritchard2000inference]. Similarly, LDA has been used in ecology to identify plant communities from tree data for the eastern United States and from a tropical forest chronosequence [@valle2014decomposing]. 
 
 The aim of this paper is to describe a Bayesian LDA model for mixture model clustering based on different types of data (i.e., multinomial, Bernoulli and Binomial), illustrating its use in a diverse set of examples. The innovative features of this model are that it generalizes LDA for other types of commonly encountered categorical data and it enables the selection of the optimal number of clusters based on a truncated stick-breaking prior approach which regularizes model results. Finally, we provide a package to fit this novel Bayesian LDA model.
 
@@ -62,7 +62,7 @@ This paper is organized as follows. Section 2 describes the mathematical formula
 
 
 #Methods.
-In the Bayesian LDA model for fuzzy clustering we postulate that each element is allocated to a single cluster, represented by a latent state variable. Specifically, consider a latent matrix $\mathbf{Z}$ with dimension equals to $L\times C$ where each row represent a sampling unit ($l=1,\dots,L$) and each column a possible state or cluster ($c=1,\dots,C$). The Data Generating Process postulated for this latent matrix is given by:
+In the Bayesian LDA model for fuzzy clustering we postulate that each element is allocated to a single cluster, represented by a latent state variable. Specifically, consider a latent matrix $\mathbf{Z}$ with dimension equals to $L\times C$ where each row represents a sampling unit ($l=1,\dots,L$) and each column a possible state or cluster ($c=1,\dots,C$). The Data Generating Process postulated for this latent matrix is given by:
 <!--  
 $$
 \begin{array}{c}
@@ -91,7 +91,7 @@ $$
 
 \noindent where $V_{lc}\sim Beta(1,\gamma)$ for $c=1,\dots,C-1$ and $V_{lC}=1$ by definition. This truncated stick-breaking prior will force the elements to be aggregated in the minimum number of clusters, given that $\theta_{lc^{*}}$ is stochastically exponentially decreasing.
 
-In the second hierarchical level, we consider a matrix $\mathbf{Y}$ with dimension equals to $L\times S$ where each row represents a sampling unit (e.g., locations, firms, individuals, plots) and each column a variable that describes these elements. In the Bayesian LDA model for fuzzy clustering, after integrating over the latent vector $\mathbf{Z}_{l\cdot}$, $Y_{ls}$ can follow one of these distributions:
+In the second hierarchical level, we consider a matrix $\mathbf{Y}$ with dimension equal to $L\times S$ where each row represents a sampling unit (e.g., locations, firms, individuals, plots) and each column a variable that describes these elements. In the Bayesian LDA model for fuzzy clustering, after integrating over the latent vector $\mathbf{Z}_{l\cdot}$, $Y_{ls}$ can follow one of these distributions:
 <!--  
 $$
 \begin{array}{lll}
@@ -216,10 +216,10 @@ Finally, the FCD for $V_{lc^{*}}$ is given by:
 \noindent where $N_{lc^{*}}$ is the total number of elements in observation $l$ classified into cluster $c^{*}$ and $N_{l(c>c^{*})}$ is the total number of elements in observation $l$ classified in clusters larger than $c^{*}$. These quantities are given by $N_{lc^{*}}=\sum_{i=1}^{n_{l}}\mathbbm{1}(z_{il}=c^{*})$ and $N_{l(c>c^{*})}=\sum_{i=1}^{n_{l}}\sum_{c=c^{*}+1}^{C}\mathbbm{1}(z_{il}=c)$.
 
 
-#The package.
+#The Rlda package.
 We found four other packages that can fit the Latent Dirichlet Allocation model. @hornik2011topicmodels developed the \pkg{topicmodels} package for which there are two LDA implementations, one using the variational inference (as described in @blei2003latent) and the other implementation using Gibbs Sampling based on @phan2013gibbslda. Similarly, @jones2016 proposed the \pkg{textmineR} which relies on Gibbs Sampling to estimate the topics in a corpus structure. @chang2012lda developed the \pkg{lda} package which includes the mixed-membership stochastic blockmodel [@airoldi2008mixed], supervised Latent Dirichlet Allocation - sLDA [@mcauliffe2008supervised] and Correspondence-Latent Dirichlet Allocation - corrLDA[@blei2003modeling]. Finally, more recently, @roberts2014stm created the \pkg{stm} which has some unsupervised functions to determine the optimal number of clusters. This unsupervised method is based on likelihood metrics obtained by the EM Algorithm, which are then used within a backward model selection approach.
 
-None of these packages adopt the truncated stick-breaking prior which enables the selection of the optimal number of clusters and regularizes model results. Furthermore, none of them use others distributions besides the Multinomial outcome for the dependent variable. Thus, our package complements current LDA approaches already available in R. 
+None of these packages adopt the truncated stick-breaking prior which enables the selection of the optimal number of clusters and regularizes model results. Furthermore, none of them use others distributions besides the Multinomial outcome for the dependent variable. Thus, our Rlda package complements current LDA approaches already available in R. 
 
 #Examples.
 In this section we present some applications for Latent Dirichlet Allocation in marketing, remote sensing and ecology.
@@ -268,12 +268,14 @@ set.seed(9292)
 beta<-rep(1,ncol(mat1))
 gamma<-0.01
 #Execute the LDA for the Multinomial entry
-res<-lda_multinomial(data=mat1,n_community=30,beta,gamma,n_gibbs=1000,ll_prior=TRUE,display_progress=FALSE)
+res<-lda_multinomial(data=mat1,n_community=30,beta,gamma,n_gibbs=1000,
+                     ll_prior=TRUE,display_progress=FALSE)
 ```
 
 In the above code we set the maximum number of clusters to 30 and the number of Gibbs Sampling iterations to 1000. Furthermore, we ask that the algorithm output the sum of the log-likelihood and the log-prior. Finally, we chose not to display the progress bar.
 
 We can visually evaluate the convergence by examining Figure \ref{figure:fig001}:
+
 
 ```{r,eval=FALSE}
 #Get the logLikelihood
@@ -401,7 +403,7 @@ Because pixels in remote sensing imagery are often large enough to encompass dif
 
 The key characteristics of the method that we propose here is that it is an unsupervised method (i.e., it does not require the a priori determination of endmembers) that enforces parsimony through our truncated stick-breaking prior. Differently from many of the currently existing methods for spectral unmixing, our model explicitly acknowledges the discreteness of the digital numbers used in remote sensing systems and the range of possible values these numbers can take.
 
-In our example, we rely on Landsat TM 5 imagery from 2010 of the Iquitos-Nauta road in the Peruvian Amazon. This area has multiple land-use land-cover (LULC) types and is the site in which we have studied the effect of these different LULC types on the malaria vector Anopheles darlingi [@dennis].
+In our example, we rely on Landsat TM 5 imagery from 2010 of the Iquitos-Nauta road in the Peruvian Amazon. This area has multiple land-use land-cover (LULC) types and is the site in which we have studied the effect of these different LULC types on the malaria vector *Anopheles darlingi* [@dennis].
 
 ```{r, eval=FALSE}
 library(Rlda)
@@ -411,12 +413,15 @@ a.phi  <- 0.1
 b.phi  <- 9.9
 ngibbs <- 10000
 #Execute the Binomial LDA
-z <- lda_binomial(Landsat,max2,5,a.phi,b.phi,1,ngibbs,T,T)
+z <- lda_binomial(data= Landsat,pop= max2, n_community=5,
+                  alpha0= a.phi,alpha1= b.phi,gamma= 1,n_gibbs= ngibbs,
+                  ll_prior=TRUE,display_progress=FALSE)
 ```
 
 In a similar way as presented in the Marketing example, we can get the \code{Phi} and \code{Theta} matrices:
 
 ```{r, eval=FALSE}
+#Total number of gibbs simulations
 ngibbs <- 10000
 #Sequence
 seq1 <- floor(seq(from=(2/3)*ngibbs,to=ngibbs,length.out=1000))
@@ -549,6 +554,8 @@ res<-lda_bernoulli(matPres,10,
 
 We can visually evaluate the cluster distribution across species, after the *burn-in phase* in Figure \ref{figure:fig003}:
 
+\newpage
+
 ```{r,echo=FALSE, message=FALSE, warning=FALSE}
 #Get the Phi Estimate
 Theta<-res[["Theta"]]
@@ -579,14 +586,14 @@ invisible(dev.off())
   \label{figure:fig003}
 \end{figure}
 
-In this type of graph each slice size is proportional to the probability of belonging, and it is possible to note that some species of trees are more or less associated with some clusters. For example, QUGA specie is more associated with Clusters 7 and 2 as well ACGR3 specie.
+In this type of graph each slice size is proportional to the probability of belonging, and it is possible to note that some species of trees are more or less associated with some clusters. For example, QUGA species is more associated with Clusters 7 and 2 as well ACGR3 species.
 
 #Conclusion.
 The goal of this paper was describe the Bayesian LDA model for fuzzy clustering based on different types of data, specifically we demonstrated how to use the model for Multinomial entry in the Marketing example, Binomial trial using the Landsat dataset and Bernoulli trial using ecological data.
 
 Also, we present the results in three different ways showing the flexibility to use the results and represent the information numerically and/or visually which is important when we faced large datasets and a great number of possible clusters.
   
-One of the main properties of the model presented here is the fact that this model adopts the truncated stick-breaking prior which enables the selection of the optimal number of clusters which regularizes model results. The next step in the development of the model presented here is the possibility to work with explanatory variables in the same structured described in this article, which can be useful not to model the cluster but also explain how the clusters are created.
+One of the main properties of the model presented here is the fact that this model adopts the truncated stick-breaking prior which enables the selection of the optimal number of clusters which regularizes model results. The next step in the development of the model presented here is the possibility to work with explanatory variables in the same structure described in this article, which can be useful not only to model the cluster but also explain how the clusters are created.
 
 #Appendix. {-}
 Here in the Appendix we will show how the Full Conditional Distributions were constructed. Consider initially the Full Conditional Distributions for $Z_{lc}=c^{*}$ in all three cases the kernel of the distribution derived is the same:

@@ -41,6 +41,11 @@ preamble: >
   \usepackage{bbm}
   \usepackage{calrsfs}
   \usepackage{draftwatermark}
+  \usepackage{graphicx}
+  \usepackage{wrapfig}
+  \usepackage{lscape}
+  \usepackage{rotating}
+  \usepackage{epstopdf}
   \SetWatermarkText{DRAFT}
   \SetWatermarkScale{1}
   \newcommand{\Za}{\mathcal{Z}}
@@ -501,8 +506,6 @@ rm(list= ls()[!(ls() %in% c('res1'))])
 res1<-as.data.frame(res1)
 library(ggmap)
 
-pdf("plot002.pdf")
-par(mfrow = c(3, 2)) 
 
 #Original Data
 #sbbox <- c(lon =-73.1,lat = -4.4)
@@ -510,58 +513,78 @@ par(mfrow = c(3, 2))
 #plot(sq_map)
 #ggmap(sq_map)
 
+pdf("plot002.pdf")
+par(mfrow=c(3,2))
+#pdf("plot0021.pdf")
 #Cluster 1
 brks <- with(res1, seq(min(prop1), max(prop1), length.out = 100))
 grps <- with(res1, cut(prop1, breaks = brks, include.lowest = TRUE))
-cores <- terrain.colors(99)[grps]
-FUN <- colorRamp(c("red","blue"))
-P1 <- with(res1, (prop1 - min(prop1)) / diff(range(prop1)))
-cols <- FUN(P1)
-cores=rgb(cols, maxColorValue=256)
+#cores <- terrain.colors(99)[grps]
+cores <- rainbow(99)[grps]
+
+
+#FUN <- colorRamp(c("red","blue"))
+#P1 <- with(res1, (prop1 - min(prop1)) / diff(range(prop1)))
+#cols <- FUN(P1)
+#cores=rgb(cols, maxColorValue=256)
+
 plot(res1$x,res1$y,pch=19,col=cores,cex=0.8,
      xlim=c(min(res1$x),675500),xlab = "",ylab="",main="Cluster 1")
+#invisible(dev.off())
 
+#pdf("plot0022.pdf")
 #Cluster 2
 brks <- with(res1, seq(min(prop2), max(prop2), length.out = 100))
 grps <- with(res1, cut(prop2, breaks = brks, include.lowest = TRUE))
-cores <- terrain.colors(99)[grps]
-FUN <- colorRamp(c("red","blue"))
-P2 <- with(res1, (prop2 - min(prop2)) / diff(range(prop2)))
-cols <- FUN(P2)
-cores=rgb(cols, maxColorValue=256)
+#cores <- terrain.colors(99)[grps]
+cores <- rainbow(99)[grps]
+
+#FUN <- colorRamp(c("red","blue"))
+#P2 <- with(res1, (prop2 - min(prop2)) / diff(range(prop2)))
+#cols <- FUN(P2)
+#cores=rgb(cols, maxColorValue=256)
 plot(res1$x,res1$y,pch=19,col=cores,cex=0.8,
      xlim=c(min(res1$x),675500),xlab = "",ylab="",main="Cluster 2")
+#invisible(dev.off())
 
+#pdf("plot0023.pdf")
 #Cluster 3
 brks <- with(res1, seq(min(prop3), max(prop3), length.out = 100))
 grps <- with(res1, cut(prop3, breaks = brks, include.lowest = TRUE))
-cores <- terrain.colors(99)[grps]
-FUN <- colorRamp(c("red","blue"))
-P3 <- with(res1, (prop3 - min(prop3)) / diff(range(prop3)))
-cols <- FUN(P3)
-cores=rgb(cols, maxColorValue=256)
+#cores <- terrain.colors(99)[grps]
+cores <- rainbow(99)[grps]
+#FUN <- colorRamp(c("red","blue"))
+#P3 <- with(res1, (prop3 - min(prop3)) / diff(range(prop3)))
+#cols <- FUN(P3)
+#cores=rgb(cols, maxColorValue=256)
 plot(res1$x,res1$y,pch=19,col=cores,cex=0.8,
      xlim=c(min(res1$x),675500),xlab = "",ylab="",main="Cluster 3")
+#invisible(dev.off())
 
+#pdf("plot0024.pdf")
 #Cluster 4
 brks <- with(res1, seq(min(prop4), max(prop4), length.out = 100))
 grps <- with(res1, cut(prop4, breaks = brks, include.lowest = TRUE))
-cores <- terrain.colors(99)[grps]
-FUN <- colorRamp(c("red","blue"))
-P4 <- with(res1, (prop4 - min(prop4)) / diff(range(prop4)))
-cols <- FUN(P4)
-cores=rgb(cols, maxColorValue=256)
+#cores <- terrain.colors(99)[grps]
+cores <- rainbow(99)[grps]
+#FUN <- colorRamp(c("red","blue"))
+#P4 <- with(res1, (prop4 - min(prop4)) / diff(range(prop4)))
+#cols <- FUN(P4)
+#cores=rgb(cols, maxColorValue=256)
 plot(res1$x,res1$y,pch=19,col=cores,cex=0.8,
      xlim=c(min(res1$x),675500),xlab = "",ylab="",main="Cluster 4")
+#invisible(dev.off())
 
+#pdf("plot0025.pdf")
 #Cluster 5
 brks <- with(res1, seq(min(prop5), max(prop5), length.out = 100))
 grps <- with(res1, cut(prop5, breaks = brks, include.lowest = TRUE))
-cores <- terrain.colors(99)[grps]
-FUN <- colorRamp(c("red","blue"))
-P5 <- with(res1, (prop5 - min(prop5)) / diff(range(prop5)))
-cols <- FUN(P5)
-cores=rgb(cols, maxColorValue=256)
+#cores <- terrain.colors(99)[grps]
+cores <- rainbow(99)[grps]
+#FUN <- colorRamp(c("red","blue"))
+#P5 <- with(res1, (prop5 - min(prop5)) / diff(range(prop5)))
+#cols <- FUN(P5)
+#cores=rgb(cols, maxColorValue=256)
 plot(res1$x,res1$y,pch=19,col=cores,cex=0.8,
      xlim=c(min(res1$x),675500),xlab = "",ylab="",main="Cluster 5")
 
@@ -577,7 +600,7 @@ invisible(dev.off())
   \label{figure:fig002}
 \end{figure}
 
-We can note different level of colors in the region which also vary depending on the cluster chosen. This similarity between regions is due to the band's share and was modeled by the Binomial LDA. In other words, some regions with red color represent regions whose can be similar with respect to the LDA results and can represent villages, streets, etc. Hence, the method can be used to classify regions in an unsupervised way to solve pixel unmixing problems.
+We can note different level of colors in the region which also vary depending on the cluster chosen (the full high-resolution figures are presented in the final of the paper). This similarity between regions is due to the band's share and was modeled by the Binomial LDA. In other words, some regions with red color represent regions whose can be similar with respect to the LDA results and can represent villages, streets, etc. For example, it is easy to see in Cluster 5 the roads and deforested areas looking the pattern presented. Hence, the method can be used to classify regions in an unsupervised way to solve pixel unmixing problems.
 
 ##Ecology.
 ```{r,echo=FALSE}
@@ -762,5 +785,36 @@ p\left(V_{lc}|Z_{lc}\right)&\propto& Binom(n_{lc}|N=N_{lc}+N_{l(c>c^{*})},V_{lc}
 \end{array}
 \label{ap:eq0007} 
 \end{equation*}
+
+\begin{sidewaysfigure}[ht]
+    \includegraphics[width=\linewidth, height=0.85\textheight]{plot0021.pdf}
+    \caption{Clusters 1 - Iquitos-Nauta road.}
+    \label{figure:cluster1}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[ht]
+    \includegraphics[width=\linewidth, height=0.85\textheight]{plot0022.pdf}
+    \caption{Clusters 2 - Iquitos-Nauta road.}
+    \label{figure:cluster2}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[ht]
+    \includegraphics[width=\linewidth, height=0.85\textheight]{plot0023.pdf}
+    \caption{Clusters 3 - Iquitos-Nauta road.}
+    \label{figure:cluster3}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[ht]
+    \includegraphics[width=\linewidth, height=0.85\textheight]{plot0024.pdf}
+    \caption{Clusters 4 - Iquitos-Nauta road.}
+    \label{figure:cluster4}
+\end{sidewaysfigure}
+
+\begin{sidewaysfigure}[ht]
+    \includegraphics[width=\linewidth, height=0.85\textheight]{plot0025.pdf}
+    \caption{Clusters 5 - Iquitos-Nauta road.}
+    \label{figure:cluster5}
+\end{sidewaysfigure}
+
 
 #References.

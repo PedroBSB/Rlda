@@ -1,10 +1,12 @@
-#include <Rcpp.h>
 #include <iostream>
 #include <ctime>
 #include <fstream>
+#include <RcppArmadillo.h>
+// [[Rcpp::depends(RcppArmadillo)]]
+#include "progress.hpp"
 // [[Rcpp::depends(RcppProgress)]]
-#include "progress.hpp" // Within MacOS, one needs quote.
-using namespace Rcpp;
+using namespace arma;
+
 
 /***************************************************************************************************************************/
 /*********************************                      UTILS          *****************************************************/
@@ -37,33 +39,76 @@ double tnormRemote(double lo, double hi,double mu, double sig){
   return(z);
 }
 
-update.omega=function(param,jump){
-  omega.orig=omega.old=param$omega
-  tmp=tnorm(nbands*ncommun,lo=0,hi=1,mu=omega.old,sig=jump)
-  novos=matrix(tmp,ncommun,nbands)
+arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList, arma::mat remoteMat, int maxBand, double a, double b ){
+  //Get the Jump Matrix for Omega
+  arma::mat jumpOmega = jumpList[0];
+  //Get the Jump Matrix for V
+  arma::mat jumpV = jumpList[1];
+  //Get the Jump Matrix for Omega
+  arma::mat jumpX = jumpList[2];
+  //Get the number of Communities
+  int n_community = jumpOmega.n_rows;
+  //Get the number of Bands
+  int n_bands = jumpOmega.n_cols;
+  //Get the number of locations
+  int n_locations = thetaMat.n_rows;
 
-  tmp=fix.MH(lo=0,hi=1,omega.old,novos,jump)
-  ajuste=matrix(tmp,ncommun,nbands)
+  //Create the Omega Matrix
+  arma::mat omegaMat(n_community,n_bands);
+  arma::mat omegaAdjust(n_community,n_bands);
+  //Prior Matrix with Beta Distribution
+  arma::mat priorOld(n_community,n_bands);
+  arma::mat priorNew(n_community,n_bands);
 
-  prior.old=matrix(dbeta(omega.old,a.omega,b.omega,log=T),ncommun,nbands)
-  prior.new=matrix(dbeta(novos    ,a.omega,b.omega,log=T),ncommun,nbands)
 
-  for (i in 1:ncommun){
-    omega.new=omega.old
-    omega.new[i,]=novos[i,]
-
-    prob.old=param$theta%*%omega.old
-    llk.old=colSums(dbinom(remote,size=ndig.values,prob=prob.old,log=T))
-
-    prob.new=param$theta%*%omega.new
-    llk.new=colSums(dbinom(remote,size=ndig.values,prob=prob.new,log=T))
-
-    k=acceptMH(llk.old+prior.old[i,],
-               llk.new+prior.new[i,]+ajuste[i,],
-                                           omega.old[i,],omega.new[i,],F)
-    omega.old[i,]=k$x
+  //Truncated Normal
+  for(int c=0;c<omegaMat.n_rows;c++){
+    for(int b=0;b<omegaMat.n_cols;b++){
+      //Truncated Normal
+      omegaMat(c,b) = tnormRemote(0.0, 1.0,Omega(c,b), jumpOmega(c,b));
+      //Adjusting the Metropolis-Hasting
+      omegaAdjust(c,b) = fixMHRemote(0.0,1.0,Omega(c,b),omegaMat(c,b),jumpOmega(c,b));
+      //Calculate the prior
+      priorOld(c,b) = R::dbeta(Omega(c,b),a,b,true);
+      priorNew(c,b) = R::dbeta(omegaMat(c,b),a,b,true);
+    }
   }
-  list(omega=omega.old,accept=omega.old!=omega.orig)
+
+  //Create the Probability Matrix
+  arma::mat probMatOld = thetaMat*Omega;
+  arma::mat probMatNew = thetaMat*omegaMat;
+
+  //Calculate the logLikelihood
+  arma::vec llkOld(n_bands);
+  arma::vec llkNew(n_bands);
+
+
+  //For each band
+  for(int b=0;b<n_bands;b++){
+    //For each location
+    for(int l=0;l<n_locations;l++){
+      llkOld(b)=llkOld(b)+R::dbinom(remoteMat(l,b),maxBand,probMatOld(l,b),true);
+      llkNew(b)=llkNew(b)+R::dbinom(remoteMat(l,b),maxBand,probMatNew(l,b),true);
+    }
+  }
+
+  //For each community acept ou reject
+  for(int c=0;c<n_community;c++){
+    //Vector P0
+    arma::vec p0 = llkOld+priorOld.row(c);
+    //Vector P1
+    arma::vec p1 = llkNew+priorNew.row(c)+omegaAdjust.row(c);
+    //For each band
+    for(int b=0;b<n_bands;b++){
+      //Acceptance
+      double a = std::exp(p1(b)-p0(b));
+      double z = R::unif_rand();
+      if(z<a){
+        Omega(c,b) = omegaMat(c,b);
+      }
+    }
+  }
+  return(Omega);
 }
 
 

@@ -51,7 +51,7 @@ arma::vec rowSums(const arma:: mat & X){
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
-
+// [[Rcpp::export]]
 arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList, arma::mat remoteMat, int maxBand, double a, double b ){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
@@ -124,6 +124,7 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
   return(Omega);
 }
 
+// [[Rcpp::export]]
 arma::mat generatePhiRemote(arma::mat Omega, arma::mat matX,arma::mat forestMat, List jumpList, arma::vec bPhi, double aPhi){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
@@ -200,7 +201,8 @@ arma::mat generatePhiRemote(arma::mat Omega, arma::mat matX,arma::mat forestMat,
   return(phiMat);
 }
 
-arma::mat generateOmegaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi, arma::mat forestMat, List jumpList, double gamma){
+// [[Rcpp::export]]
+arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi, arma::mat forestMat, List jumpList, double gamma){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
   //Get the Jump Matrix for V

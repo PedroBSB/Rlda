@@ -88,7 +88,6 @@ arma::mat rdirichletArma(int n, Rcpp::NumericVector parms) {
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
 
-// [[Rcpp::export]]
 arma::mat generateBetas(List resYZW, arma::mat xMat, arma::vec varBetas){
   //Get the yMat
   arma::mat yMat = resYZW(0);
@@ -143,7 +142,6 @@ arma::mat generateBetas(List resYZW, arma::mat xMat, arma::vec varBetas){
   return(betaMat);
 }
 
-// [[Rcpp::export]]
 List generateZ(List resYZW, arma::mat xMat, arma::mat betasMat, arma::mat phiMat){
   //Get the yMat
   arma::mat yMat = resYZW(0);
@@ -191,7 +189,6 @@ List generateZ(List resYZW, arma::mat xMat, arma::mat betasMat, arma::mat phiMat
 }
 
 
-// [[Rcpp::export]]
 arma::mat generatePhi(List resYZW, arma::mat xMat, double gamma, int nSpecies){
   //Get the yMat
   arma::mat yMat = resYZW(0);

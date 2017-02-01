@@ -39,6 +39,19 @@ double tnormRemote(double lo, double hi,double mu, double sig){
   return(z);
 }
 
+arma::vec rowSums(const arma:: mat & X){
+  int nRows = X.n_rows;
+  arma::vec out(nRows);
+  for(int i = 0; i < nRows; i++){
+    out(i) = sum(X.row(i));
+  }
+  return(out);
+}
+
+/***************************************************************************************************************************/
+/*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
+/***************************************************************************************************************************/
+
 arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList, arma::mat remoteMat, int maxBand, double a, double b ){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
@@ -139,6 +152,7 @@ arma::mat generatePhiRemote(arma::mat Omega, arma::mat matX,arma::mat forestMat,
   arma::mat p1Old(1,1);
   arma::mat p1New(1,1);
 
+
   //For each number of species
   for(int s=0;s<n_species;s++){
     //For each community
@@ -186,7 +200,75 @@ arma::mat generatePhiRemote(arma::mat Omega, arma::mat matX,arma::mat forestMat,
   return(phiMat);
 }
 
+arma::mat generateOmegaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi, arma::mat forestMat, List jumpList, double gamma){
+  //Get the Jump Matrix for Omega
+  arma::mat jumpOmega = jumpList[0];
+  //Get the Jump Matrix for V
+  arma::mat jumpV = jumpList[1];
+  //Get the Jump Matrix for Omega
+  arma::mat jumpX = jumpList[2];
+  //Get the number of communities
+  int n_community = jumpV.n_cols;
+  //Get the total number of locations
+  int n_locations = jumpV.n_rows;
+  //Initialize the new V matrix
+  arma::mat newVMat(n_locations,n_community);
+  newVMat.fill(1.0);
+  arma::mat vAdjustedMat(n_locations,n_community);
 
+    //Create the old prior matrix
+  arma::mat priorOld(vMatrix.n_rows,vMatrix.n_cols);
+  //Create the new prior matrix
+  arma::mat priorNew(vMatrix.n_rows,vMatrix.n_cols);
+
+  //Create the prod vector
+  arma::vec prod(n_community);
+  for(int c=0;c<n_community;c++)prod(c)=c;
+
+  for(int l=0;l<n_locations;l++){
+    for(int c=0;c<n_community;c++){
+      //Generate new X
+      if(c<n_community-1) newVMat(l,c) = tnormRemote(0.0, 1.0,vMatrix(l,c), jumpV(l,c));
+      //Adjusting the Metropolis-Hasting
+      vAdjustedMat(l,c) = fixMHRemote(0.0,1.0,vMatrix(l,c),newVMat(l,c),jumpV(l,c));
+
+      //Simulate old prior
+      priorOld(l,c)= R::dbeta(vMatrix(l,c),1.0,gamma,true);
+      //Simulate new prior
+      priorNew(l,c)= R::dbeta(newVMat(l,c),1.0,gamma,true);
+
+      //Old Theta
+      arma::mat thetaOld=convertSBtoNormal(vMatrix,n_community,n_locations,prod);
+      //New Theta
+      arma::mat thetaNew=convertSBtoNormal(newVMat,n_community,n_locations,prod);
+
+      //Calculate the old probability
+      arma::mat pOld = thetaOld*Omega;
+      //Calculate the new probability
+      arma::mat pNew = thetaNew*Omega;
+
+      //Calculate the vector old probability
+      arma::vec pOld2 = rowSums(forestMat*arma::log(thetaOld*Phi));
+      //Calculate the vector new probability
+      arma::vec pNew2 = rowSums(forestMat*arma::log(thetaNew*Phi));
+
+      if(c<n_community-1){
+        //Probability p0
+        double p0 = pOld2(l)+priorOld(l,c);
+        //Probability p1
+        double p1 = pNew2(l)+priorNew(l,c)+vAdjustedMat(l,c);
+        //Acceptance
+        double a = std::exp(p1-p0);
+        double z = R::unif_rand();
+        if(z<a){
+          vMatrix(l,c) = newVMat(l,c);
+        }
+      }
+    }
+  }
+  arma::mat Theta = convertSBtoNormal(vMatrix,n_community,n_locations,prod);
+  return(Theta);
+}
 
 
 

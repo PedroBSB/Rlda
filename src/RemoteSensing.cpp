@@ -14,12 +14,12 @@ using namespace arma;
 
 arma::mat convertSBtoNormal(arma::mat vmat,
                                 int ncol, int nrow,
-                                arma::vec prod) {
+                                arma::colvec prod) {
   arma::mat res(nrow,ncol);
 
   for(int j=0; j<ncol;j++){
-    res.col(j)=vmat.col(j)*prod;
-    prod=prod*(1-vmat.col(j));
+    res.col(j)=vmat.col(j)%prod;
+    prod=prod%(1.0-vmat.col(j));
   }
 
   return (res);
@@ -57,12 +57,12 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
   arma::mat jumpOmega = jumpList[0];
   //Get the Jump Matrix for V
   arma::mat jumpV = jumpList[1];
-  //Get the Jump Matrix for Omega
+  //Get the Jump Matrix for X
   arma::mat jumpX = jumpList[2];
   //Get the number of Communities
-  int n_community = jumpOmega.n_rows;
+  int n_community = Omega.n_rows;
   //Get the number of Bands
-  int n_bands = jumpOmega.n_cols;
+  int n_bands = Omega.n_cols;
   //Get the number of locations
   int n_locations = thetaMat.n_rows;
 
@@ -79,11 +79,14 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
     for(int b=0;b<omegaMat.n_cols;b++){
       //Truncated Normal
       omegaMat(c,b) = tnormRemote(0.0, 1.0,Omega(c,b), jumpOmega(c,b));
+
       //Adjusting the Metropolis-Hasting
       omegaAdjust(c,b) = fixMHRemote(0.0,1.0,Omega(c,b),omegaMat(c,b),jumpOmega(c,b));
+
       //Calculate the prior
       priorOld(c,b) = R::dbeta(Omega(c,b),a,b,true);
       priorNew(c,b) = R::dbeta(omegaMat(c,b),a,b,true);
+
     }
   }
 
@@ -92,8 +95,8 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
   arma::mat probMatNew = thetaMat*omegaMat;
 
   //Calculate the logLikelihood
-  arma::vec llkOld(n_bands);
-  arma::vec llkNew(n_bands);
+  arma::rowvec llkOld(n_bands);
+  arma::rowvec llkNew(n_bands);
 
 
   //For each band
@@ -107,10 +110,15 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
 
   //For each community acept ou reject
   for(int c=0;c<n_community;c++){
+
     //Vector P0
-    arma::vec p0 = llkOld+priorOld.row(c);
+    arma::rowvec tmp = priorOld.row(c);
+    arma::rowvec p0 = llkOld + tmp;
+
     //Vector P1
-    arma::vec p1 = llkNew+priorNew.row(c)+omegaAdjust.row(c);
+    tmp = priorNew.row(c)+omegaAdjust.row(c);
+    arma::rowvec p1 = llkNew + tmp;
+
     //For each band
     for(int b=0;b<n_bands;b++){
       //Acceptance
@@ -121,16 +129,17 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
       }
     }
   }
+
   return(Omega);
 }
 
 // [[Rcpp::export]]
-arma::mat generatePhiRemote(arma::mat Omega, arma::mat matX,arma::mat forestMat, List jumpList, arma::vec bPhi, double aPhi){
+arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat, List jumpList, arma::vec bPhi, double aPhi){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
   //Get the Jump Matrix for V
   arma::mat jumpV = jumpList[1];
-  //Get the Jump Matrix for Omega
+  //Get the Jump Matrix for X
   arma::mat jumpX = jumpList[2];
   //Get the total number of Species
   int n_species = matX.n_cols;
@@ -149,47 +158,54 @@ arma::mat generatePhiRemote(arma::mat Omega, arma::mat matX,arma::mat forestMat,
   //Create the prod vector
   arma::vec prod(n_community);
   for(int c=0;c<n_community;c++)prod(c)=c;
-  //Initialize the matrix
-  arma::mat p1Old(1,1);
-  arma::mat p1New(1,1);
-
 
   //For each number of species
   for(int s=0;s<n_species;s++){
     //For each community
     for(int c=0;c<n_community;c++){
+
       //Generate new X
-      newXMat(s,c) = tnormRemote(0.0, 1.0,matX(s,c), jumpX(s,c));
+      newXMat(c,s) = tnormRemote(0.0, 1.0,matX(c,s), jumpX(c,s));
+
       //Adjusting the Metropolis-Hasting
-      xAdjust(s,c) = fixMHRemote(0.0,1.0,matX(s,c),newXMat(s,c),jumpX(s,c));
+      xAdjust(c,s) = fixMHRemote(0.0,1.0,matX(c,s),newXMat(c,s),jumpX(c,s));
+
       //Old Phi
       arma::mat phiOld=convertSBtoNormal(matX,n_species,n_community,prod);
+
       //New Phi
       arma::mat phiNew=convertSBtoNormal(newXMat,n_species,n_community,prod);
+
       //Calculate the old probability
-      arma::mat pOld = Omega*phiOld;
+      arma::mat pOld = Theta*phiOld;
+
       //Calculate the new probability
-      arma::mat pNew = Omega*phiNew;
+      arma::mat pNew = Theta*phiNew;
+
       //Calculate the old scalar probability
-      p1Old = sum(forestMat*arma::log(pOld));
+      double p1Old = arma::sum(arma::sum(forestMat%arma::log(pOld)));
+
       //Calculate the old scalar probability
-      p1New = arma::sum(forestMat*arma::log(pNew));
+      double p1New = arma::sum(arma::sum(forestMat%log(pNew)));
 
       //Simulate old prior
-      priorOld(s,c)= R::dbeta(matX(s,c),aPhi,bPhi(s),true);
+      priorOld(c,s)= R::dbeta(matX(c,s),aPhi,bPhi(s),true);
+
       //Simulate new prior
-      priorNew(s,c)= R::dbeta(newXMat(s,c),aPhi,bPhi(s),true);
+      priorNew(c,s)= R::dbeta(newXMat(c,s),aPhi,bPhi(s),true);
 
       if(s<n_species-1){
         //Probability p0
-        double p0 = p1Old(0,0)+priorOld(s,c);
+        double p0 = p1Old+priorOld(c,s);
+
         //Probability p1
-        double p1 = p1New(0,0)+priorNew(s,c)+xAdjust(s,c);
+        double p1 = p1New+priorNew(c,s)+xAdjust(c,s);
+
         //Acceptance
         double a = std::exp(p1-p0);
         double z = R::unif_rand();
         if(z<a){
-          matX(s,c) = newXMat(s,c);
+          matX(c,s) = newXMat(c,s);
         }
       }
     }
@@ -224,8 +240,8 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
   arma::mat priorNew(vMatrix.n_rows,vMatrix.n_cols);
 
   //Create the prod vector
-  arma::vec prod(n_community);
-  for(int c=0;c<n_community;c++)prod(c)=c;
+  arma::vec prod(n_locations);
+  for(int l=0;l<n_locations;l++)prod(l)=l;
 
   for(int l=0;l<n_locations;l++){
     for(int c=0;c<n_community;c++){
@@ -250,9 +266,9 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
       arma::mat pNew = thetaNew*Omega;
 
       //Calculate the vector old probability
-      arma::vec pOld2 = rowSums(forestMat*arma::log(thetaOld*Phi));
+      arma::vec pOld2 = rowSums(forestMat%arma::log(thetaOld*Phi));
       //Calculate the vector new probability
-      arma::vec pNew2 = rowSums(forestMat*arma::log(thetaNew*Phi));
+      arma::vec pNew2 = rowSums(forestMat%arma::log(thetaNew*Phi));
 
       if(c<n_community-1){
         //Probability p0

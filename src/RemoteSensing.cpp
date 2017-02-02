@@ -13,8 +13,8 @@ using namespace arma;
 /***************************************************************************************************************************/
 
 arma::mat convertSBtoNormal(arma::mat vmat,
-                                int ncol, int nrow,
-                                arma::colvec prod) {
+                            int ncol, int nrow,
+                            arma::colvec prod) {
   arma::mat res(nrow,ncol);
 
   for(int j=0; j<ncol;j++){
@@ -46,6 +46,29 @@ arma::vec rowSums(const arma:: mat & X){
     out(i) = sum(X.row(i));
   }
   return(out);
+}
+
+arma::rowvec meltRemote(arma::mat mat){
+  //'Initialize the NumericVector
+  arma::rowvec vec(mat.n_rows*mat.n_cols);
+  //'Initialize the position
+  int pos=0;
+  for(int col=0;col<mat.n_cols;col++){
+    for(int row=0;row<mat.n_rows;row++){
+      //'meltAbundance the matrix
+      vec(pos)=mat(row,col);
+      //'Increment the position
+      pos=pos+1;
+    }
+  }
+  return(vec);
+}
+
+void updateThetaAndPhiAndOmegaRemote(arma::mat &ThetaGibbs,arma::mat Theta,arma::mat &PhiGibbs, arma::mat Phi,arma::mat &OmegaGibbs, arma::mat Omega,int gibbs){
+  //'meltAbundance the Theta and Phi matrix
+  ThetaGibbs.row(gibbs) = meltRemote(Theta);
+  PhiGibbs.row(gibbs)   = meltRemote(Phi);
+  OmegaGibbs.row(gibbs)   = meltRemote(Omega);
 }
 
 /***************************************************************************************************************************/
@@ -234,7 +257,7 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
   newVMat.fill(1.0);
   arma::mat vAdjustedMat(n_locations,n_community);
 
-    //Create the old prior matrix
+  //Create the old prior matrix
   arma::mat priorOld(vMatrix.n_rows,vMatrix.n_cols);
   //Create the new prior matrix
   arma::mat priorNew(vMatrix.n_rows,vMatrix.n_cols);
@@ -288,6 +311,94 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
   return(Theta);
 }
 
+/***************************************************************************************************************************/
+/*********************************            GIBBS SAMPLING PROCEDURE                  ************************************/
+/***************************************************************************************************************************/
+
+
+// [[Rcpp::export]]
+List lda_remote(arma::mat remoteMat,arma::mat forestMat, List jumpList, int n_community, int maxBand, double gamma, double aOmega, double bOmega, double psi, int accept_output, int n_gibbs, bool display_progress=true) {
+
+  //'Total number of locations
+  int nLocations = remoteMat.n_rows;
+
+  //'Total number of species
+  int nSpecies = forestMat.n_cols;
+
+  //Total number of bands
+  int nBands = remoteMat.n_cols;
+
+  //Initialize hyperparameter
+  double aPhi = psi;
+  arma::vec bPhi(nSpecies);
+  for(int i=0;i<nSpecies;i++) bPhi(i)=nSpecies-i-1.0;
+
+  //'Intialize Phi
+  arma::mat phiMat(n_community,nSpecies);
+  phiMat.fill(1.0/(double)nSpecies);
+  arma::mat xMat = phiMat;
+  //Fill the last column with ones
+  xMat.col(nSpecies-1).fill(1.0);
+
+  //'Intialize Omega
+  arma::mat omegaMat = arma::randu<arma::mat>(n_community,nBands);
+
+  //'Intialize Theta
+  arma::mat thetaMat(nLocations,n_community);
+  thetaMat.fill(1.0/(double)n_community);
+
+  arma::mat vMat = thetaMat;
+  //Fill the last column with ones
+  vMat.col(nBands-1).fill(1.0);
+
+  //'Initialize the ThetaGibbs
+  arma::mat ThetaGibbs(n_gibbs,nLocations*n_community);
+
+  //'Initialize the PhiGibbs
+  arma::mat PhiGibbs(n_gibbs,n_community*nSpecies);
+
+  //'Initialize the OmegaGibbs
+  arma::mat OmegaGibbs(n_gibbs,n_community*nBands);
+
+  //'Intialize the progressbar
+  Progress p(n_gibbs, display_progress);
+  for (int g = 0; g < n_gibbs; ++g) {
+    //'Verify if everything is ok
+    if (Progress::check_abort() )
+      Rcpp::stop("Operation cancelled by interrupt.");
+
+    //'Generate Omega
+    omegaMat = generateOmegaRemote(thetaMat, omegaMat, jumpList, remoteMat, maxBand, aOmega, bOmega);
+
+    //'Generate Phi
+    phiMat = generatePhiRemote(thetaMat, xMat, forestMat, jumpList, bPhi, aPhi);
+
+    //'Generate Theta
+    thetaMat = generateThetaRemote(vMat, omegaMat, phiMat, forestMat, jumpList, gamma);
+
+    /*  //Adpat the Jumps
+    if (g%accept_output==0 & g<1000){
+    k=print.adapt(accept1,jump1)
+    accept1=k$accept1
+    jump1=k$jump1
+    }
+     */
+    //'Create the final ThetaGibbs, PhiGibbs and OmegaGibbs
+    updateThetaAndPhiAndOmegaRemote(ThetaGibbs, thetaMat, PhiGibbs, phiMat, OmegaGibbs, omegaMat, g);
+
+
+    //'Increment the progress bar
+    p.increment();
+
+  }
+
+  //'Store the results
+  List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
+                                    Rcpp::Named("Phi")  = PhiGibbs,
+                                    Rcpp::Named("Omega")  = OmegaGibbs);
+
+  return resTemp;
+  }
 
 
 

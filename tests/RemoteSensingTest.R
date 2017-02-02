@@ -342,5 +342,15 @@ phi <- generatePhiRemote(thetaMat, matX, forestMat, jumpList, bPhi, aPhi)
 theta <- generateThetaRemote(vMatrix, omega,phi, forestMat, jumpList, gamma)
 
 
+################################################################################################################################
+################################################################################################################################
+################################################################################################################################
+
+n_community<-ncommun
+aOmega<- a
+bOmega <-b
+psi <- 1
+accept_output <- 50
+teste <- lda_remote(remoteMat, forestMat, jumpList, n_community, maxBand, gamma, aOmega, bOmega, psi, accept_output, 10, TRUE)
 
 

@@ -71,13 +71,47 @@ void updateThetaAndPhiAndOmegaRemote(arma::mat &ThetaGibbs,arma::mat Theta,arma:
   OmegaGibbs.row(gibbs)   = meltRemote(Omega);
 }
 
+void updateMatrixJumps(arma::mat &matAcceptance, arma::mat &matJump){
+  for(int r=0;r<matAcceptance.n_rows;r++){
+    for(int c=0;c<matAcceptance.n_cols;c++){
+      if(matAcceptance(r,c)>0.4 & matJump(r,c)<100){
+        matJump(r,c)=matJump(r,c)*2;
+      }
+      else if(matAcceptance(r,c)<0.2 & matJump(r,c)>0.001){
+        matJump(r,c)=matJump(r,c)*0.5;
+      }
+    }
+  }
+  //Erase the Acceptance Matrix
+  matAcceptance.fill(0.0);
+}
+
+void updateJumps(List &jumpAcceptance, List &jumpList, int accept_output){
+  arma::mat acceptanceOmega = jumpAcceptance[0];
+  acceptanceOmega = acceptanceOmega/(double)accept_output;
+  arma::mat jumpOmega = jumpList[0];
+  updateMatrixJumps(acceptanceOmega, jumpOmega);
+
+  arma::mat acceptanceTheta = jumpAcceptance[2];
+  acceptanceTheta = acceptanceTheta/(double)accept_output;
+  arma::mat jumpX = jumpList[2];
+  updateMatrixJumps(acceptanceTheta, jumpX);
+
+  arma::mat acceptancePhi = jumpAcceptance[1];
+  acceptancePhi = acceptancePhi/(double)accept_output;
+  arma::mat jumpV = jumpList[1];
+  updateMatrixJumps(acceptancePhi, jumpV);
+}
+
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
 // [[Rcpp::export]]
-arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList, arma::mat remoteMat, int maxBand, double a, double b ){
+arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList, List &jumpAcceptance, arma::mat remoteMat, int maxBand, double a, double b ){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
+  arma::mat acceptanceOmega = jumpAcceptance[0];
+
   //Get the Jump Matrix for V
   arma::mat jumpV = jumpList[1];
   //Get the Jump Matrix for X
@@ -149,6 +183,7 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
       double z = R::unif_rand();
       if(z<a){
         Omega(c,b) = omegaMat(c,b);
+        omegaAdjust(c,b) = omegaAdjust(c,b)+1.0;
       }
     }
   }
@@ -157,11 +192,12 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
 }
 
 // [[Rcpp::export]]
-arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat, List jumpList, arma::vec bPhi, double aPhi){
+arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat, List jumpList, List &jumpAcceptance, arma::vec bPhi, double aPhi){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
   //Get the Jump Matrix for V
   arma::mat jumpV = jumpList[1];
+  arma::mat acceptancePhi = jumpAcceptance[2];
   //Get the Jump Matrix for X
   arma::mat jumpX = jumpList[2];
   //Get the total number of Species
@@ -229,6 +265,7 @@ arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat,
         double z = R::unif_rand();
         if(z<a){
           matX(c,s) = newXMat(c,s);
+          acceptancePhi(c,s) = acceptancePhi(c,s)+1.0;
         }
       }
     }
@@ -241,9 +278,11 @@ arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat,
 }
 
 // [[Rcpp::export]]
-arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi, arma::mat forestMat, List jumpList, double gamma){
+arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi, arma::mat forestMat, List jumpList, List &jumpAcceptance, double gamma){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
+  arma::mat acceptanceTheta = jumpAcceptance[1];
+
   //Get the Jump Matrix for V
   arma::mat jumpV = jumpList[1];
   //Get the Jump Matrix for Omega
@@ -303,6 +342,7 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
         double z = R::unif_rand();
         if(z<a){
           vMatrix(l,c) = newVMat(l,c);
+          acceptanceTheta(l,c) = acceptanceTheta(l,c)+1.0;
         }
       }
     }
@@ -360,6 +400,20 @@ List lda_remote(arma::mat remoteMat,arma::mat forestMat, List jumpList, int n_co
   //'Initialize the OmegaGibbs
   arma::mat OmegaGibbs(n_gibbs,n_community*nBands);
 
+  //'List acceptance
+  arma::mat omegaAcceptance(n_community,nBands);
+  omegaAcceptance.fill(0.0);
+
+  arma::mat phiAcceptance(n_community,nSpecies);
+  phiAcceptance.fill(0.0);
+
+  arma::mat thetaAcceptance(nLocations,n_community);
+  thetaAcceptance.fill(0.0);
+
+  List jumpAcceptance = Rcpp::List::create(Rcpp::Named("Omega") = omegaAcceptance,
+                                          Rcpp::Named("Theta")  = thetaAcceptance,
+                                          Rcpp::Named("Phi")  = phiAcceptance);
+
   //'Intialize the progressbar
   Progress p(n_gibbs, display_progress);
   for (int g = 0; g < n_gibbs; ++g) {
@@ -368,21 +422,19 @@ List lda_remote(arma::mat remoteMat,arma::mat forestMat, List jumpList, int n_co
       Rcpp::stop("Operation cancelled by interrupt.");
 
     //'Generate Omega
-    omegaMat = generateOmegaRemote(thetaMat, omegaMat, jumpList, remoteMat, maxBand, aOmega, bOmega);
+    omegaMat = generateOmegaRemote(thetaMat, omegaMat, jumpList, jumpAcceptance, remoteMat, maxBand, aOmega, bOmega);
 
     //'Generate Phi
-    phiMat = generatePhiRemote(thetaMat, xMat, forestMat, jumpList, bPhi, aPhi);
+    phiMat = generatePhiRemote(thetaMat, xMat, forestMat, jumpList, jumpAcceptance, bPhi, aPhi);
 
     //'Generate Theta
-    thetaMat = generateThetaRemote(vMat, omegaMat, phiMat, forestMat, jumpList, gamma);
+    thetaMat = generateThetaRemote(vMat, omegaMat, phiMat, forestMat, jumpList, jumpAcceptance, gamma);
 
-    /*  //Adpat the Jumps
+      //Adapt the Jumps
     if (g%accept_output==0 & g<1000){
-    k=print.adapt(accept1,jump1)
-    accept1=k$accept1
-    jump1=k$jump1
+      updateJumps(jumpAcceptance, jumpList, accept_output);
     }
-     */
+
     //'Create the final ThetaGibbs, PhiGibbs and OmegaGibbs
     updateThetaAndPhiAndOmegaRemote(ThetaGibbs, thetaMat, PhiGibbs, phiMat, OmegaGibbs, omegaMat, g);
 

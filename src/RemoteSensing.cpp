@@ -204,48 +204,54 @@ arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat,
   int n_species = matX.n_cols;
   //Get the total number of communities
   int n_community = matX.n_rows;
+
   //Create the new matrix
   arma::mat newXMat(matX.n_rows,matX.n_cols);
   //Fill with ones
   newXMat.fill(1.0);
   //Create the new adjuested matrix
   arma::mat xAdjust(matX.n_rows,matX.n_cols);
+  xAdjust.fill(0.0);
   //Create the old prior matrix
   arma::mat priorOld(matX.n_rows,matX.n_cols);
   //Create the new prior matrix
   arma::mat priorNew(matX.n_rows,matX.n_cols);
   //Create the prod vector
   arma::vec prod(n_community);
-  for(int c=0;c<n_community;c++)prod(c)=c;
+  for(int c=0;c<n_community;c++)prod(c)=1.0;
 
+  double p1Old = 0.0;
+  double p1New = 0.0;
   //For each number of species
   for(int s=0;s<n_species;s++){
     //For each community
     for(int c=0;c<n_community;c++){
 
-      //Generate new X
-      newXMat(c,s) = tnormRemote(0.0, 1.0,matX(c,s), jumpX(c,s));
+      if(s<n_species-1){
+        //Generate new X
+        newXMat(c,s) = tnormRemote(0.0, 1.0,matX(c,s), jumpX(c,s));
 
-      //Adjusting the Metropolis-Hasting
-      xAdjust(c,s) = fixMHRemote(0.0,1.0,matX(c,s),newXMat(c,s),jumpX(c,s));
+        //Adjusting the Metropolis-Hasting
+        xAdjust(c,s) = fixMHRemote(0.0,1.0,matX(c,s),newXMat(c,s),jumpX(c,s));
 
-      //Old Phi
-      arma::mat phiOld=convertSBtoNormal(matX,n_species,n_community,prod);
+        //Old Phi
+        arma::mat phiOld=convertSBtoNormal(matX,n_species,n_community,prod);
 
-      //New Phi
-      arma::mat phiNew=convertSBtoNormal(newXMat,n_species,n_community,prod);
+        //New Phi
+        arma::mat phiNew=convertSBtoNormal(newXMat,n_species,n_community,prod);
 
-      //Calculate the old probability
-      arma::mat pOld = Theta*phiOld;
+        //Calculate the old probability
+        arma::mat pOld = Theta*phiOld;
 
-      //Calculate the new probability
-      arma::mat pNew = Theta*phiNew;
+        //Calculate the new probability
+        arma::mat pNew = Theta*phiNew;
 
-      //Calculate the old scalar probability
-      double p1Old = arma::sum(arma::sum(forestMat%arma::log(pOld)));
+        //Calculate the old scalar probability
+        p1Old = arma::sum(arma::sum(forestMat%arma::log(pOld)));
 
-      //Calculate the old scalar probability
-      double p1New = arma::sum(arma::sum(forestMat%log(pNew)));
+        //Calculate the old scalar probability
+        p1New = arma::sum(arma::sum(forestMat%log(pNew)));
+      }
 
       //Simulate old prior
       priorOld(c,s)= R::dbeta(matX(c,s),aPhi,bPhi(s),true);
@@ -303,7 +309,7 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
 
   //Create the prod vector
   arma::vec prod(n_locations);
-  for(int l=0;l<n_locations;l++)prod(l)=l;
+  for(int l=0;l<n_locations;l++)prod(l)=1.0;
 
   for(int l=0;l<n_locations;l++){
     for(int c=0;c<n_community;c++){

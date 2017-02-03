@@ -318,6 +318,9 @@ Omega <- param$omega
 jumpList <- list(omega=matrix(1,ncommun,nbands),
                 v=matrix(0.3,nloc,ncommun),
                 x=matrix(0.05,ncommun,nspp))
+jumpAcceptance <- list(Omega=matrix(0,ncommun,nbands),
+                 Theta=matrix(0,nloc,ncommun),
+                 Phi=matrix(0,ncommun,nspp))
 remoteMat <- as.matrix(remote)
 maxBand <- 256
 a <- 1.0
@@ -332,10 +335,10 @@ aPhi <- 1.0
 vMatrix<-param$v
 
 ##Generate Omega
-omega<-generateOmegaRemote(thetaMat, Omega, jumpList, remoteMat, maxBand, a, b)
+omega<-generateOmegaRemote(thetaMat, Omega, jumpList,jumpAcceptance, remoteMat, maxBand, a, b)
 
 ##Generate Phi
-phi <- generatePhiRemote(thetaMat, matX, forestMat, jumpList, bPhi, aPhi)
+phi <- generatePhiRemote(thetaMat, matX, forestMat, jumpList,jumpAcceptance, bPhi, aPhi)
 
 
 ##Generate Theta
@@ -351,6 +354,25 @@ aOmega<- a
 bOmega <-b
 psi <- 1
 accept_output <- 50
-teste <- lda_remote(remoteMat, forestMat, jumpList, n_community, maxBand, gamma, aOmega, bOmega, psi, accept_output, 10, TRUE)
+teste <- lda_remote(remoteMat, forestMat, jumpList, n_community, maxBand, gamma, aOmega, bOmega, psi, accept_output, 2000, TRUE)
+save.image("C:\\Users\\p.albuquerque\\Desktop\\Resultados.Rdata")
 
+################################################################################################################################
+################################################################################################################################
+################################################################################################################################
 
+theta<-matrix(teste$Theta[2000,],nrow =n_community ,ncol=nrow(remoteMat))
+phi<-matrix(teste$Phi[2000,],nrow = n_community,ncol=ncol(forestMat))
+omega<-matrix(teste$Omega[2000,],nrow = n_community,ncol=ncol(remoteMat))
+
+boxplot(theta)
+
+rango=c(0,0.2)
+plot(phi.true,phi[1:5,],xlim=rango,ylim=rango)
+lines(rango,rango)
+
+rango=c(0,1)
+plot(omega.true,omega[1:5,],xlim=rango,ylim=rango)
+lines(rango,rango)
+
+plot(rep(1,5),1:5,col=1:5)

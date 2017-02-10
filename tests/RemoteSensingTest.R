@@ -342,7 +342,7 @@ phi <- generatePhiRemote(thetaMat, matX, forestMat, jumpList,jumpAcceptance, bPh
 
 
 ##Generate Theta
-theta <- generateThetaRemote(vMatrix, omega,phi, forestMat, jumpList, gamma)
+theta <- generateThetaRemote(vMatrix, omega,phi, forestMat,jumpAcceptance, jumpList, gamma)
 
 
 ################################################################################################################################

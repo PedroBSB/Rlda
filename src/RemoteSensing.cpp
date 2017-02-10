@@ -218,7 +218,7 @@ arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat,
   arma::mat priorNew(matX.n_rows,matX.n_cols);
   //Create the prod vector
   arma::vec prod(n_community);
-  for(int c=0;c<n_community;c++)prod(c)=1.0;
+  prod.fill(1.0);
 
   double p1Old = 0.0;
   double p1New = 0.0;
@@ -309,7 +309,7 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
 
   //Create the prod vector
   arma::vec prod(n_locations);
-  for(int l=0;l<n_locations;l++)prod(l)=1.0;
+  prod.fill(1.0);
 
   for(int l=0;l<n_locations;l++){
     for(int c=0;c<n_community;c++){

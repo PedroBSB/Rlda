@@ -550,7 +550,7 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
     Phi = generatePhiBinomial(zMat, nBands, n_community, alpha0, alpha1);
 
     //'Create the final Theta (n_gibbs,nLocations*n_community) and final Phi (n_gibbs,nBands*n_community)
-    updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Phi, g);
+    updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Rcpp::transpose(Phi), g);
 
     //'Initialize the logLikelihood
     double logLikelihood=ll_priorFunctionBinomial(matDATA,matPOP,
@@ -661,7 +661,7 @@ List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alp
     Phi = generatePhiBinomial(zMat, nBands, n_community, alpha0, alpha1);
     if(g>n_burn){
       //'Create the final Theta (n_gibbs,nLocations*n_community) and final Phi (n_gibbs,nBands*n_community)
-      updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Phi, cont);
+      updateThetaAndPhiBinomial(ThetaGibbs, Theta, PhiGibbs, Rcpp::transpose(Phi), cont);
 
       //'Initialize the logLikelihood
       double logLikelihood=ll_priorFunctionBinomial(matDATA,matPOP,

@@ -445,7 +445,7 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
     vMat = generateVPresence(zList,nLocations, gamma);
 
     //'Create the final Phi (n_gibbs,n_community*nSpecies) and final Theta (ThetaGibbs)
-    updatePhiAndThetaPresence(PhiGibbs, Phi, ThetaGibbs, ThetaMat, g);
+    updatePhiAndThetaPresence(PhiGibbs, Rcpp::transpose(Phi), ThetaGibbs, ThetaMat, g);
 
     //'Initialize the logLikelihood
     double logLikelihood=ll_priorFunctionPresence(matDATA, nLocations,
@@ -556,7 +556,7 @@ List lda_bernoulli_burn(DataFrame data, int n_community, double alpha0, double a
     if(g>n_burn){
 
       //'Create the final Phi (n_gibbs,n_community*nSpecies) and final Theta (ThetaGibbs)
-      updatePhiAndThetaPresence(PhiGibbs, Phi, ThetaGibbs, ThetaMat, cont);
+      updatePhiAndThetaPresence(PhiGibbs, Rcpp::transpose(Phi), ThetaGibbs, ThetaMat, cont);
 
       //'Initialize the logLikelihood
       double logLikelihood=ll_priorFunctionPresence(matDATA, nLocations,

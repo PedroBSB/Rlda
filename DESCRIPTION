@@ -15,9 +15,7 @@ LinkingTo:
     RcppArmadillo,
     RcppProgress
 Imports:
-    Rcpp,
-    RcppArmadillo,
-    RcppProgress
+    RcppArmadillo
 SystemRequirements: GNU make
 Suggests:
     knitr,

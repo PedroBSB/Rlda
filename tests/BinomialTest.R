@@ -58,7 +58,7 @@ set.seed(9292)
 #Estimate the parameters by Gibbs Sampling (Time difference of 23.31748 secs)
 start.time <- Sys.time()
 
-res<-rlda.binomial(as.data.frame(DATA), as.data.frame(POP), 4, alpha0, alpha1, gamma, 1000, TRUE, TRUE)
+res<-rlda.binomial(as.data.frame(DATA), as.data.frame(POP), 4, alpha0, alpha1, gamma, 100, TRUE, TRUE)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time

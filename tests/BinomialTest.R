@@ -4,7 +4,7 @@ rm(list=ls())
 #Generate the fake data
 set.seed(5587)
 library(gtools)
-
+library(Rlda)
 #Number of communities
 community <- 3
 

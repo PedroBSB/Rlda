@@ -72,13 +72,14 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
   stopifnot(inherits(data, "data.frame"))
   stopifnot(inherits(pop, "data.frame"))
   stopifnot(inherits(n_community, "numeric"))
-  stopifnot(inherits(beta, "numeric"))
+  stopifnot(inherits(alpha0, "numeric"))
+  stopifnot(inherits(alpha1, "numeric"))
   stopifnot(inherits(gamma, "numeric") | is.na(gamma))
   stopifnot(inherits(n_gibbs, "numeric"))
   stopifnot(inherits(ll_prior, "logical"))
   stopifnot(inherits(display_progress, "logical"))
   if(nrow(data)!=nrow(pop)){
-
+    stop('Both "data" and "pop" must have the same number of rows.')
   }
   # Execute the LDA for the Binomial entry
   res <- Rlda:::lda_binomial(data, pop, n_community,  alpha0 , alpha1, gamma,

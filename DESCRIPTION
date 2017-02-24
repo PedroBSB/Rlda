@@ -7,7 +7,7 @@ Maintainer: Pedro Albuquerque <pedroa@unb.br>
 Description: The goal of this packageis to describe the Bayesian LDA model for
     fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli,
     and Binomial entries).
-License: What license is it under?
+License: GPL-2
 LazyData: TRUE
 LinkingTo:
     Rcpp,

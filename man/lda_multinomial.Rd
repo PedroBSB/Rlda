@@ -74,7 +74,7 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
       \email{daijianglee@gmail.com}\cr
   }
 }
-\seealso{\code{\link{lda_binomial}}, \code{\link{lda_bernoulli}} }
+\seealso{\code{\link{rlda.binomial}}, \code{\link{rlda.bernoulli}} }
 
 \keyword{LDA}
 \keyword{Fuzzy}

@@ -83,7 +83,7 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
       \url{http://daijiang.name}
   }
 }
-\seealso{\code{\link{lda_multinomial}}, \code{\link{lda_bernoulli}} }
+\seealso{\code{\link{rlda.multinomial}}, \code{\link{rlda.bernoulli}} }
 
 \keyword{LDA}
 \keyword{Fuzzy}

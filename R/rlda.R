@@ -101,7 +101,11 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
   return(res)
 }
 
-
+#' Plot the Rlda object.
+#'
+#' @param d rlda object
+#' @param ... ignored
+#' @export
 plot.rlda <- function(d,...){
   #Burn-in
   i<- ceiling(d$n_gibbs*0.1)
@@ -123,6 +127,11 @@ plot.rlda <- function(d,...){
   invisible(d)
 }
 
+#' Summarize the Bayesian LDA.
+#'
+#' @param d rlda object
+#' @param ... ignored
+#' @export
 summary.rlda <-function(d,...){
   #Burn-in
   i<- ceiling(d$n_gibbs*0.1)

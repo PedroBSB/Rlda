@@ -2,6 +2,11 @@ exportPattern("^[[:alpha:]]+")
 import(Rcpp)
 import(RcppProgress)
 import(RcppArmadillo)
+export(rlda.bernoulli)
+export(rlda.multinomial)
+export(rlda.binomial)
+export(plot.rlda)
+export(summary.rlda)
 useDynLib(Rlda)
 
 

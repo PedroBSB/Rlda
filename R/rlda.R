@@ -5,6 +5,7 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
   stopifnot(inherits(n_community, "numeric"))
   stopifnot(inherits(alpha0, "numeric"))
   stopifnot(inherits(alpha1, "numeric"))
+  stopifnot(inherits(gamma, "numeric") | is.na(gamma))
   stopifnot(inherits(n_gibbs, "numeric"))
   stopifnot(inherits(ll_prior, "logical"))
   stopifnot(inherits(display_progress, "logical"))

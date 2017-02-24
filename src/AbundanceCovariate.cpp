@@ -1,11 +1,14 @@
+#include <RcppArmadillo.h>
+#include <Rcpp.h>
+#include "progress.hpp"
 #include <iostream>
 #include <ctime>
 #include <fstream>
-#include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
-#include "progress.hpp"
 // [[Rcpp::depends(RcppProgress)]]
 using namespace arma;
+
+
 
 /***************************************************************************************************************************/
 /*********************************                      UTILS          *****************************************************/

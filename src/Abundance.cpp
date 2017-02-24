@@ -1,17 +1,16 @@
 #include <RcppArmadillo.h>
+#include <Rcpp.h>
+#include "progress.hpp"
 #include <iostream>
 #include <ctime>
 #include <fstream>
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
-#include "progress.hpp"
-using namespace Rcpp;
+using namespace arma;
 
 /***************************************************************************************************************************/
 /*********************************                      UTILS          *****************************************************/
 /***************************************************************************************************************************/
-
-
 
 int whichLessAbundance(double value, NumericVector vector) {
   int res = -1;

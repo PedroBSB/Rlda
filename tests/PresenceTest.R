@@ -67,7 +67,7 @@ set.seed(9292)
 #Estimate the parameters by Gibbs Sampling (Time difference of 18.73626 secs)
 start.time <- Sys.time()
 
-res<-lda_bernoulli(DATA, 4, alpha0, alpha1, gamma, 1000, TRUE, TRUE)
+res<-rlda.bernoulli(DATA, 4, alpha0, alpha1, gamma, 1000, TRUE, TRUE)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time

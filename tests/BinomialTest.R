@@ -18,7 +18,8 @@ locations<-1000
 alpha0<-0.1
 alpha1<-0.1
 Omega<-matrix(rbeta(bands*community,alpha0,alpha1),nrow=bands,ncol=community)
-Theta=data.matrix(read.csv('tests/theta.csv',as.is=T))
+Theta=matrix(rbeta(locations*community,alpha0,alpha1),nrow=locations,ncol=community)
+Theta=t(apply(Theta,1,function(x) x/sum(x)))
 
 plot(NA,NA,xlim=c(1,locations),ylim=c(0,1))
 for (i in 1:3) lines(1:locations,Theta[,i],col=i)
@@ -57,7 +58,7 @@ set.seed(9292)
 #Estimate the parameters by Gibbs Sampling (Time difference of 23.31748 secs)
 start.time <- Sys.time()
 
-res<-lda_binomial(DATA, POP, 4, alpha0, alpha1, gamma, 1000, TRUE, TRUE)
+res<-rlda.binomial(as.data.frame(DATA), as.data.frame(POP), 4, alpha0, alpha1, gamma, 1000, TRUE, TRUE)
 
 end.time <- Sys.time()
 time.taken <- end.time - start.time
@@ -69,4 +70,3 @@ logLikeli<-res$logLikelihood
 #Plot the logLikelihood
 plot(logLikeli,type="l")
 
-plot(logLikeli[600:length(logLikeli)],type="l")

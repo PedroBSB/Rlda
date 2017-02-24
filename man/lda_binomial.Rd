@@ -1,14 +1,14 @@
-\name{lda_binomial}
-\alias{lda_binomial}
+\name{rlda.binomial}
+\alias{rlda.binomial}
 \title{LDA with binomial entry and Stick-Breaking prior.}
 \description{
   This method implements the Latent Dirichlet Allocation with
   Stick-Breaking prior for binomial data.
-  \code{lda_binomial} works with frequency data.frame and also a
+  \code{rlda.binomial} works with frequency data.frame and also a
   population data.frame.
 }
 \usage{
-  lda_binomial(data, pop, n_community, alpha0, alpha1, gamma,
+  rlda.binomial(data, pop, n_community, alpha0, alpha1, gamma,
   n_gibbs, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{
@@ -43,7 +43,7 @@
   each Gibbs Sample.}
 }
 \details{
-  \code{lda_binomial} uses a modified Latent Dirichlet Allocation method
+  \code{rlda.binomial} uses a modified Latent Dirichlet Allocation method
   to construct Fuzzy Clusters using Bayesian Inference.
   The \code{data} must be a non-empty data.frame with the frequencies for each variable
   (column) in each observation (row). The \code{pop} must be a non-empty data.frame with
@@ -105,7 +105,7 @@ gamma  <- 0.01
 alpha0 <- 0.01
 alpha1 <- 0.01
 # Execute the LDA for the Binomial entry
-res <- lda_binomial(data = sp500, pop = spSize, n_community = 10,
+res <- rlda.binomial(data = sp500, pop = spSize, n_community = 10,
                     alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
                     n_gibbs = 500, ll_prior = TRUE, display_progress = TRUE)
 }

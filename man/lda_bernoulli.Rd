@@ -1,13 +1,13 @@
-\name{lda_bernoulli}
-\alias{lda_bernoulli}
+\name{rlda.bernoulli}
+\alias{rlda.bernoulli}
 \title{LDA with bernoulli entry and Stick-Breaking prior.}
 \description{
   This method implements the Latent Dirichlet Allocation with
   Stick-Breaking prior for bernoulli data.
-  \code{lda_bernoulli} works with binary data.frame.
+  \code{rlda.bernoulli} works with binary data.frame.
 }
 \usage{
-  lda_binomial(data, n_community, alpha0, alpha1, gamma,
+  rlda.bernoulli(data, n_community, alpha0, alpha1, gamma,
   n_gibbs, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{
@@ -38,7 +38,7 @@
   each Gibbs Sample.}
 }
 \details{
-  \code{lda_bernoulli} uses a modified Latent Dirichlet Allocation method
+  \code{rlda.bernoulli} uses a modified Latent Dirichlet Allocation method
   to construct Fuzzy Clusters using Bayesian Inference.
   The \code{data} must be a non-empty data.frame with the binaries values
   Zero or Ones for each variable (column) in each observation (row).
@@ -76,7 +76,7 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
       \url{http://daijiang.name/}
   }
 }
-\seealso{\code{\link{lda_multinomial}}, \code{\link{lda_bernoulli}} }
+\seealso{\code{\link{lda_multinomial}}, \code{\link{rlda.bernoulli}} }
 
 \keyword{LDA}
 \keyword{Fuzzy}
@@ -109,7 +109,7 @@ gamma <- 0.01
 alpha0 <- 0.01
 alpha1 <- 0.01
 # Execute the LDA for the Binomial entry
-res <- lda_bernoulli(data = matPres, n_community = 10,
+res <- rlda.bernoulli(data = matPres, n_community = 10,
                    alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
                    n_gibbs = 5000,ll_prior = TRUE, display_progress = TRUE)
 }

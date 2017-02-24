@@ -1,13 +1,13 @@
-\name{lda_multinomial}
-\alias{lda_multinomial}
+\name{rlda.multinomial}
+\alias{rlda.multinomial}
 \title{LDA with multinomial entry and Stick-Breaking prior.}
 \description{
   This method implements the Latent Dirichlet Allocation with
   Stick-Breaking prior for multinomial data.
-  \code{lda_multinomial} works with frequency data.frame.
+  \code{rlda.multinomial} works with frequency data.frame.
 }
 \usage{
-  lda_multinomial(data, n_community, beta, gamma,
+  rlda.multinomial(data, n_community, beta, gamma,
   n_gibbs, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{
@@ -37,7 +37,7 @@
   each Gibbs Sample.}
 }
 \details{
-  \code{lda_multinomial} uses a modified Latent Dirichlet Allocation method
+  \code{rlda.multinomial} uses a modified Latent Dirichlet Allocation method
   to construct Fuzzy Clusters using Bayesian Inference.
   The \code{data} must be a non-empty data.frame with the frequencies for each variable
   (column) in each observation (row).
@@ -104,6 +104,6 @@ beta <- rep(1,ncol(mat1))
 gamma <- 0.01
 
 #Execute the LDA for the Multinomial entry
-res <- lda_multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
+res <- rlda.multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
                        n_gibbs = 1000, ll_prior = TRUE, display_progress = TRUE)
 }

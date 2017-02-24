@@ -1,3 +1,16 @@
+#' @name rlda.bernoulli
+#' @title Gibbs Sampling for LDA Presence and Absence
+#' @description Compute the Gibbs Sampling for LDA Presence and Absence
+#' @param data - DataFrame with Presence and Absecence (Zeros and Ones)
+#' @param n_community - Number of communities
+#' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
+#' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
+#' @param gamma - Hyperparameter  Beta(1,gamma)
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
+#' @param bool display_progress=true - Should I Show the progressBar ?
+#' @return Rlda object
+#' @export
 rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
                          n_gibbs, ll_prior = TRUE, display_progress = TRUE){
   #Create a stop point
@@ -12,9 +25,9 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
 
   #Use a function not exported
   # Execute the LDA for the Bernoulli entry
-  res <- Rlda:::lda_bernoulli(data, n_community,
-                       alpha0, alpha1, gamma,
-                       n_gibbs, ll_prior, display_progress)
+  res <- lda_bernoulli(data, n_community,
+            alpha0, alpha1, gamma,
+            n_gibbs, ll_prior, display_progress)
   #Number of communities
   res$n_community<- n_community
   #Sample size
@@ -34,6 +47,18 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
   return(res)
 }
 
+#' @name rlda.multinomial
+#' @title Gibbs Sampling for LDA Abundance with Stick-Breaking
+#' @description Compute the Gibbs Sampling for LDA Abundance with Stick-Breaking
+#' @param data - dataFrame with Abundance
+#' @param int n_community - Number of communities
+#' @param beta - NumericVector for beta (Sx1)
+#' @param gamma - Hyperparameter  Beta(1,gamma)
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
+#' @param bool display_progress=true - Should I Show the progressBar ?
+#' @return Rlda object
+#' @export
 rlda.multinomial<-function(data, n_community, beta, gamma,
                            n_gibbs, ll_prior = TRUE, display_progress = TRUE){
   #Create a stop point
@@ -47,8 +72,8 @@ rlda.multinomial<-function(data, n_community, beta, gamma,
 
   #Use a function not exported
   # Execute the LDA for the Multinomial entry
-  res <- Rlda:::lda_multinomial(data, n_community, beta, gamma,
-                         n_gibbs, ll_prior, display_progress)
+  res <- lda_multinomial(data, n_community, beta, gamma,
+           n_gibbs, ll_prior, display_progress)
   #Number of communities
   res$n_community<- n_community
   #Sample size
@@ -66,6 +91,20 @@ rlda.multinomial<-function(data, n_community, beta, gamma,
   return(res)
 }
 
+#' @name rlda.binomial
+#' @title Compute the Gibbs Sampling for LDA Binomial
+#' @description Compute the Gibbs Sampling for LDA Binomial
+#' @param DATA - DataFrame with Presence and Absecence (Binomial)
+#' @param POP - DataFrame with Population Size (Binomial)
+#' @param int n_community - Number of communities
+#' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
+#' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
+#' @param gamma - Hyperparameter  Beta(1,gamma)
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
+#' @param bool display_progress=true - Should I Show the progressBar ?
+#' @return Rlda object
+#' @export
 rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
                            n_gibbs, ll_prior = TRUE, display_progress = TRUE){
   #Create a stop point
@@ -82,8 +121,8 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
     stop('Both "data" and "pop" must have the same number of rows.')
   }
   # Execute the LDA for the Binomial entry
-  res <- Rlda:::lda_binomial(data, pop, n_community,  alpha0 , alpha1, gamma,
-                             n_gibbs, ll_prior, display_progress)
+  res <- lda_binomial(data, pop, n_community,  alpha0 , alpha1, gamma,
+                      n_gibbs, ll_prior, display_progress)
   #Number of communities
   res$n_community<- n_community
   #Sample size

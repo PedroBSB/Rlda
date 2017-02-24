@@ -1,3 +1,8 @@
+include Makevars
+
+# This is also defined in Makevars, but somehow the definition from there is not used
+OBJECTS = $(CFILES:.c=.o) $(CPPFILES:.cpp=.o)
+
 PKG_LIBS = $(shell $(R_HOME)/bin/Rscript.exe -e "Rcpp:::LdFlags()")
 PKG_CPPFLAGS =  -I. -I../inst/include
 PKG_LIBS = $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)

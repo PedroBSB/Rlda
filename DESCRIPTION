@@ -1,11 +1,11 @@
 Package: Rlda
 Type: Package
-Title: Bayesian LDA for fuzzy clustering analysis
+Title: Bayesian LDA for mixed-membership clustering analysis
 Version: 0.1.0
-Author: Pedro Albuquerque
-Maintainer: Pedro Albuquerque <pedroa@unb.br>
+Author: Pedro Albuquerque and Denis Valle
+Maintainer: Pedro Albuquerque <pedroa@unb.br> and Denis Valle <drvalle@ufl.edu>
 Description: The goal of this packageis to describe the Bayesian LDA model for
-    fuzzy clustering based on different types of data (i.e., Multinomial, Bernoulli,
+    mixed-membership clustering based on different types of data (i.e., Multinomial, Bernoulli,
     and Binomial entries).
 License: GPL-2
 LazyData: TRUE
@@ -15,8 +15,7 @@ LinkingTo:
     RcppArmadillo,
     RcppProgress
 Imports:
-    RcppArmadillo, 
-    reshape2,
+    RcppArmadillo,
     gtools
 SystemRequirements: GNU make
 Suggests:

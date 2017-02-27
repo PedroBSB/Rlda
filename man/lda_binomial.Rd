@@ -107,8 +107,8 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 		alpha1 <- 0.01
 		# Execute the LDA for the Binomial entry
 		res <- rlda.binomial(data = sp500, pop = spSize, n_community = 10,
-							alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
-							n_gibbs = 500, ll_prior = TRUE, display_progress = TRUE)
+		alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
+		n_gibbs = 500, ll_prior = TRUE, display_progress = TRUE)
 	}
 }
 

@@ -105,8 +105,9 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 		gamma <- 0.01
 
 		#Execute the LDA for the Multinomial entry
-		res <- rlda.multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
-							   n_gibbs = 1000, ll_prior = TRUE, display_progress = TRUE)
+		res <- rlda.multinomial(data = mat1, n_community = 30,
+		beta = beta, gamma = gamma, n_gibbs = 1000,
+		ll_prior = TRUE, display_progress = TRUE)
 	}
 }
 

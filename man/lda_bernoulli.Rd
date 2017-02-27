@@ -84,17 +84,20 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 \keyword{Bernoulli}
 
 \examples{
-library(Rlda)
-# Presence
-data(presence)
-# Set seed
-set.seed(9842)
-# Hyperparameters for each prior distribution
-gamma <- 0.01
-alpha0 <- 0.01
-alpha1 <- 0.01
-# Execute the LDA for the Binomial entry
-res <- rlda.bernoulli(data = presence, n_community = 10,
-                   alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
-                   n_gibbs = 5000,ll_prior = TRUE, display_progress = TRUE)
+	\dontrun{
+		library(Rlda)
+		# Presence
+		data(presence)
+		# Set seed
+		set.seed(9842)
+		# Hyperparameters for each prior distribution
+		gamma <- 0.01
+		alpha0 <- 0.01
+		alpha1 <- 0.01
+		# Execute the LDA for the Binomial entry
+		res <- rlda.bernoulli(data = presence, n_community = 10,
+						   alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
+						   n_gibbs = 5000,ll_prior = TRUE, display_progress = TRUE)
+	}
 }
+

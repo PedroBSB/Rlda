@@ -91,21 +91,24 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 \keyword{Binomial}
 
 \examples{
-library(Rlda)
-# Read the SP500 data
-data(sp500)
-# Create size
-spSize <- as.data.frame(matrix(100,
-                      ncol = ncol(sp500),
-                      nrow = nrow(sp500)))
-# Set seed
-set.seed(5874)
-# Hyperparameters for each prior distribution
-gamma  <- 0.01
-alpha0 <- 0.01
-alpha1 <- 0.01
-# Execute the LDA for the Binomial entry
-res <- rlda.binomial(data = sp500, pop = spSize, n_community = 10,
-                    alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
-                    n_gibbs = 500, ll_prior = TRUE, display_progress = TRUE)
+	\dontrun{
+		library(Rlda)
+		# Read the SP500 data
+		data(sp500)
+		# Create size
+		spSize <- as.data.frame(matrix(100,
+							  ncol = ncol(sp500),
+							  nrow = nrow(sp500)))
+		# Set seed
+		set.seed(5874)
+		# Hyperparameters for each prior distribution
+		gamma  <- 0.01
+		alpha0 <- 0.01
+		alpha1 <- 0.01
+		# Execute the LDA for the Binomial entry
+		res <- rlda.binomial(data = sp500, pop = spSize, n_community = 10,
+							alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
+							n_gibbs = 500, ll_prior = TRUE, display_progress = TRUE)
+	}
 }
+

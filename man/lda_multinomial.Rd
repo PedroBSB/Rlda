@@ -82,28 +82,31 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 \keyword{Multinomial}
 
 \examples{
-# Invoke the library
-library(Rlda)
-# Read the Complaints data
-data(complaints)
+	\dontrun{
+		# Invoke the library
+		library(Rlda)
+		# Read the Complaints data
+		data(complaints)
 
-# Create the abundance matrix
-library(reshape2)
-mat1 <- dcast(complaints[, c("Company","Issue")],
-            Company ~ Issue, fun.aggregate = length,
-            value.var = "Issue")
-# Create the rowname
-rownames(mat1) <- mat1[, 1]
-# Remove the ID variable
-mat1 <- mat1[, -1]
+		# Create the abundance matrix
+		library(reshape2)
+		mat1 <- dcast(complaints[, c("Company","Issue")],
+					Company ~ Issue, fun.aggregate = length,
+					value.var = "Issue")
+		# Create the rowname
+		rownames(mat1) <- mat1[, 1]
+		# Remove the ID variable
+		mat1 <- mat1[, -1]
 
-# Set seed
-set.seed(9292)
-# Hyperparameters for each prior distribution
-beta <- rep(1,ncol(mat1))
-gamma <- 0.01
+		# Set seed
+		set.seed(9292)
+		# Hyperparameters for each prior distribution
+		beta <- rep(1,ncol(mat1))
+		gamma <- 0.01
 
-#Execute the LDA for the Multinomial entry
-res <- rlda.multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
-                       n_gibbs = 1000, ll_prior = TRUE, display_progress = TRUE)
+		#Execute the LDA for the Multinomial entry
+		res <- rlda.multinomial(data = mat1, n_community = 30, beta = beta, gamma = gamma,
+							   n_gibbs = 1000, ll_prior = TRUE, display_progress = TRUE)
+	}
 }
+

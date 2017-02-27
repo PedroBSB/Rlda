@@ -144,36 +144,36 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
 
 #' Plot the Rlda object.
 #'
-#' @param d rlda object
+#' @param x rlda object
 #' @param ... ignored
 #' @export
-plot.rlda <- function(object,...){
+plot.rlda <- function(x, ...){
   #Burn-in
-  i<- ceiling(object$n_gibbs*0.1)
+  i<- ceiling(x$n_gibbs*0.1)
   #Plot the log-likelihood
-  plot(object$logLikelihood[i:object$n_gibbs],type="l", main="Log-Likelihood")
+  plot(x$logLikelihood[i:x$n_gibbs],type="l", main="Log-Likelihood")
   par(ask=T)
   #Plot the box-plot Theta
-  tmp<- colMeans(object$Theta[i:object$n_gibbs,])
-  theta<- matrix(tmp,object$N,object$n_community)
-  colnames(theta)=paste(1:object$n_community,sep='')
+  tmp<- colMeans(x$Theta[i:x$n_gibbs,])
+  theta<- matrix(tmp,x$N,x$n_community)
+  colnames(theta)=paste(1:x$n_community,sep='')
   boxplot(theta,main="Theta matrix")
   par(ask=T)
   #Plot the box-plot Phi
-  tmp<- colMeans(object$Phi[i:object$n_gibbs,])
-  phi<- matrix(tmp,object$n_community,length(object$Species))
-  rownames(phi)=paste(1:object$n_community,sep='')
-  colnames(phi)=object$Species
+  tmp<- colMeans(x$Phi[i:x$n_gibbs,])
+  phi<- matrix(tmp,x$n_community,length(x$Species))
+  rownames(phi)=paste(1:x$n_community,sep='')
+  colnames(phi)=x$Species
   boxplot(phi,main="Phi matrix")
-  invisible(object)
+  invisible(x)
 }
 
 #' Summarize the Bayesian LDA.
 #'
-#' @param d rlda object
+#' @param object rlda object
 #' @param ... ignored
 #' @export
-summary.rlda <-function(object,...){
+summary.rlda <-function(object, ...){
   #Burn-in
   i<- ceiling(object$n_gibbs*0.1)
   seq<-i:object$n_gibbs

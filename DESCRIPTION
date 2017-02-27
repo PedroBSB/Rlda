@@ -15,7 +15,8 @@ LinkingTo:
     RcppArmadillo,
     RcppProgress
 Imports:
-    RcppArmadillo
+    RcppArmadillo, 
+    reshape2
 SystemRequirements: GNU make
 Suggests:
     knitr,

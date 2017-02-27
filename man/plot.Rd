@@ -8,12 +8,12 @@
 The \code{plot} function returns three plots based on Theta matrix, Phi matrix and log-likelihood. }
 
 \usage{
-  \method{plot}{rlda}(object,...)
+  \S3method{plot}{rlda}(x,...)
 }
 
 \arguments{
 
-  \item{object}{a \code{rlda} object created by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} function}
+  \item{x}{a \code{rlda} object created by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} function}
   \item{...}{ other arguments may be useful.}
 }
 
@@ -35,7 +35,7 @@ The \code{plot} function returns three plots based on Theta matrix, Phi matrix a
   }
 }
 
-\keyword{plot}   
+\keyword{plot}
 \keyword{LDA}
 \keyword{Fuzzy}
 \keyword{Cluster}

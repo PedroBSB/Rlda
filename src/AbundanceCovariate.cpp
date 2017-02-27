@@ -225,7 +225,7 @@ arma::mat generatePhi(List resYZW, arma::mat xMat, double gamma, int nSpecies){
 /***************************************************************************************************************************/
 
 
-// [[Rcpp::export]]
+
 List lda_multinomial_cov(DataFrame yData, DataFrame xData, IntegerVector specVector, arma::vec varBetas, int n_community, int n_specie, double gamma, int n_gibbs, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix

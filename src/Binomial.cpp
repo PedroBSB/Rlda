@@ -591,7 +591,6 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
 //' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
 //' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
-// [[Rcpp::export]]
 List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs,int n_burn, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix

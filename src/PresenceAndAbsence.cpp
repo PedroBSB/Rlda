@@ -485,7 +485,6 @@ List lda_bernoulli(DataFrame data, int n_community, double alpha0, double alpha1
 //' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
 //' @return List - With Phi(n_gibbs,n_community*nSpecies), Theta(n_gibbs,nLocations*n_community) and logLikelihood
-// [[Rcpp::export]]
 List lda_bernoulli_burn(DataFrame data, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs,int n_burn, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix

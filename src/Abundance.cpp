@@ -472,7 +472,6 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
 //' @param ll_prior - Likelihood compute with Priors ?
 //' @param bool display_progress=true - Should I Show the progressBar ?
 //' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
-// [[Rcpp::export]]
 List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, double gamma, int n_gibbs,int n_burn, bool ll_prior=true, bool display_progress=true) {
 
   //'Convert to matrix

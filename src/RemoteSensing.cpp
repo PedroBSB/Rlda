@@ -107,7 +107,7 @@ void updateJumps(List &jumpAcceptance, List &jumpList, int accept_output){
 /***************************************************************************************************************************/
 /*********************************            GIBBS SAMPLING FUNCTIONS           *******************************************/
 /***************************************************************************************************************************/
-// [[Rcpp::export]]
+
 arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList, List &jumpAcceptance, arma::mat remoteMat, int maxBand, double a, double b ){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
@@ -192,7 +192,7 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
   return(Omega);
 }
 
-// [[Rcpp::export]]
+
 arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat, List jumpList, List &jumpAcceptance, arma::vec bPhi, double aPhi){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
@@ -284,7 +284,7 @@ arma::mat generatePhiRemote(arma::mat Theta, arma::mat matX,arma::mat forestMat,
   return(phiMat);
 }
 
-// [[Rcpp::export]]
+
 arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi, arma::mat forestMat, List jumpList, List &jumpAcceptance, double gamma){
   //Get the Jump Matrix for Omega
   arma::mat jumpOmega = jumpList[0];
@@ -363,7 +363,7 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
 /***************************************************************************************************************************/
 
 
-// [[Rcpp::export]]
+
 List lda_remote(arma::mat remoteMat,arma::mat forestMat, List jumpList, int n_community, int maxBand, double gamma, double aOmega, double bOmega, double psi, int accept_output, int n_gibbs, bool display_progress=true) {
 
   //'Total number of locations

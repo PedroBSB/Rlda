@@ -10,7 +10,6 @@ Daily transactions for 46 firms of the Sp500 Index in 2015.
   A data frame with 249 observations for 46 firms.
   Each cell represents one when some transactions ocurred and zero otherwise.
   }
-}
 \examples{
 data(sp500)
 }

@@ -7,6 +7,8 @@ export(rlda.multinomial)
 export(rlda.binomial)
 export(plot.rlda)
 export(summary.rlda)
+S3method("plot", "rlda")
+S3method("summary", "rlda")
 useDynLib(Rlda)
 
 

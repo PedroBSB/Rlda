@@ -7,6 +7,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 // [[Rcpp::depends(RcppProgress)]]
 using namespace arma;
+using namespace Rcpp;
 
 
 

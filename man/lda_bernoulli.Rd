@@ -39,7 +39,7 @@
 }
 \details{
   \code{rlda.bernoulli} uses a modified Latent Dirichlet Allocation method
-  to construct Fuzzy Clusters using Bayesian Inference.
+  to construct Mixed-Membership Clusters using Bayesian Inference.
   The \code{data} must be a non-empty data.frame with the binaries values
   Zero or Ones for each variable (column) in each observation (row).
 }
@@ -79,7 +79,7 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 \seealso{\code{\link{rlda.multinomial}}, \code{\link{rlda.binomial}} }
 
 \keyword{LDA}
-\keyword{Fuzzy}
+\keyword{Mixed-Membership}
 \keyword{Cluster}
 \keyword{Bernoulli}
 

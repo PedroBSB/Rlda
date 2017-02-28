@@ -4,6 +4,7 @@
 * Running under: Windows >= 8 x64 (build 9200)
 
 ## R CMD check results
-There were no ERRORs but some WARNINGS. 
+There were no ERRORs or WARNINGs. 
 
-
+## Downstream dependencies
+There are currently no downstream dependencies for this package.

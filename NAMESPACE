@@ -8,6 +8,6 @@ export(plot.rlda)
 export(summary.rlda)
 S3method("plot", "rlda")
 S3method("summary", "rlda")
-useDynLib(Rlda)
+useDynLib(Rlda, .registration = TRUE)
 
 

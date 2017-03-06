@@ -8,3 +8,15 @@ There were no ERRORs or WARNINGs.
 
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
+
+## Updates
+* Changed the description. Omited the redundant "The goal of this package is to" and rather started with "Describes ...."
+* **Correct the NOTES:**
+* checking package dependencies ... NOTE
+Package in Depends/Imports which should probably only be in LinkingTo: 'RcppArmadillo'
+* checking compiled code ... NOTE
+File 'Rlda/libs/i386/Rlda.dll':
+  Found no calls to: 'R_registerRoutines', 'R_useDynamicSymbols'
+File 'Rlda/libs/x64/Rlda.dll':
+  Found no calls to: 'R_registerRoutines', 'R_useDynamicSymbols'
+

@@ -1,5 +1,6 @@
 import(Rcpp)
 import(RcppProgress)
+import(gtools)
 importFrom("graphics", "boxplot", "par", "plot")
 export(rlda.bernoulli)
 export(rlda.multinomial)

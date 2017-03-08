@@ -182,7 +182,7 @@ summary.rlda <-function(object, ...){
   print(paste("Number of variables:", length(object$Species)))
 
   #Burn-in
-  i<- ceiling(x$n_gibbs*0.1)
+  i<- ceiling(object$n_gibbs*0.1)
 
   #Plot the box-plot Theta
   tmp<- colMeans(object$Theta[i:object$n_gibbs,])

@@ -180,6 +180,23 @@ summary.rlda <-function(object, ...){
   print(paste("Total number of gibbs sampling:", object$n_gibbs))
   print(paste("Number of clusters:", object$n_community))
   print(paste("Number of variables:", length(object$Species)))
+
+  #Burn-in
+  i<- ceiling(x$n_gibbs*0.1)
+
+  #Plot the box-plot Theta
+  tmp<- colMeans(object$Theta[i:object$n_gibbs,])
+  theta<- matrix(tmp,object$N,object$n_community)
+  colnames(theta)=paste(1:object$n_community,sep='')
+  boxplot(theta,main="Theta matrix")
+  par(ask=T)
+  #Plot the box-plot Phi
+  tmp<- colMeans(object$Phi[i:object$n_gibbs,])
+  phi<- matrix(tmp,object$n_community,length(object$Species))
+  rownames(phi)=paste(1:object$n_community,sep='')
+  colnames(phi)=object$Species
+
+  return(list("Theta"=theta,"Phi"=phi))
 }
 
 

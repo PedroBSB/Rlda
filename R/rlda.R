@@ -188,8 +188,6 @@ summary.rlda <-function(object, ...){
   tmp<- colMeans(object$Theta[i:object$n_gibbs,])
   theta<- matrix(tmp,object$N,object$n_community)
   colnames(theta)=paste(1:object$n_community,sep='')
-  boxplot(theta,main="Theta matrix")
-  par(ask=T)
   #Plot the box-plot Phi
   tmp<- colMeans(object$Phi[i:object$n_gibbs,])
   phi<- matrix(tmp,object$n_community,length(object$Species))

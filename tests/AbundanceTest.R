@@ -85,4 +85,4 @@ logLikeli<-res$logLikelihood
 #Plot the logLikelihood
 plot(logLikeli,type="l")
 
-summary(res)
+xx<-summary(res)

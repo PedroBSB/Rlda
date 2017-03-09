@@ -151,7 +151,7 @@ plot.rlda <- function(x, ...){
   #Burn-in
   i<- ceiling(x$n_gibbs*0.1)
   #Plot the log-likelihood
-  plot(x$logLikelihood[i:x$n_gibbs],type="l", main="Log-Likelihood")
+  plot(x$logLikelihood[i:x$n_gibbs],type="l",xlab="Gibbs iteration", ylab="Log-Likelihood",main="Log-Likelihood")
   par(ask=T)
   #Plot the box-plot Theta
   tmp<- colMeans(x$Theta[i:x$n_gibbs,])

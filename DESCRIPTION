@@ -3,7 +3,7 @@ Type: Package
 Title: Bayesian LDA for Mixed-Membership Clustering Analysis
 Version: 0.1.0
 Author: Pedro Albuquerque and Denis Valle and Daijiang Li
-Maintainer: Pedro Albuquerque <pedroa@unb.br> and Denis Valle <drvalle@ufl.edu>
+Maintainer: Pedro Albuquerque <pedroa@unb.br>
 Description: Describes the Bayesian LDA model for mixed-membership clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries).
 License: GPL-2
 LazyData: TRUE

@@ -364,7 +364,7 @@ arma::mat generateThetaRemote(arma::mat &vMatrix, arma::mat Omega,arma::mat Phi,
 /***************************************************************************************************************************/
 
 
-// [[Rcpp::export]]
+//''[[Rcpp::export]]
 List lda_remote(arma::mat remoteMat,arma::mat forestMat, List jumpList, int n_community, int maxBand, double gamma, double aOmega, double bOmega, double psi, int accept_output, int n_gibbs, bool display_progress=true) {
 
   //'Total number of locations

@@ -173,17 +173,15 @@ plot.rlda <- function(x, ...){
 #' @param object rlda object
 #' @param ... ignored
 #' @export
-summary.rlda <-function(object, ...){
+summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
   #Burn-in
   i<- ceiling(object$n_gibbs*0.1)
   seq<-i:object$n_gibbs
-  print(paste("Total number of gibbs sampling:", object$n_gibbs))
-  print(paste("Number of clusters:", object$n_community))
-  print(paste("Number of variables:", length(object$Species)))
-
-  #Burn-in
-  i<- ceiling(object$n_gibbs*0.1)
-
+  if(!silent){
+    print(paste("Total number of gibbs sampling:", object$n_gibbs,
+                "\nNumber of clusters:", object$n_community,
+                "\nNumber of variables:", length(object$Species)))
+  }
   #Plot the box-plot Theta
   tmp<- colMeans(object$Theta[i:object$n_gibbs,])
   theta<- matrix(tmp,object$N,object$n_community)

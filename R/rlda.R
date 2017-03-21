@@ -180,7 +180,7 @@ summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
   stopifnot(inherits(silent, "logical"))
 
   #Burn-in
-  i<- ceiling(object$n_gibbs*0.1)
+  i<- ceiling(object$n_gibbs*burnin)
   seq<-i:object$n_gibbs
   if(!silent){
     print(paste("Total number of gibbs sampling:", object$n_gibbs,

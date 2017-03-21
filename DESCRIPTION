@@ -4,7 +4,7 @@ Title: Bayesian LDA for Mixed-Membership Clustering Analysis
 Version: 0.1.0
 Author: Pedro Albuquerque and Denis Valle and Daijiang Li
 Maintainer: Pedro Albuquerque <pedroa@unb.br>
-Description: Describes the Bayesian LDA model for mixed-membership clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries).
+Description: Estimates the Bayesian LDA model for mixed-membership clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries).
 License: GPL-2
 LazyData: TRUE
 Depends: R (>= 2.10), Rcpp (>= 0.9.4), RcppProgress (>= 0.1)
@@ -17,6 +17,8 @@ Imports:
 SystemRequirements: GNU make
 Suggests:
     knitr,
-    rmarkdown
+    rmarkdown,
+    RColorBrewer,
+    reshape2
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr

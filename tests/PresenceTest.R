@@ -76,7 +76,3 @@ time.taken
 #Get the logLikelihood with Priors
 logLikeli<-res$logLikelihood
 
-#Plot the logLikelihood
-plot(logLikeli,type="l")
-
-tt<-res$Theta

@@ -6,7 +6,7 @@
 Takes a \code{rlda} object produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} and produces a summary from it.
 }
 \usage{
-  \method{summary}{rlda}(object,...)
+  \method{summary}{rlda}(object, burnin=0.1, silent=FALSE, ...)
 }
 \arguments{
   \item{object}{a \code{rlda} object as produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial}.}

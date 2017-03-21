@@ -8,7 +8,7 @@
 The \code{plot} function returns three plots based on Theta matrix, Phi matrix and log-likelihood. }
 
 \usage{
-  \S3method{plot}{rlda}(x,...)
+  \S3method{plot}{rlda}(x, burnin=0.1, ...)
 }
 
 \arguments{

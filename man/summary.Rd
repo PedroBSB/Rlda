@@ -10,6 +10,8 @@ Takes a \code{rlda} object produced by \code{rlda.binomial}, \code{rlda.bernoull
 }
 \arguments{
   \item{object}{a \code{rlda} object as produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial}.}
+  \item{burnin}{a percentual of burn-in observations must be a number between 0 and 1. The default value is \code{burnin=0.1}}
+  \item{silent}{a logical value specifying if the number of clusters, variables and gibbs interations must be printed. The default value is \code{silent=FALSE}}
   \item{...}{ other arguments may be useful.}
 }
 
@@ -42,11 +44,18 @@ Summarizes the Gibbs Samping results and arguments.
 
 \examples{
 \dontrun{
-if(requireNamespace("INLA", quietly = TRUE)){
-  require("INLA", quietly = TRUE)
-  data(Catheter)
-  res <- rlda(data = Catheter)
-  summary(res)
-  }
+#Load data
+data(presence)
+#Set seed
+set.seed(9842)
+#Hyperparameters for each prior distribution
+gamma <-0.01
+alpha0<-0.01
+alpha1<-0.01
+#Execute the LDA for the Binomial entry
+res<-rlda.bernoulli(presence, 10, alpha0, alpha1, gamma,
+                    5000, TRUE, FALSE)
+#Summary method
+Theta<-summary(res)$Theta
 }
 }

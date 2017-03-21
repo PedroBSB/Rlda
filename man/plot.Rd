@@ -13,7 +13,8 @@ The \code{plot} function returns three plots based on Theta matrix, Phi matrix a
 
 \arguments{
 
-  \item{x}{a \code{rlda} object created by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} function}
+  \item{x}{a \code{rlda} object created by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} function.}
+  \item{burnin}{a percentual of burn-in observations must be a number between 0 and 1. The default value is \code{burnin=0.1}.}
   \item{...}{ other arguments may be useful.}
 }
 
@@ -39,3 +40,21 @@ The \code{plot} function returns three plots based on Theta matrix, Phi matrix a
 \keyword{LDA}
 \keyword{Fuzzy}
 \keyword{Cluster}
+
+\examples{
+\dontrun{
+#Load data
+data(presence)
+#Set seed
+set.seed(9842)
+#Hyperparameters for each prior distribution
+gamma <-0.01
+alpha0<-0.01
+alpha1<-0.01
+#Execute the LDA for the Binomial entry
+res<-rlda.bernoulli(presence, 10, alpha0, alpha1, gamma,
+                    5000, TRUE, FALSE)
+#Plot the results
+plot(res)
+}
+}

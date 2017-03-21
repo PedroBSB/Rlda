@@ -147,9 +147,11 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
 #' @param x rlda object
 #' @param ... ignored
 #' @export
-plot.rlda <- function(x, ...){
+plot.rlda <- function(x, burnin=0.1, ...){
+  stopifnot(inherits(burnin, "numeric"))
+  stopifnot(!(burnin>1 || burnin<0))
   #Burn-in
-  i<- ceiling(x$n_gibbs*0.1)
+  i<- ceiling(x$n_gibbs*burnin)
   #Plot the log-likelihood
   plot(x$logLikelihood[i:x$n_gibbs],type="l",xlab="Gibbs iteration", ylab="Log-Likelihood",main="Log-Likelihood")
   par(ask=T)
@@ -176,14 +178,14 @@ plot.rlda <- function(x, ...){
 summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
   stopifnot(inherits(object, "rlda"))
   stopifnot(inherits(burnin, "numeric"))
-  stopifnot(burnin>1 || burnin<0)
+  stopifnot(!(burnin>1 || burnin<0))
   stopifnot(inherits(silent, "logical"))
 
   #Burn-in
   i<- ceiling(object$n_gibbs*burnin)
   seq<-i:object$n_gibbs
   if(!silent){
-    print(paste("Total number of gibbs sampling:", object$n_gibbs,
+    cat(paste("Total number of gibbs sampling:", object$n_gibbs,
                 "\nNumber of clusters:", object$n_community,
                 "\nNumber of variables:", length(object$Species)))
   }

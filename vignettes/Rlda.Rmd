@@ -1,0 +1,56 @@
+---
+title: "Bayesian LDA for mixed-membership clustering analysis."
+author: "Pedro Albuquerque, Denis Ribeiro do Valle and Daijiang Li"
+date: "`r Sys.Date()`"
+bibliography: bibliography.bib
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Introduction.
+The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to construct clusters of tags that represent the most common topics in blogs. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis, and the correlated topic model. The major limitation of LDA, as identified by these authors, was that the method does not consider relationship between topics as a mixed-membership clustering approach does [@erosheva2005bayesian]. Despite these limitations, however, LDA continues to be used in multiple disciplines. For instance, [@griffiths2004finding] used LDA to identify the main scientific topics in a large corpus of the Proceedings of the National Academy of Science articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. Finally, in finance, a stock market analysis system based on LDA was used to combine financial news items together with stock market data to identify and characterize major events that impact the market. This system was then used to make predictions regarding stock market behavior based on news items identified by LDA [@mahajan2008mining]. 
+
+## Vignette Info
+
+Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))

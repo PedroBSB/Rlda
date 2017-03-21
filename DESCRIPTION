@@ -1,7 +1,7 @@
 Package: Rlda
 Type: Package
 Title: Bayesian LDA for Mixed-Membership Clustering Analysis
-Version: 0.1.0
+Version: 0.1.1
 Author: Pedro Albuquerque and Denis Valle and Daijiang Li
 Maintainer: Pedro Albuquerque <pedroa@unb.br>
 Description: Estimates the Bayesian LDA model for mixed-membership clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries).

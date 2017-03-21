@@ -174,6 +174,11 @@ plot.rlda <- function(x, ...){
 #' @param ... ignored
 #' @export
 summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
+  stopifnot(inherits(object, "rlda"))
+  stopifnot(inherits(burnin, "numeric"))
+  stopifnot(burnin>1 || burnin<0)
+  stopifnot(inherits(silent, "logical"))
+
   #Burn-in
   i<- ceiling(object$n_gibbs*0.1)
   seq<-i:object$n_gibbs

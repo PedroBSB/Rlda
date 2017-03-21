@@ -9,15 +9,15 @@ There were no ERRORs or WARNINGs.
 ## Downstream dependencies
 There are currently no downstream dependencies for this package.
 
-## Updates
-* The Title field is the follow format: Bayesian LDA for Mixed-Membership Clustering Analysis.
-* Changed the description. Omited the redundant "The goal of this package is to" and rather started with "Describes ...."
-* **Corrected NOTES:**
-* checking package dependencies ... NOTE
-Package in Depends/Imports which should probably only be in LinkingTo: 'RcppArmadillo'
-* checking compiled code ... NOTE
-File 'Rlda/libs/i386/Rlda.dll':
-  Found no calls to: 'R_registerRoutines', 'R_useDynamicSymbols'
-File 'Rlda/libs/x64/Rlda.dll':
-  Found no calls to: 'R_registerRoutines', 'R_useDynamicSymbols'
+## Update
+* Update to the new version Rlda 0.1.1 .
 
+## News
+* Add Vignette manual.
+* Correct the complaints dataset manual.
+* Insert two more arguments inside the summary method: burn-in control and silient.
+* Update the summary manual.
+* Insert one more argument inside the plot method: burn-in control.
+* Update the plot manual.
+* Update DESCRIPTION file: correct description label, add suggested packages.
+* Create the NEWS file.

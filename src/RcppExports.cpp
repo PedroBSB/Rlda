@@ -23,23 +23,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// lda_covariate
-List lda_covariate(DataFrame data, DataFrame design, int n_community, NumericVector beta, int n_gibbs, bool ll_prior, bool display_progress);
-RcppExport SEXP Rlda_lda_covariate(SEXP dataSEXP, SEXP designSEXP, SEXP n_communitySEXP, SEXP betaSEXP, SEXP n_gibbsSEXP, SEXP ll_priorSEXP, SEXP display_progressSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< DataFrame >::type design(designSEXP);
-    Rcpp::traits::input_parameter< int >::type n_community(n_communitySEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< int >::type n_gibbs(n_gibbsSEXP);
-    Rcpp::traits::input_parameter< bool >::type ll_prior(ll_priorSEXP);
-    Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(lda_covariate(data, design, n_community, beta, n_gibbs, ll_prior, display_progress));
-    return rcpp_result_gen;
-END_RCPP
-}
 // lda_binomial
 List lda_binomial(DataFrame data, DataFrame pop, int n_community, double alpha0, double alpha1, double gamma, int n_gibbs, bool ll_prior, bool display_progress);
 RcppExport SEXP Rlda_lda_binomial(SEXP dataSEXP, SEXP popSEXP, SEXP n_communitySEXP, SEXP alpha0SEXP, SEXP alpha1SEXP, SEXP gammaSEXP, SEXP n_gibbsSEXP, SEXP ll_priorSEXP, SEXP display_progressSEXP) {
@@ -74,60 +57,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type ll_prior(ll_priorSEXP);
     Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
     rcpp_result_gen = Rcpp::wrap(lda_bernoulli(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rmvnorm
-arma::mat rmvnorm(unsigned int n, const arma::vec& mu, const arma::mat& S);
-RcppExport SEXP Rlda_rmvnorm(SEXP nSEXP, SEXP muSEXP, SEXP SSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< unsigned int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const arma::vec& >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(rmvnorm(n, mu, S));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rwishart
-arma::mat rwishart(unsigned int df, const arma::mat& S);
-RcppExport SEXP Rlda_rwishart(SEXP dfSEXP, SEXP SSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< unsigned int >::type df(dfSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(rwishart(df, S));
-    return rcpp_result_gen;
-END_RCPP
-}
-// riwishart
-arma::mat riwishart(unsigned int df, const arma::mat& S);
-RcppExport SEXP Rlda_riwishart(SEXP dfSEXP, SEXP SSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< unsigned int >::type df(dfSEXP);
-    Rcpp::traits::input_parameter< const arma::mat& >::type S(SSEXP);
-    rcpp_result_gen = Rcpp::wrap(riwishart(df, S));
-    return rcpp_result_gen;
-END_RCPP
-}
-// lda_bernoulli_sparseness
-List lda_bernoulli_sparseness(DataFrame data, int n_community, double alpha0, double alpha1, int n_gibbs, bool ll_prior, bool display_progress);
-RcppExport SEXP Rlda_lda_bernoulli_sparseness(SEXP dataSEXP, SEXP n_communitySEXP, SEXP alpha0SEXP, SEXP alpha1SEXP, SEXP n_gibbsSEXP, SEXP ll_priorSEXP, SEXP display_progressSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< DataFrame >::type data(dataSEXP);
-    Rcpp::traits::input_parameter< int >::type n_community(n_communitySEXP);
-    Rcpp::traits::input_parameter< double >::type alpha0(alpha0SEXP);
-    Rcpp::traits::input_parameter< double >::type alpha1(alpha1SEXP);
-    Rcpp::traits::input_parameter< int >::type n_gibbs(n_gibbsSEXP);
-    Rcpp::traits::input_parameter< bool >::type ll_prior(ll_priorSEXP);
-    Rcpp::traits::input_parameter< bool >::type display_progress(display_progressSEXP);
-    rcpp_result_gen = Rcpp::wrap(lda_bernoulli_sparseness(data, n_community, alpha0, alpha1, n_gibbs, ll_prior, display_progress));
     return rcpp_result_gen;
 END_RCPP
 }

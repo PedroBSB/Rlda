@@ -42,6 +42,10 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
   res$gamma<- gamma
   #Number of gibbs
   res$n_gibbs<- n_gibbs
+  #Species
+  res$colnames<-colnames(data)
+  #Locations
+  res$rownames<-rownames(data)
   #Create the class
   class(res) <- c("list", "rlda")
   return(res)
@@ -86,6 +90,10 @@ rlda.multinomial<-function(data, n_community, beta, gamma,
   res$gamma<- gamma
   #Number of gibbs
   res$n_gibbs<- n_gibbs
+  #Species
+  res$colnames<-colnames(data)
+  #Locations
+  res$rownames<-rownames(data)
   #Create the class
   class(res) <- c("list", "rlda")
   return(res)
@@ -137,6 +145,8 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
   res$gamma<- gamma
   #Number of gibbs
   res$n_gibbs<- n_gibbs
+  #Locations
+  res$rownames<-rownames(data)
   #Create the class
   class(res) <- c("list", "rlda")
   return(res)
@@ -158,15 +168,16 @@ plot.rlda <- function(x, burnin=0.1, ...){
   #Plot the box-plot Theta
   tmp<- colMeans(x$Theta[i:x$n_gibbs,])
   theta<- matrix(tmp,x$N,x$n_community)
-  colnames(theta)=paste(1:x$n_community,sep='')
-  boxplot(theta,main="Theta matrix")
+  colnames(theta)=paste("Cluster ", 1:x$n_community,sep='')
+  rownames(theta)=x$rownames
+  boxplot(theta,main="Theta matrix",  ylab="Probability")
   par(ask=T)
   #Plot the box-plot Phi
   tmp<- colMeans(x$Phi[i:x$n_gibbs,])
   phi<- matrix(tmp,x$n_community,length(x$Species))
-  rownames(phi)=paste(1:x$n_community,sep='')
+  rownames(phi)=paste("Cluster ", 1:x$n_community,sep='')
   colnames(phi)=x$Species
-  boxplot(phi,main="Phi matrix")
+  barplot(phi, main="Phi matrix", ylab="Probability", legend=rownames(phi))
   invisible(x)
 }
 
@@ -189,14 +200,15 @@ summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
                 "\nNumber of clusters:", object$n_community,
                 "\nNumber of variables:", length(object$Species)))
   }
-  #Plot the box-plot Theta
+  #Summary Theta
   tmp<- colMeans(object$Theta[i:object$n_gibbs,])
   theta<- matrix(tmp,object$N,object$n_community)
-  colnames(theta)=paste(1:object$n_community,sep='')
-  #Plot the box-plot Phi
+  colnames(theta)=paste("Cluster ", 1:object$n_community,sep='')
+  rownames(theta)=object$rownames
+  #Summary Phi
   tmp<- colMeans(object$Phi[i:object$n_gibbs,])
   phi<- matrix(tmp,object$n_community,length(object$Species))
-  rownames(phi)=paste(1:object$n_community,sep='')
+  rownames(phi)=paste("Cluster ", 1:object$n_community,sep='')
   colnames(phi)=object$Species
 
   return(list("Theta"=theta,"Phi"=phi))

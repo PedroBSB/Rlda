@@ -79,6 +79,10 @@ end.time <- Sys.time()
 time.taken <- end.time - start.time
 time.taken
 
+plot(res)
+
+
+
 #Get the logLikelihood with Priors
 logLikeli<-res$logLikelihood
 

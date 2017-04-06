@@ -5,6 +5,7 @@ Rlda is an R package that estimates the Bayesian LDA model for mixed-membership 
 Changes in version 0.1.1 2017-03-21
      + Add the Vignette manual.
      + Edit the complaints dataset manual.
+     + Create the Landsat TM 5 imagery from 2010 of the Iquitos-Nauta road in the Peruvian Amazon.
      + Insert two more arguments inside the summary method: burn-in control and silent. The burn-in argument specifies the percentual number of Gibbs iterations that must be burned out. The silent is a logical argument to suppress the summary message.
      + Insert one more argument inside the plot method: burn-in control. The burn-in argument specifies the percentual number of Gibbs iterations that must be burned out.
      + Create the predict.rlda function. Used only with rlda.binomial.

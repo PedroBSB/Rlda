@@ -223,6 +223,55 @@ summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
 }
 
 
+#' Predict the Bayesian LDA.
+#'
+#' @param object rlda object
+#' @param ... ignored
+#' @export
+predict.rlda <-function(object, data, nclus=5, ...){
+  stopifnot(inherits(object, "rlda"))
+  stopifnot(inherits(nclus, "numeric"))
+  stopifnot(nclus>0)
+
+
+  #Create a matrix with all possible combinations of proportions
+  seq1<- seq(from=0, to=1, by=0.05)
+  combo<- expand.grid(p1=seq1)
+  for(i in 2:(nclus-1)){
+    temp<- expand.grid(var=seq1)
+    colnames(temp)<-paste0("p",i)
+    combo<-merge(combo,temp)
+  }
+  cond<- apply(combo, 1, sum)<= 1
+  combo1<- combo[cond, ]
+  combo1[ ,paste0("p",nclus)]<- 1-apply(combo1, 1, sum)
+
+  #Calculate implied binomial probabilities
+  probs<- data.matrix(combo1)%*%data.matrix(t(phi1))
+  #Import the data for the desired region
+  dat1<- data
+  nbands<- length(object$Species)
+  #Let's change the range of our data to start at zero.
+  tmp<- apply(dat1,2,range)
+  dat2<- dat1-matrix(tmp[1,],nrow(dat1),nbands,byrow=T)
+  tmp<- apply(dat2,2,range)
+  max1<- tmp[2,]
+  max2<- matrix(max1,nrow(probs),length(max1),byrow=T)
+  #Find which proportion of communities  yield the highest probability
+  res<- matrix(NA,nrow(dat2),nclus)
+  for (i in 1:nrow(dat2)){
+   rasc<- matrix(dat2[i,],nrow(probs),ncol=ncol(dat2),byrow=T)
+   llikel<- dbinom(rasc,size=max2,prob=probs,log=T)
+   fim<- apply(llikel,1,sum)
+   ind<- which(fim==max(fim))
+   res[i,]<- as.numeric(combo1[ind,])
+  }
+  colnames(res)<- paste('prop',1:nclus,sep='')
+
+  return(res)
+}
+
+
 
 
 

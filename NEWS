@@ -7,5 +7,6 @@ Changes in version 0.1.1 2017-03-21
      + Edit the complaints dataset manual.
      + Insert two more arguments inside the summary method: burn-in control and silent. The burn-in argument specifies the percentual number of Gibbs iterations that must be burned out. The silent is a logical argument to suppress the summary message.
      + Insert one more argument inside the plot method: burn-in control. The burn-in argument specifies the percentual number of Gibbs iterations that must be burned out.
-     + Update the summary and plot manual with the new arguments.
+     + Create the predict.rlda function. Used only with rlda.binomial.
+     + Update the summary, predict and plot manual with the new arguments.
      + Update DESCRIPTION file: correct description label, add suggested packages.

@@ -6,9 +6,11 @@ export(rlda.bernoulli)
 export(rlda.multinomial)
 export(rlda.binomial)
 export(plot.rlda)
+export(predict.rlda)
 export(summary.rlda)
 S3method("plot", "rlda")
 S3method("summary", "rlda")
+S3method("predict", "rlda")
 useDynLib(Rlda, .registration = TRUE)
 
 

@@ -28,6 +28,8 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
   res <- lda_bernoulli(data, n_community,
             alpha0, alpha1, gamma,
             n_gibbs, ll_prior, display_progress)
+  #Type distribution
+  res$type<- "Bernoulli"
   #Number of communities
   res$n_community<- n_community
   #Sample size
@@ -78,6 +80,8 @@ rlda.multinomial<-function(data, n_community, beta, gamma,
   # Execute the LDA for the Multinomial entry
   res <- lda_multinomial(data, n_community, beta, gamma,
            n_gibbs, ll_prior, display_progress)
+  #Type distribution
+  res$type<- "Multinomial"
   #Number of communities
   res$n_community<- n_community
   #Sample size
@@ -131,6 +135,10 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
   # Execute the LDA for the Binomial entry
   res <- lda_binomial(data, pop, n_community,  alpha0 , alpha1, gamma,
                       n_gibbs, ll_prior, display_progress)
+  #Type distribution
+  res$type<- "Binomial"
+  #Maximum value
+  res$max<-max(pop)
   #Number of communities
   res$n_community<- n_community
   #Sample size

@@ -228,11 +228,12 @@ summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
 #' @param object rlda object
 #' @param ... ignored
 #' @export
-predict.rlda <-function(object, data, nclus=5, ...){
+predict.rlda <-function(object, data, nclus=5, burnin=0.1, ...){
   stopifnot(inherits(object, "rlda"))
   stopifnot(inherits(nclus, "numeric"))
   stopifnot(nclus>0)
-
+  stopifnot(inherits(burnin, "numeric"))
+  stopifnot(!(burnin>1 || burnin<0))
 
   #Create a matrix with all possible combinations of proportions
   seq1<- seq(from=0, to=1, by=0.05)
@@ -246,8 +247,11 @@ predict.rlda <-function(object, data, nclus=5, ...){
   combo1<- combo[cond, ]
   combo1[ ,paste0("p",nclus)]<- 1-apply(combo1, 1, sum)
 
+  #Matrix
+  summ<-summary(object,burnin,T)
+  theta<-summ$Theta
   #Calculate implied binomial probabilities
-  probs<- data.matrix(combo1)%*%data.matrix(t(phi1))
+  probs<- data.matrix(combo1)%*%data.matrix(t(theta))
   #Import the data for the desired region
   dat1<- data
   nbands<- length(object$Species)

@@ -228,10 +228,12 @@ summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
 #' @param object rlda object
 #' @param ... ignored
 #' @export
-predict.rlda <-function(object, data, nclus=5, burnin=0.1, ...){
+predict.rlda <-function(object, data, nclus=5, burnin=0.1, places.round=0, ...){
   stopifnot(inherits(object, "rlda"))
   stopifnot(inherits(nclus, "numeric"))
+  stopifnot(inherits(places.round, "numeric"))
   stopifnot(nclus>0)
+  stopifnot(places.round>=0)
   stopifnot(inherits(burnin, "numeric"))
   stopifnot(!(burnin>1 || burnin<0))
 
@@ -248,34 +250,59 @@ predict.rlda <-function(object, data, nclus=5, burnin=0.1, ...){
   combo1[ ,paste0("p",nclus)]<- 1-apply(combo1, 1, sum)
 
   #Matrix
-  summ<-summary(object,burnin,T)
-  theta<-summ$Theta
+  summ<-summary.rlda(object,burnin,T)
+  phi<-summ$Phi
   #Calculate implied binomial probabilities
-  probs<- data.matrix(combo1)%*%data.matrix(t(theta))
+  probs<- data.matrix(combo1)%*%data.matrix(phi)
+
   #Import the data for the desired region
-  dat1<- data
+  dat1<- data[,object$Species]
   nbands<- length(object$Species)
+
   #Let's change the range of our data to start at zero.
   tmp<- apply(dat1,2,range)
   dat2<- dat1-matrix(tmp[1,],nrow(dat1),nbands,byrow=T)
   tmp<- apply(dat2,2,range)
   max1<- tmp[2,]
   max2<- matrix(max1,nrow(probs),length(max1),byrow=T)
-  #Find which proportion of communities  yield the highest probability
-  res<- matrix(NA,nrow(dat2),nclus)
-  for (i in 1:nrow(dat2)){
-   rasc<- matrix(dat2[i,],nrow(probs),ncol=ncol(dat2),byrow=T)
-   llikel<- dbinom(rasc,size=max2,prob=probs,log=T)
-   fim<- apply(llikel,1,sum)
-   ind<- which(fim==max(fim))
-   res[i,]<- as.numeric(combo1[ind,])
+
+  #Divisor
+  div<-10^(places.round)
+  max2<-floor(max2/div)
+  dat2<-floor(dat2/div)
+  df_args <- c(as.data.frame(dat2), sep="")
+  dat1<-as.data.frame(dat1)
+  dat1$ID<-as.character(do.call(paste, df_args))
+  dat2<-unique(dat2)
+
+  ncl<-detectCores()
+  cl <- makeCluster(ncl)
+  registerDoParallel(cl)
+  #find which proportion of endmembers that yields the highest likelihood
+  res=matrix(NA,nrow(dat2),nclus)
+  res2 <- foreach(i=1:nrow(dat2), .combine=rbind) %dopar% {
+    #print(i)
+    rasc=matrix(as.integer(dat2[i,]),nrow=nrow(probs),ncol=ncol(dat2),byrow=T)
+    llikel=dbinom(rasc,size=max2,prob=probs,log=T)
+    fim=apply(llikel,1,sum)
+    ind=which(fim==max(fim))
+    data.frame(combo1[ind,])
   }
-  colnames(res)<- paste('prop',1:nclus,sep='')
+  colnames(res2)=paste('prop',1:nclus,sep='')
+  rownames(res2)=NULL
+  #Stop clusters
+  stopCluster(cl)
 
-  return(res)
+  #Convert to data.frame
+  dat2<-as.data.frame(dat2)
+  df_args <- c(dat2, sep="")
+  res2<-as.data.frame(res2)
+  res2$ID<-as.character(do.call(paste, df_args))
+
+  final<-merge(dat1,res2,by="ID",all=T)
+  final<- final[ , -which(names(final) %in% c("ID"))]
+  return(final)
 }
-
-
 
 
 

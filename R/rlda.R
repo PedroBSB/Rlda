@@ -271,22 +271,22 @@ predict.rlda <-function(object, data, nclus=5, burnin=0.1, places.round=0, ...){
   max2<-floor(max2/div)
   dat2<-floor(dat2/div)
   df_args <- c(as.data.frame(dat2), sep="")
-  dat1<-as.data.frame(dat1)
-  dat1$ID<-as.character(do.call(paste, df_args))
+  dat2full<-as.data.frame(dat2)
+  dat2full$ID<-as.character(do.call(paste, df_args))
+  dat2full$Sort<-seq(1,nrow(dat2full))
   dat2<-unique(dat2)
 
   ncl<-detectCores()
   cl <- makeCluster(ncl)
   registerDoParallel(cl)
   #find which proportion of endmembers that yields the highest likelihood
-  res=matrix(NA,nrow(dat2),nclus)
   res2 <- foreach(i=1:nrow(dat2), .combine=rbind) %dopar% {
     #print(i)
     rasc=matrix(as.integer(dat2[i,]),nrow=nrow(probs),ncol=ncol(dat2),byrow=T)
     llikel=dbinom(rasc,size=max2,prob=probs,log=T)
     fim=apply(llikel,1,sum)
     ind=which(fim==max(fim))
-    data.frame(combo1[ind,])
+    as.numeric(combo1[ind,])
   }
   colnames(res2)=paste('prop',1:nclus,sep='')
   rownames(res2)=NULL
@@ -298,9 +298,10 @@ predict.rlda <-function(object, data, nclus=5, burnin=0.1, places.round=0, ...){
   df_args <- c(dat2, sep="")
   res2<-as.data.frame(res2)
   res2$ID<-as.character(do.call(paste, df_args))
-
-  final<-merge(dat1,res2,by="ID",all=T)
+  final<-merge(dat2full,res2,by="ID",all=T)
   final<- final[ , -which(names(final) %in% c("ID"))]
+  final <- final[order(final$Sort),]
+  final<- final[, paste('prop',1:nclus,sep='')]
   return(final)
 }
 

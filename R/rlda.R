@@ -228,14 +228,22 @@ summary.rlda <-function(object, burnin=0.1, silent=FALSE, ...){
 #' @param object rlda object
 #' @param ... ignored
 #' @export
-predict.rlda <-function(object, data, nclus=5, burnin=0.1, places.round=0, ...){
+predict.rlda <-function(object, data, nclus=NA, burnin=0.1, places.round=0, ...){
   stopifnot(inherits(object, "rlda"))
   stopifnot(inherits(nclus, "numeric"))
   stopifnot(inherits(places.round, "numeric"))
-  stopifnot(nclus>0)
+  stopifnot(nclus>0 || is.na(nclus))
   stopifnot(places.round>=0)
   stopifnot(inherits(burnin, "numeric"))
   stopifnot(!(burnin>1 || burnin<0))
+
+  #Matrix
+  summ<-summary.rlda(object,burnin,T)
+  phi<-summ$Phi
+
+  if(is.na(nclus)){
+    nclus<-nrow(phi)
+  }
 
   #Create a matrix with all possible combinations of proportions
   seq1<- seq(from=0, to=1, by=0.05)
@@ -249,9 +257,7 @@ predict.rlda <-function(object, data, nclus=5, burnin=0.1, places.round=0, ...){
   combo1<- combo[cond, ]
   combo1[ ,paste0("p",nclus)]<- 1-apply(combo1, 1, sum)
 
-  #Matrix
-  summ<-summary.rlda(object,burnin,T)
-  phi<-summ$Phi
+
   #Calculate implied binomial probabilities
   probs<- data.matrix(combo1)%*%data.matrix(phi)
 

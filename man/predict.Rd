@@ -11,7 +11,7 @@ Takes a \code{rlda} object produced by \code{rlda.binomial} and produces a predi
 \arguments{
   \item{object}{a \code{rlda} object as produced by \code{rlda.binomial}}
   \item{data}{Dataset used to make the predictions. Must have the same number of columns as the dataset used in the \code{rlda.binomial}.}
-  \item{nclus}{Number of clusters to be used in the prediction. The default value is \code{nclus=5}}
+  \item{nclus}{Number of clusters to be used in the prediction. The default value is \code{nclus=NA}}
   \item{burnin}{a percentual of burn-in observations must be a number between 0 and 1. The default value is \code{burnin=0.1}}
   \item{places.round}{Number decimal places tob rounded. The default value is \code{places.round=0}}
   \item{...}{ other arguments may be useful.}

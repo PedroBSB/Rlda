@@ -6,7 +6,7 @@
 Takes a \code{rlda} object produced by \code{rlda.binomial} and produces a prediction from it.
 }
 \usage{
-  \method{predict}{rlda}(object, data, nclus=5, burnin=0.1, places.round=0, ...)
+  \method{predict}{rlda}(object, data, nclus=NA, burnin=0.1, places.round=0, ...)
 }
 \arguments{
   \item{object}{a \code{rlda} object as produced by \code{rlda.binomial}}

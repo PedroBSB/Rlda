@@ -65,5 +65,5 @@ Predicts the Gibbs Samping results and arguments.
 		n_gibbs = 500, ll_prior = TRUE, display_progress = TRUE)
 		#Predict
 		pred<- predict(res, sp500, nclus=3)
-}
+  }
 }

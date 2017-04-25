@@ -282,6 +282,10 @@ predict.rlda <-function(object, data, nclus=NA, burnin=0.1, places.round=0, ...)
   dat2full$Sort<-seq(1,nrow(dat2full))
   dat2<-unique(dat2)
 
+  #Keep the same scale
+  max2<-max2*div
+  dat2<-dat2*div
+
   ncl<- detectCores()
   cl <- makeCluster(ncl)
   registerDoParallel(cl)

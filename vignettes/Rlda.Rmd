@@ -1,4 +1,4 @@
-﻿---
+---
 title: "Bayesian LDA for mixed-membership clustering analysis."
 author: "Pedro Albuquerque, Denis Ribeiro do Valle and Daijiang Li"
 date: "`r Sys.Date()`"
@@ -13,7 +13,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-## Introduction.
+# Introduction.
 The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to construct clusters of tags that represent the most common topics in blogs. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis, and the correlated topic model. The major limitation of LDA, as identified by these authors, was that the method does not consider relationship between topics as a mixed-membership clustering approach does [@erosheva2005bayesian]. Despite these limitations, however, LDA continues to be used in multiple disciplines. For instance, [@griffiths2004finding] used LDA to identify the main scientific topics in a large corpus of the Proceedings of the National Academy of Science articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. Finally, in finance, a stock market analysis system based on LDA was used to combine financial news items together with stock market data to identify and characterize major events that impact the market. This system was then used to make predictions regarding stock market behavior based on news items identified by LDA [@mahajan2008mining]. 
 
 Despite its success in text mining across multiple fields, LDA is a model that need not be restricted to text-mining. More specifically, LDA can be viewed as a mixed membership models since each element in the sample can belong to more than one cluster (or state) simultaneously. There are a few examples of LDA being used for other purposes than text-mining. For instance, a modified version of LDA has been extensively used on genetic data to identify populations and admixed probabilities of individuals [@pritchard2000inference]. Similarly, LDA has been used in ecology to identify plant communities from tree data for the eastern United States and from a tropical forest chronosequence [@valle2014decomposing].
@@ -22,7 +22,7 @@ The aim of this paper is to present the **Rlda** package for mixed-membership cl
 
 This vignette is organized as follows. Section 2 and section 3 describe the mathematical formulation for the Bayesian LDA mixed-membership cluster model. Section 4 and 5 present examples of the use of the package and the conclusions, respectively.
 
-## Methods.
+# Methods.
 
 In the Bayesian LDA mixed-membership cluster model we postulate that each element is allocated to a single cluster, represented by a latent state variable. Specifically, consider a latent matrix $\mathbf{Z}$ with dimension equals to $L\times C$ where each row represents a sampling unit ($l=1,\dots,L$) and each column a possible state or cluster ($c=1,\dots,C$). The Data Generating Process postulated for this latent matrix is given by:
 
@@ -155,10 +155,10 @@ Finally, the FCD for $V_{lc}$ is given by:
 
 \noindent where $z_{l(c^{*}>c)}$ is the total number of elements in observation $l$ classified in clusters larger than $c$. This quantity is given by  $z_{l(c^{*}>c)}=\sum_{i=1}^{n_{l}}\sum_{c^{*}=c+1}^{C}I(w_{il}=c^{*})$.
 
-##Examples. 
+#Examples. 
 In this section we present some applications of our **Rlda** package for mixed-membership clustering in marketing and ecology.
 
-###Marketing.
+##Marketing.
 It is well known that attracting a new customer is often considerably costlier than keeping current customer [@kotler2006principles]. For this reason, firms can better retain their customers if they pay careful attention to their consumers' complaints and work to solve them in a satisfactory way. Therefore, our first application considers the classical LDA for a Multinomial entry in the field of Marketing. Specifically, we are interested in characterizing firms based on their consumers' complaints. 
 
 The data come from the 2015 [Consumer Complaint Database](http://catalog.data.gov/dataset/consumer-complaint-database) and consist of complaints received by the **Bureau of Consumer Financial Protection** in US regarding financial products and services. In this example, we work only with credit card complaints. This dataset contains information on the number of complaints for each firm ($L = 226$), categorized according to the specific type of issue ($S = 30$). Examples of issues include  billing disputes, identity theft / fraud, and unsolicited issuance of credit card. In this case, each sampling unit represents a firm and each variable represents an issue.
@@ -223,7 +223,7 @@ scatter3d(x=Theta[,'Cluster1'], y=Theta[,'Cluster2'], z=Theta[,'Cluster3'],
              labels=rownames(Theta), id.n=20)
 ```
 
-### Ecology.
+## Ecology.
 In many ecological studies, it is not possible to determine the total number of individuals per species in each sampling unit. As a result, these data are often presented as or summarized into binary presence/absence matrices (1 and 0, respectively) [@pearce2006modelling].
 
 In this example we used *data("presence")*, which includes presence/absence information on 13 species at 386 forested locations [@moisen2006predicting]. We analyze these data using the *rlda.bernoulli* S3 method.
@@ -256,15 +256,15 @@ stars(Phi,col.segments=myColor,scale=TRUE,
 ```
 
 
-## Conclusion.
+# Conclusion.
 The goal of this vignette was to describe the Bayesian LDA model for mixed membership clustering based on different types of discrete data. We  have demonstrated how to use the model for Multinomial entry in the Marketing example and Bernoulli trial using ecological data.
 
 One of the main properties of the model presented here is the fact that this model adopts the truncated stick-breaking prior which enables the selection of the optimal number of clusters by regularizing model results. The next step in the development of the model presented here is the possibility to work with explanatory variables within our algorithms, which can be useful to make inference on the drivers of the probability of each cluster.
 
-##Appendix.
+#Appendix.
 In this Appendix we provide the derivation for the  Full Conditional Distributions associated with each model. 
 
-###Bernoulli model.
+##Bernoulli model.
 For $W_{ls}$:
 
 $$p(W_{ls}=c^{*}|...)=k\times Cat(W_{ls}=c^{*}| \boldsymbol{\theta_{l}}) \times Bernoulli(y_{ls}|\phi_{c^{*}s})$$
@@ -290,7 +290,7 @@ $$p(\phi_{cs}|...)=Beta(q_{cs}^{(1)}+\alpha_0,q_{cs}^{(0)}+\alpha_1)$$
 
 \noindent where $q_{cs}^{(j)}=\sum_{l=1}^LI(w_{ls}=c,y_{ls}=j)$.
 
-###Binomial model.
+##Binomial model.
 For $W_{ils}$:
 $$p(W_{ils}=c^{*}|...)=k\times Cat(W_{ils}=c^{*}|\boldsymbol{\theta_{l}})\times Bernoulli(x_{ils}|\phi_{c^{*}s})$$
 $$=k\times\theta_{lc^{*}}\times\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}$$
@@ -314,7 +314,7 @@ $$\propto \phi_{cs}^{\sum_{l=1}^L \sum_{i=1}^{n_{ls}} I(w_{ils}=c,x_{ils}=1)+\al
 $$p(\phi_{cs}|...)=Beta(q_{cs}^{(1)}+\alpha_0,q_{cs}^{(0)}+\alpha_1)$$
 \noindent where $q_{cs}^{(j)}=\sum_{l=1}^L \sum_{i=1}^{n_{ls}} I(w_{ls}=c,y_{ls}=j)$.
 
-###Multinomial model.
+##Multinomial model.
 For $W_{il}$:
 
 $$p(W_{il}=c^*|...)=k\times Cat(W_{il}=c^*|\boldsymbol{\theta_l})\times Cat(x_{il}=s|\phi_{sc^*})$$
@@ -338,4 +338,4 @@ $$\phi_{1c}^{\sum_{l=1}^L \sum_{i=1}^{n_l} I(x_{il}=1,w_{li}=c) +\beta_1-1}\time
 $$p(\phi_c|...)= Dirichlet([q_{c1}+\beta_1,...,q_{cS}+\beta_S])$$
 \noindent where $q_{cs}=\sum_{i=1}^{n_l} I(x_{il}=s,w_{li}=c)$.
 
-## References.
+# References.

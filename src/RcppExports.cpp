@@ -60,3 +60,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// convertSBtoNormal
+NumericMatrix convertSBtoNormal(NumericMatrix vmat, int ncol, int nrow, NumericVector prod);
+RcppExport SEXP Rlda_convertSBtoNormal(SEXP vmatSEXP, SEXP ncolSEXP, SEXP nrowSEXP, SEXP prodSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type vmat(vmatSEXP);
+    Rcpp::traits::input_parameter< int >::type ncol(ncolSEXP);
+    Rcpp::traits::input_parameter< int >::type nrow(nrowSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type prod(prodSEXP);
+    rcpp_result_gen = Rcpp::wrap(convertSBtoNormal(vmat, ncol, nrow, prod));
+    return rcpp_result_gen;
+END_RCPP
+}
+// aggregatesum
+NumericVector aggregatesum(NumericVector Tobesum, int nind, int nobs, IntegerVector ind);
+RcppExport SEXP Rlda_aggregatesum(SEXP TobesumSEXP, SEXP nindSEXP, SEXP nobsSEXP, SEXP indSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type Tobesum(TobesumSEXP);
+    Rcpp::traits::input_parameter< int >::type nind(nindSEXP);
+    Rcpp::traits::input_parameter< int >::type nobs(nobsSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type ind(indSEXP);
+    rcpp_result_gen = Rcpp::wrap(aggregatesum(Tobesum, nind, nobs, ind));
+    return rcpp_result_gen;
+END_RCPP
+}

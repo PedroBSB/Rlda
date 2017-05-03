@@ -4,5 +4,6 @@ Rlda is an R package that estimates the Bayesian LDA model for mixed-membership 
 
 Changes in version 0.1.2 2017-05-29
      + Correct the Vignette manual.
-     + Add the LDA presence absence with stick-breaking priors
-
+     + Add the LDA presence absence with stick-breaking priors.
+     + Add the LDA for Remote Sensing data.
+     + Add Breeding Bird Survey data.

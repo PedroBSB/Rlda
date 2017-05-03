@@ -429,6 +429,247 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
   return(res)
 }
 
+
+#' @name rlda.binomialRemote
+#' @title Compute the Gibbs Sampling for LDA Binomial for Remote Sensing
+#' @description Compute the Gibbs Sampling for LDA Binomial
+#' @param DATA - DataFrame with Presence and Absecence (Binomial)
+#' @param POP - DataFrame with Population Size (Binomial)
+#' @param int n_community - Number of communities
+#' @param alpha0 - Hyperparameter Beta(alpha0,alpha1)
+#' @param alpha1 - Hyperparameter Beta(alpha0,alpha1)
+#' @param gamma - Hyperparameter  Beta(1,gamma)
+#' @param n_gibbs - Total number of Gibbs Samples
+#' @param ll_prior - Likelihood compute with Priors ?
+#' @param bool display_progress=true - Should I Show the progressBar ?
+#' @return Rlda object
+#' @export
+rlda.binomialRemote<-function(data, pop, n_community, alpha0 , alpha1, gamma,
+                        n_gibbs, ll_prior = TRUE, display_progress = TRUE){
+  #Create a stop point
+  stopifnot(inherits(data, "data.frame"))
+  stopifnot(inherits(pop, "data.frame"))
+  stopifnot(inherits(n_community, "numeric"))
+  stopifnot(inherits(alpha0, "numeric"))
+  stopifnot(inherits(alpha1, "numeric"))
+  stopifnot(inherits(gamma, "numeric") | is.na(gamma))
+  stopifnot(inherits(n_gibbs, "numeric"))
+  stopifnot(inherits(ll_prior, "logical"))
+  stopifnot(inherits(display_progress, "logical"))
+  if(nrow(data)!=nrow(pop)){
+    stop('Both "data" and "pop" must have the same number of rows.')
+  }
+
+  #Dictionary
+  a.omega<-alpha0
+  b.omega<-alpha1
+  nbands<-ncol(data)
+  ncommun<-n_community
+  nloc <- nrow(data)
+  ngibbs<- n_gibbs
+  ndig.values<-as.matrix(pop)
+  remote<-as.matrix(data)
+
+
+  ############################################################################################
+  fix.MH=function(lo,hi,old1,new1,jump){
+    jold=pnorm(hi,mean=old1,sd=jump)-pnorm(lo,mean=old1,sd=jump)
+    jnew=pnorm(hi,mean=new1,sd=jump)-pnorm(lo,mean=new1,sd=jump)
+    log(jold)-log(jnew) #add this to pnew
+  }
+  #----------------------------------------------------------------------------------------------
+  tnorm <- function(n,lo,hi,mu,sig){   #generates truncated normal variates based on cumulative normal distribution
+    #normal truncated lo and hi
+
+    if(length(lo) == 1 & length(mu) > 1)lo <- rep(lo,length(mu))
+    if(length(hi) == 1 & length(mu) > 1)hi <- rep(hi,length(mu))
+
+    q1 <- pnorm(lo,mu,sig) #cumulative distribution
+    q2 <- pnorm(hi,mu,sig) #cumulative distribution
+
+    z <- runif(n,q1,q2)
+    z <- qnorm(z,mu,sig)
+    z[z == -Inf]  <- lo[z == -Inf]
+    z[z == Inf]   <- hi[z == Inf]
+    z
+  }
+  #----------------------------------------------------------------------------------------------
+  acceptMH <- function(p0,p1,x0,x1,BLOCK){   #accept for M, M-H
+    # if BLOCK, then accept as a block,
+    # otherwise, accept individually
+
+    nz           <- length(x0)  #no. to accept
+    if(BLOCK) nz <- 1
+
+    a    <- exp(p1 - p0)       #acceptance PR
+    z    <- runif(nz,0,1)
+    keep <- which(z < a)
+
+    if(BLOCK & length(keep) > 0) x0 <- x1
+    if(!BLOCK)                   x0[keep] <- x1[keep]
+    accept <- length(keep)
+
+    list(x = x0, accept = accept)
+  }
+  #-------------------------------
+  print.adapt = function(accept1z,jump1z,accept.output){
+    accept1=accept1z; jump1=jump1z;
+
+    for (k in 1:length(accept1)){
+      z=accept1[[k]]/accept.output
+    }
+
+    for (k in 1:length(jump1)){
+      cond=(accept1[[k]]/accept.output)>0.4 & jump1[[k]]<100
+      jump1[[k]][cond] = jump1[[k]][cond]*2
+      cond=(accept1[[k]]/accept.output)<0.2 & jump1[[k]]>0.001
+      jump1[[k]][cond] = jump1[[k]][cond]*0.5
+      accept1[[k]][]=0
+    }
+
+    return(list(jump1=jump1,accept1=accept1))
+  }
+  #----------------------------------------------------
+  update.omega=function(param,jump,ncommun,nbands,ndig.values,a.omega,b.omega){
+    omega.orig=omega.old=param$omega
+    tmp=tnorm(nbands*ncommun,lo=0,hi=1,mu=omega.old,sig=jump)
+    novos=matrix(tmp,ncommun,nbands)
+
+    tmp=fix.MH(lo=0,hi=1,omega.old,novos,jump)
+    ajuste=matrix(tmp,ncommun,nbands)
+
+    prior.old=matrix(dbeta(omega.old,a.omega,b.omega,log=T),ncommun,nbands)
+    prior.new=matrix(dbeta(novos,a.omega,b.omega,log=T),ncommun,nbands)
+
+    for (i in 1:ncommun){
+      omega.new=omega.old
+      omega.new[i,]=novos[i,]
+
+      prob.old=param$theta%*%omega.old
+      llk.old=colSums(dbinom(remote,size=ndig.values,prob=prob.old,log=T))
+
+      prob.new=param$theta%*%omega.new
+      llk.new=colSums(dbinom(remote,size=ndig.values,prob=prob.new,log=T))
+
+      k=acceptMH(llk.old+prior.old[i,],
+                 llk.new+prior.new[i,]+ajuste[i,],
+                 omega.old[i,],omega.new[i,],F)
+      omega.old[i,]=k$x
+    }
+    list(omega=omega.old,accept=omega.old!=omega.orig)
+  }
+
+  update.theta=function(param,jump,ncommun,nloc,ndig.values){
+    v.orig=v.old=param$v
+    tmp=tnorm(nloc*(ncommun-1),lo=0,hi=1,mu=v.old[,-ncommun],sig=jump[,-ncommun])
+    novos=cbind(matrix(tmp,nloc,ncommun-1),1)
+    ajuste=matrix(fix.MH(lo=0,hi=1,v.old,novos,jump),nloc,ncommun)
+
+    prior.old=matrix(dbeta(v.old,1,param$gamma,log=T),nloc,ncommun)
+    prior.new=matrix(dbeta(novos,1,param$gamma,log=T),nloc,ncommun)
+
+    for (j in 1:(ncommun-1)){ #last column has to be 1
+      v.new=v.old
+      v.new[,j]=novos[,j]
+
+      theta.old=convertSBtoNormal(vmat=v.old,ncol=ncommun,nrow=nloc,prod=rep(1,nloc))
+      theta.new=convertSBtoNormal(vmat=v.new,ncol=ncommun,nrow=nloc,prod=rep(1,nloc))
+
+      #contribution from reflectance data
+      pold=theta.old%*%param$omega
+      pnew=theta.new%*%param$omega
+      p1.old=rowSums(dbinom(remote,size=ndig.values,pold,log=T))
+      p1.new=rowSums(dbinom(remote,size=ndig.values,pnew,log=T))
+
+      k=acceptMH(p1.old+prior.old[,j],
+                 p1.new+prior.new[,j]+ajuste[,j],
+                 v.old[,j],v.new[,j],F)
+      v.old[,j]=k$x
+    }
+    theta=convertSBtoNormal(vmat=v.old,ncol=ncommun,nrow=nloc,prod=rep(1,nloc))
+    list(theta=theta,v=v.old,accept=v.old!=v.orig)
+  }
+
+  ############################################################################################
+
+  #initial values
+  omega=matrix(runif(ncommun*nbands),ncommun,nbands)
+  theta=matrix(1/ncommun,nloc,ncommun)
+  v=theta
+  v[,ncommun]=1
+
+  #stuff for gibbs sampling
+  param=list(theta=theta,omega=omega,v=v,gamma=gamma)
+  vec.theta=matrix(NA,ngibbs,nloc*ncommun)
+  vec.omega=matrix(NA,ngibbs,ncommun*nbands)
+
+  #stuff for MH algorithm
+  jump1=list(omega=matrix(1,ncommun,nbands),
+             v=matrix(0.3,nloc,ncommun))
+  accept1=list(omega=matrix(0,ncommun,nbands),
+               v=matrix(0,nloc,ncommun))
+  accept.output=50
+
+  # create progress bar
+  if(display_progress) pb <- txtProgressBar(min = 0, max = ngibbs, style = 3)
+
+  for (i in 1:ngibbs){
+    tmp=update.theta(param,jump1$v,ncommun,nloc,ndig.values)
+    param$theta=tmp$theta #theta.true#
+    param$v=tmp$v
+    accept1$v=accept1$v+tmp$accept
+
+    tmp=update.omega(param,jump1$omega,ncommun,nbands,ndig.values,a.omega,b.omega)
+    param$omega=tmp$omega
+    accept1$omega=accept1$omega+tmp$accept
+
+    if (i%%accept.output==0 & i<1000){
+      k=print.adapt(accept1,jump1,accept.output)
+      accept1=k$accept1
+      jump1=k$jump1
+    }
+
+    vec.theta[i,]=param$theta
+    vec.omega[i,]=param$omega
+    #Progress Bar
+    if(display_progress) setTxtProgressBar(pb, i)
+  }
+  if(display_progress) close(pb)
+
+  vec.logl<-rep(0,nloc)
+
+  #Use a function not exported
+  # Execute the LDA for the Bernoulli entry
+  res <- list("Theta"=vec.theta,
+              "Phi"=vec.omega,
+              "logLikelihood"=vec.logl)
+
+  #Type distribution
+  res$type<- "Binomial"
+  #Maximum value
+  res$max<-max(pop)
+  #Number of communities
+  res$n_community<- n_community
+  #Sample size
+  res$N<- nrow(data)
+  #Covariates
+  res$Species<- colnames(data)
+  #Alpha0
+  res$alpha0<- alpha0
+  #Alpha1
+  res$alpha1<- alpha1
+  #Gamma
+  res$gamma<- gamma
+  #Number of gibbs
+  res$n_gibbs<- n_gibbs
+  #Locations
+  res$rownames<-rownames(data)
+  #Create the class
+  class(res) <- c("list", "rlda")
+  return(res)
+}
+
+
 #' Plot the Rlda object.
 #'
 #' @param x rlda object

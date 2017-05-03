@@ -3,7 +3,7 @@ title: "Bayesian LDA for mixed-membership clustering analysis."
 author: "Pedro Albuquerque, Denis Ribeiro do Valle and Daijiang Li"
 date: "`r Sys.Date()`"
 bibliography: bibliography.bib
-output: 
+output:
   rmarkdown::html_vignette:
     toc: true
     number_sections: true
@@ -14,11 +14,11 @@ vignette: >
 ---
 
 # Introduction.
-The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to construct clusters of tags that represent the most common topics in blogs. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis, and the correlated topic model. The major limitation of LDA, as identified by these authors, was that the method does not consider relationship between topics as a mixed-membership clustering approach does [@erosheva2005bayesian]. Despite these limitations, however, LDA continues to be used in multiple disciplines. For instance, [@griffiths2004finding] used LDA to identify the main scientific topics in a large corpus of the Proceedings of the National Academy of Science articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. Finally, in finance, a stock market analysis system based on LDA was used to combine financial news items together with stock market data to identify and characterize major events that impact the market. This system was then used to make predictions regarding stock market behavior based on news items identified by LDA [@mahajan2008mining]. 
+The Latent Dirichlet Allocation model (LDA), first proposed by @blei2003latent, has been extensively used for text-mining in multiple fields. @tsai2011tag used LDA to construct clusters of tags that represent the most common topics in blogs. @lee2010empirical compared LDA against three other text mining methods that are frequently used: latent semantic analysis, probabilistic latent semantic analysis, and the correlated topic model. The major limitation of LDA, as identified by these authors, was that the method does not consider relationship between topics as a mixed-membership clustering approach does [@erosheva2005bayesian]. Despite these limitations, however, LDA continues to be used in multiple disciplines. For instance, [@griffiths2004finding] used LDA to identify the main scientific topics in a large corpus of the Proceedings of the National Academy of Science articles.  In conservation biology, LDA has been used to identify research gaps in the conservation literature [@westgate2015text]. LDA has also been proposed as a promising method for the automatic annotation of remote sensing imagery [@lienou2010semantic]. In marketing, LDA has been used to extract information from product reviews across 15 firms in five markets over four years, enabling the identification of the most important latent dimensions of consumer decision making in each studied market [@tirunillai2014mining]. Finally, in finance, a stock market analysis system based on LDA was used to combine financial news items together with stock market data to identify and characterize major events that impact the market. This system was then used to make predictions regarding stock market behavior based on news items identified by LDA [@mahajan2008mining].
 
 Despite its success in text mining across multiple fields, LDA is a model that need not be restricted to text-mining. More specifically, LDA can be viewed as a mixed membership models since each element in the sample can belong to more than one cluster (or state) simultaneously. There are a few examples of LDA being used for other purposes than text-mining. For instance, a modified version of LDA has been extensively used on genetic data to identify populations and admixed probabilities of individuals [@pritchard2000inference]. Similarly, LDA has been used in ecology to identify plant communities from tree data for the eastern United States and from a tropical forest chronosequence [@valle2014decomposing].
 
-The aim of this paper is to present the **Rlda** package for mixed-membership clustering analysis and describe this novel Bayesian model based on different types of data (i.e., multinomial, Bernoulli and Binomial), illustrating its use in a diverse set of examples. The innovative features of this model are twofold. First generalizes LDA for other types of commonly encountered categorical data. Second it enables the selection of the optimal number of clusters based on a truncated stick-breaking prior approach regularizing model results. 
+The aim of this paper is to present the **Rlda** package for mixed-membership clustering analysis and describe this novel Bayesian model based on different types of data (i.e., multinomial, Bernoulli and Binomial), illustrating its use in a diverse set of examples. The innovative features of this model are twofold. First generalizes LDA for other types of commonly encountered categorical data. Second it enables the selection of the optimal number of clusters based on a truncated stick-breaking prior approach regularizing model results.
 
 This vignette is organized as follows. Section 2 and section 3 describe the mathematical formulation for the Bayesian LDA mixed-membership cluster model. Section 4 and 5 present examples of the use of the package and the conclusions, respectively.
 
@@ -48,7 +48,7 @@ In the second hierarchical level, we consider a matrix $\mathbf{Y}$ with dimensi
 Y_{ls}\sim Bernoulli(\boldsymbol\theta_{i}^{t}\boldsymbol\phi_{s})\\
 Y_{ls}\sim Binomial(n_{ls},\boldsymbol\theta_{i}^{t}\boldsymbol\phi_{s})
 		\label{eq:eq0003}
-\end{cases}		
+\end{cases}
 \end{equation}
 
 \noindent for $l=1,\dots,L$ and $s=1,\dots,S$ possible variables. $Y_{ls}$ represents a random variable, $\boldsymbol Y_{l\cdot}$ is a vector with these random variables for location $l$, $n_{l}$ is the total number of elements in sampling unit $l$, $n_{ls}$ is the total number of elements in sampling unit $l$ and variable $s$. In these models,  $\boldsymbol\phi_{s}=(\phi_{1s},\dots,\phi_{Cs})$ is a vector of parameters, while $\boldsymbol\Phi$ is a  $C\times S$ matrix of parameters, given by:
@@ -58,7 +58,7 @@ $$
     \phi_{11} & \phi_{12} & \dots  & \phi_{1S} \\
     \phi_{21} & \phi_{22} & \dots  & \phi_{2S} \\
     \vdots & \vdots  & \ddots & \vdots \\
-    \phi_{C1} & \phi_{C2} & \dots  & \phi_{CS} 
+    \phi_{C1} & \phi_{C2} & \dots  & \phi_{CS}
 \end{bmatrix}
 $$
 
@@ -68,7 +68,7 @@ These models are fit using Gibbs Sampling where parameter draws are iteratively 
 
 \begin{equation}
 \mathbb{E}[\mathbf{Y}_{L\times S}]=\mathbf{K}\circ[\Theta_{L\times C}\Phi_{C\times S}]
-	\label{eq:eq0004} 
+	\label{eq:eq0004}
 \end{equation}
 
 where $\mathbf{K}$ is a matrix of constants and $\circ$ is the Hadamard product. Sparseness is ensured by forcing large $c$ in the $\Theta_{L\times C}$ matrix to be close to zero. For the multinomial model, the $\mathbf{K}$ matrix contains the total number of elements in each row whereas for the Bernoulli model, this matrix is equal to the identity matrix. Finally, for the Binomial model, the $\mathbf{K}$ matrix has the total number of trials of each binomial distribution (i.e., $n_{ls}$). Although there are many ways matrices can be decomposed, the key characteristic of the form of matrix decomposition we choose is that each row of $\mathbf{\Theta}$ is comprised of probabilities that sum to one. As a result, one can interpret $\Phi_{C\times S}$ as the matrix that contain the "pure" features of the data, which are then mixed by the matrix $\Theta_{L\times C}$ and multiplied by $\mathbf{K}$ to generate the expected data.
@@ -76,13 +76,13 @@ where $\mathbf{K}$ is a matrix of constants and $\circ$ is the Hadamard product.
 ##Full Conditional Distributions - FCD.
 ###Bernoulli model.
 
-The probability of community membership status for each element $W_{ls}$, where $Z_{lc}=\sum_{s=1}^S I(W_{ls}=c)$, is given by: 
+The probability of community membership status for each element $W_{ls}$, where $Z_{lc}=\sum_{s=1}^S I(W_{ls}=c)$, is given by:
 
 \begin{equation}
 \begin{array}{lll}
 p(W_{ls}=c^{*}|...)&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{y_{ls}}(1-\phi_{c^{*}s})^{1-y_{ls}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{y_{ls}}(1-\phi_{cs})^{1-y_{ls}}}
 \end{array}
-\label{eq:eq0005} 
+\label{eq:eq0005}
 \end{equation}
 Therefore, $W_{ls}$ can be drawn from a categorical distribution. The FCD for $V_{lc}$ is given by:
 
@@ -105,7 +105,7 @@ For this model, we have $n_{ls}$ elements for each sampling unit $l$ and variabl
 \begin{array}{lll}
 p(W_{ils}=c^{*}|...)&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*}s})^{1-x_{ils}}}{\displaystyle\sum_{c=1}^{C}\theta_{lc}\phi_{cs}^{x_{ils}}(1-\phi_{cs})^{1-x_{ils}}}
 \end{array}
-\label{eq:eq0006} 
+\label{eq:eq0006}
 \end{equation}
 
 \noindent where $x_{ils}$ are binary random variables such that $\sum_{i=1}^{n_{ls}}x_{ils}=y_{ls}$. Therefore, $W_{ils}$ can be drawn from a multinomial distribution. The FCD for $\phi_{cs}$ is given by:
@@ -114,16 +114,16 @@ p(W_{ils}=c^{*}|...)&=&\frac{\theta_{lc^{*}}\phi_{c^{*}s}^{x_{ils}}(1-\phi_{c^{*
 \begin{array}{lll}
 p(\phi_{cs}|...)= Beta\left(\displaystyle q_{cs}^{(1)}+\alpha_{0},q_{cs}^{(0)}+\alpha_{1}\right)
 \end{array}
-\label{eq:eq0007} 
+\label{eq:eq0007}
 \end{equation}
 
 \noindent where, similar to the Bernoulli model,  $q_{cs}^{(j)}=\sum_{l=1}^{L} \sum_{i=1}^{n_{ls}}I(x_{ils}=j,w_{ils}=c)$.
 
-Finally, the FCD for $V_{lc}$ is given by: 
+Finally, the FCD for $V_{lc}$ is given by:
 
 \begin{equation}
 p\left(V_{lc}|...\right) = Beta(z_{lc}+1,z_{l(c^{*}>c)}+\gamma)
-	\label{eq:eq0008} 
+	\label{eq:eq0008}
 \end{equation}
 
 \noindent where $z_{lc}$ is the total number of elements in location $l$ classified into cluster $c$ and $z_{l(c^{*}>c)}$ is the total number of elements in location $l$ classified in clusters larger than $c$. This latter quantity is given by  $z_{l(c^{*}>c)}=\sum_{s=1}^{S}\sum_{i=1}^{n_{ls}}\sum_{c^{*}=c+1}^{C}I(w_{ils}=c^{*})$.
@@ -133,33 +133,33 @@ For the Multinomial case, if unit $i$ in location $l$ is associated with variabl
 
 \begin{equation}
 p(W_{il}=c^{*}|...)=\frac{\theta_{lc^{*}}\phi_{sc^{*}}}{\left(\theta_{1l}\phi_{s1}+\dots+\theta_{Cl}\phi_{sC}\right)}
-	\label{eq:eq0009} 
+	\label{eq:eq0009}
 \end{equation}
 
-In this equation, $W_{il}$ is the group assignment of element i in location l, such that $Z_{lc}=\sum_{i=1}^{n_l} {1} (W_{il}=c)$, and it can be sampled from a categorical distribution. Since we assumed a conjugate prior for $\boldsymbol\phi_{c}$ with $c\in\{1,\dots,C\}$, the Full Conditional Distribution for this vector of parameters is a straight-forward Dirichlet distribution: 
+In this equation, $W_{il}$ is the group assignment of element i in location l, such that $Z_{lc}=\sum_{i=1}^{n_l} {1} (W_{il}=c)$, and it can be sampled from a categorical distribution. Since we assumed a conjugate prior for $\boldsymbol\phi_{c}$ with $c\in\{1,\dots,C\}$, the Full Conditional Distribution for this vector of parameters is a straight-forward Dirichlet distribution:
 
 \begin{equation}
 p(\boldsymbol\phi_{c}|...)=Dirichlet([q_{c1}+\beta_{1},\dots,q_{cS}+\beta_{S}])
-	\label{eq:eq0010} 
+	\label{eq:eq0010}
 \end{equation}
 
 where $q_{cs}=\sum_{l=1}^{L}\sum_{i=1}^{n_{l}}I(w_{il}=c,x_{il}=s)$.
 
-Finally, the FCD for $V_{lc}$ is given by: 
+Finally, the FCD for $V_{lc}$ is given by:
 
 \begin{equation}
   p(V_{lc}|...)=Beta(z_{lc}+1,z_{l(c^{*}>c)} +\gamma)
-	\label{eq:eq0011} 
+	\label{eq:eq0011}
 \end{equation}
 
 
 \noindent where $z_{l(c^{*}>c)}$ is the total number of elements in observation $l$ classified in clusters larger than $c$. This quantity is given by  $z_{l(c^{*}>c)}=\sum_{i=1}^{n_{l}}\sum_{c^{*}=c+1}^{C}I(w_{il}=c^{*})$.
 
-#Examples. 
+#Examples.
 In this section we present some applications of our **Rlda** package for mixed-membership clustering in marketing and ecology.
 
 ##Marketing.
-It is well known that attracting a new customer is often considerably costlier than keeping current customer [@kotler2006principles]. For this reason, firms can better retain their customers if they pay careful attention to their consumers' complaints and work to solve them in a satisfactory way. Therefore, our first application considers the classical LDA for a Multinomial entry in the field of Marketing. Specifically, we are interested in characterizing firms based on their consumers' complaints. 
+It is well known that attracting a new customer is often considerably costlier than keeping current customer [@kotler2006principles]. For this reason, firms can better retain their customers if they pay careful attention to their consumers' complaints and work to solve them in a satisfactory way. Therefore, our first application considers the classical LDA for a Multinomial entry in the field of Marketing. Specifically, we are interested in characterizing firms based on their consumers' complaints.
 
 The data come from the 2015 [Consumer Complaint Database](http://catalog.data.gov/dataset/consumer-complaint-database) and consist of complaints received by the **Bureau of Consumer Financial Protection** in US regarding financial products and services. In this example, we work only with credit card complaints. This dataset contains information on the number of complaints for each firm ($L = 226$), categorized according to the specific type of issue ($S = 30$). Examples of issues include  billing disputes, identity theft / fraud, and unsolicited issuance of credit card. In this case, each sampling unit represents a firm and each variable represents an issue.
 
@@ -173,8 +173,8 @@ library(Rlda)
 data(complaints)
 #Create the abundance matrix
 library(reshape2)
-mat1<- dcast(complaints[ ,c("Company","Issue")], 
-       Company~Issue, length, 
+mat1<- dcast(complaints[ ,c("Company","Issue")],
+       Company~Issue, length,
        value.var="Issue")
 #Create the rowname
 rownames(mat1)<- mat1[,1]
@@ -262,7 +262,7 @@ The goal of this vignette was to describe the Bayesian LDA model for mixed membe
 One of the main properties of the model presented here is the fact that this model adopts the truncated stick-breaking prior which enables the selection of the optimal number of clusters by regularizing model results. The next step in the development of the model presented here is the possibility to work with explanatory variables within our algorithms, which can be useful to make inference on the drivers of the probability of each cluster.
 
 #Appendix.
-In this Appendix we provide the derivation for the  Full Conditional Distributions associated with each model. 
+In this Appendix we provide the derivation for the  Full Conditional Distributions associated with each model.
 
 ##Bernoulli model.
 For $W_{ls}$:

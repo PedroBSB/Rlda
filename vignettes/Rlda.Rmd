@@ -1,9 +1,12 @@
----
+﻿---
 title: "Bayesian LDA for mixed-membership clustering analysis."
 author: "Pedro Albuquerque, Denis Ribeiro do Valle and Daijiang Li"
 date: "`r Sys.Date()`"
 bibliography: bibliography.bib
-output: rmarkdown::html_vignette
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+    number_sections: true
 vignette: >
   %\VignetteIndexEntry{Bayesian LDA for mixed-membership clustering analysis.}
   %\VignetteEngine{knitr::rmarkdown}

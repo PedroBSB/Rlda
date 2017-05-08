@@ -170,7 +170,7 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
   #Sample size
   res$N<- nrow(data)
   #Covariates
-  res$Species<- nspp
+  res$Species<- seq(1,nspp)
   #Alpha0
   res$alpha0<- alpha0
   #Alpha1
@@ -441,9 +441,6 @@ plot.rlda <- function(x, burnin=0.1, ...){
   par(ask=T)
   #Plot the box-plot Phi
   tmp<- colMeans(x$Phi[i:x$n_gibbs,])
-  if(length(x$Species)==1){
-    x$Species<-seq(1,x$Species)
-  }
   phi<- matrix(tmp,x$n_community,length(x$Species))
   rownames(phi)=paste("Cluster ", 1:x$n_community,sep='')
   colnames(phi)=x$Species

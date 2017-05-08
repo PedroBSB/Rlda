@@ -72,7 +72,7 @@ set.seed(9292)
 #Estimate the parameters by Gibbs Sampling (Time difference of 20.28974 secs)
 start.time <- Sys.time()
 
-res<-rlda.multinomial(as.data.frame(FIA), 4, beta, NA, 100,  FALSE, TRUE)
+#res<-rlda.multinomial(as.data.frame(FIA), 4, beta, NA, 100,  FALSE, TRUE)
 #res<-lda_multinomial_burn(FIA, 4, beta, NA, 1000, 50,  FALSE, TRUE)
 
 end.time <- Sys.time()

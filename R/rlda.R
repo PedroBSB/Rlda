@@ -66,8 +66,8 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return Rlda object
 #' @export
-rlda.bernoulliSB<-function(data, n_community, alpha0, alpha1, gamma,
-                         n_gibbs, ll_prior = TRUE, display_progress = TRUE){
+rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
+                         n_gibbs, nadapt, ll_prior = TRUE, display_progress = TRUE){
   #Create a stop point
   stopifnot(inherits(data, "data.frame"))
   stopifnot(inherits(n_community, "numeric"))
@@ -79,159 +79,32 @@ rlda.bernoulliSB<-function(data, n_community, alpha0, alpha1, gamma,
   stopifnot(inherits(display_progress, "logical"))
 
   #Dictionary
+  dat<-data
   a.phi<-alpha0
   b.phi<-alpha1
-  loc.id<-seq(1,nrow(data))
   nspp<-ncol(data)
   ncomm<-n_community
   nloc <- nrow(data)
   y<-as.matrix(data)
   ngibbs<- n_gibbs
 
-  ############################################################################################
+  #initial values
+  #convert from a bunch of bernoulli to a single binomial per location
+  tmp=aggregate.data(dat)
+  y=tmp$dat
+  loc.id=tmp$loc.id
+  nspp=ncol(y)
+  nloc=length(unique(loc.id))
+  n=tmp$n
+  nmat=matrix(n,nloc,nspp)
 
-  print.adapt = function(accept1z,jump1z){
-    accept1=accept1z; jump1=jump1z;
-
-    for (k in 1:length(accept1)){
-      z=accept1[[k]]/accept.output
-    }
-
-    for (k in 1:length(jump1)){
-      cond=(accept1[[k]]/accept.output)>0.4 & jump1[[k]]<10000
-      jump1[[k]][cond] = jump1[[k]][cond]*2
-      cond=(accept1[[k]]/accept.output)<0.2 & jump1[[k]]>0.001
-      jump1[[k]][cond] = jump1[[k]][cond]*0.5
-      accept1[[k]][]=0
-    }
-
-    return(list(jump1=jump1,accept1=accept1))
-  }
-  #----------------------------
-  fix.MH=function(lo,hi,old1,new1,jump){
-    jold=pnorm(hi,mean=old1,sd=jump)-pnorm(lo,mean=old1,sd=jump)
-    jnew=pnorm(hi,mean=new1,sd=jump)-pnorm(lo,mean=new1,sd=jump)
-    log(jold)-log(jnew) #add this to pnew
-  }
-  #----------------------------------------------------------------------------------------------
-  tnorm <- function(n,lo,hi,mu,sig){   #generates truncated normal variates based on cumulative normal distribution
-    #normal truncated lo and hi
-
-    if(length(lo) == 1 & length(mu) > 1)lo <- rep(lo,length(mu))
-    if(length(hi) == 1 & length(mu) > 1)hi <- rep(hi,length(mu))
-
-    q1 <- pnorm(lo,mu,sig) #cumulative distribution
-    q2 <- pnorm(hi,mu,sig) #cumulative distribution
-
-    z <- runif(n,q1,q2)
-    z <- qnorm(z,mu,sig)
-    z[z == -Inf]  <- lo[z == -Inf]
-    z[z == Inf]   <- hi[z == Inf]
-    z
-  }
-  #----------------------------------------------------------------------------------------------
-  acceptMH <- function(p0,p1,x0,x1,BLOCK){   #accept for M, M-H
-    # if BLOCK, then accept as a block,
-    # otherwise, accept individually
-
-    nz           <- length(x0)  #no. to accept
-    if(BLOCK) nz <- 1
-
-    a    <- exp(p1 - p0)       #acceptance PR
-    z    <- runif(nz,0,1)
-    keep <- which(z < a)
-
-    if(BLOCK & length(keep) > 0) x0 <- x1
-    if(!BLOCK)                   x0[keep] <- x1[keep]
-    accept <- length(keep)
-
-    list(x = x0, accept = accept)
-  }
-  #-------------------------------
-  rmvnorm1=function (n, sigma, pre0.9_9994 = FALSE)
-  {
-    #   retval <- chol(sigma, pivot = TRUE)
-    #   o <- order(attr(retval, "pivot"))
-    #   retval <- retval[, o]
-    s. <- svd(sigma)
-    if (!all(s.$d >= -sqrt(.Machine$double.eps) * abs(s.$d[1]))) {
-      warning("sigma is numerically not positive definite")
-    }
-    R = t(s.$v %*% (t(s.$u) * sqrt(s.$d)))
-    retval <- matrix(rnorm(n * ncol(sigma)), nrow = n, byrow = !pre0.9_9994) %*% R
-    retval
-  }
-  #----------------------------
-  fix.probs=function(probs){
-    cond=probs<0.00001
-    probs[cond]=0.00001
-    cond=probs>0.99999
-    probs[cond]=0.99999
-    probs
-  }
-  #----------------------------
-  update.phi=function(param,jump){
-    phi.orig=phi.old=param$phi
-    proposed=matrix(tnorm(nspp*ncomm,lo=0,hi=1,mu=phi.old,sig=jump),ncomm,nspp)
-
-    for (i in 1:ncomm){
-      phi.new=phi.old
-      phi.new[i,]=proposed[i,]
-      adj=fix.MH(lo=0,hi=1,phi.old[i,],phi.new[i,],jump[i,])
-
-      prob.old=fix.probs(param$theta%*%phi.old)[loc.id,]
-      prob.new=fix.probs(param$theta%*%phi.new)[loc.id,]
-      pold=colSums(dbinom(y,size=1,prob=prob.old,log=T))+dbeta(phi.old[i,],a.phi,b.phi,log=T)
-      pnew=colSums(dbinom(y,size=1,prob=prob.new,log=T))+dbeta(phi.new[i,],a.phi,b.phi,log=T)
-      k=acceptMH(pold,pnew+adj,phi.old[i,],phi.new[i,],F)
-      phi.old[i,]=k$x
-    }
-    list(phi=phi.old,accept=phi.orig!=phi.old)
-  }
-  #-----------------------------
-  update.theta=function(param,jump){
-    v.orig=v.old=param$vmat
-    tmp=tnorm(nloc*(ncomm-1),lo=0,hi=1,mu=v.old[,-ncomm],sig=jump[,-ncomm])
-    novos=cbind(matrix(tmp,nloc,ncomm-1),1)
-    ajuste=matrix(fix.MH(lo=0,hi=1,v.old,novos,jump),nloc,ncomm)
-
-    prior.old=matrix(dbeta(v.old,1,gamma,log=T),nloc,ncomm)
-    prior.new=matrix(dbeta(novos,1,gamma,log=T),nloc,ncomm)
-
-    for (j in 1:(ncomm-1)){ #last column has to be 1
-      v.new=v.old
-      v.new[,j]=novos[,j]
-
-      theta.old=convertSBtoNormal(vmat=v.old,ncol=ncomm,nrow=nloc,prod=rep(1,nloc))
-      theta.new=convertSBtoNormal(vmat=v.new,ncol=ncomm,nrow=nloc,prod=rep(1,nloc))
-
-      #contribution from reflectance data
-      pold=fix.probs(theta.old%*%param$phi)[loc.id,]
-      pnew=fix.probs(theta.new%*%param$phi)[loc.id,]
-
-      k=rowSums(dbinom(y,size=1,prob=pold,log=T))
-      p1.old=aggregatesum(Tobesum=k, nind=nloc, nobs=length(k), ind=loc.id)
-
-      k=rowSums(dbinom(y,size=1,prob=pnew,log=T))
-      p1.new=aggregatesum(Tobesum=k, nind=nloc, nobs=length(k), ind=loc.id)
-
-      k=acceptMH(p1.old+prior.old[,j],
-                 p1.new+prior.new[,j]+ajuste[,j],
-                 v.old[,j],v.new[,j],F)
-      v.old[,j]=k$x
-    }
-    theta=convertSBtoNormal(vmat=v.old,ncol=ncomm,nrow=nloc,prod=rep(1,nloc))
-    list(theta=theta,v=v.old,accept=v.old!=v.orig)
-  }
-  ############################################################################################
   #initial values
   theta=matrix(1/ncomm,nloc,ncomm)
   vmat=theta
   vmat[,ncomm]=1
-  phi=matrix(colMeans(y),ncomm,nspp,byrow=T)
-  phi[phi==1]=0.99999
+  phi=matrix(0.2,ncomm,nspp,byrow=T)
 
-  #Initial Values Gibbs
+  #gibbs stuff
   vec.theta=matrix(0,ngibbs,nloc*ncomm)
   vec.phi=matrix(0,ngibbs,ncomm*nspp)
   vec.logl=matrix(NA,ngibbs,1)
@@ -248,34 +121,26 @@ rlda.bernoulliSB<-function(data, n_community, alpha0, alpha1, gamma,
   if(display_progress) pb <- txtProgressBar(min = 0, max = n_gibbs, style = 3)
   count=0
   for (i in 1:ngibbs){
-    tmp=update.phi(param,jump1$phi)
-    param$phi=tmp$phi #phi.true #
+    tmp=update.phiAbundanceSB(param=param,jump=jump1$phi,ncomm=ncomm,nspp=nspp,y=y,nmat=nmat,a.phi=a.phi,b.phi=b.phi)
+    param$phi=tmp$phi
     accept1$phi=accept1$phi+tmp$accept
 
-    tmp=update.theta(param,jump1$vmat)
+    tmp=update.thetaAbundanceSB(param=param,jump=jump1$vmat,nloc=nloc,ncomm=ncomm,y=y,nmat=nmat,gamma=gamma)
     param$theta=tmp$theta
     param$vmat=tmp$v
     accept1$vmat=accept1$vmat+tmp$accept
 
-    if (i%%accept.output==0 & i<1000){
-      k=print.adapt(accept1,jump1)
+    if (i%%accept.output==0 & i<nadapt){
+      k=print.adapt(accept1=accept1,jump1=jump1,accept.output=accept.output)
       accept1=k$accept1
       jump1=k$jump1
     }
 
     #to assess convergence, examine logl
-    prob=fix.probs(param$theta%*%param$phi)[loc.id,]
-    loglikel <- sum(dbinom(y,size=1,prob=prob,log=T))
-
-    #Numerical Correction
-    param$phi[param$phi==0]<- 1e-10
-    param$vmat[param$vmat==0]<- 1e-10
-
-
-    if(ll_prior){
-      loglikel <- sum(dbeta(param$phi,alpha0,alpha1,log=T))+
-        sum(dbeta(param$vmat[,-n_community],1,gamma,log=T))
-    }
+    prob=get.logl(theta=param$theta,phi=param$phi,y=y,nmat=nmat)
+    loglikel=sum(prob)+
+      sum(dbeta(param$phi,a.phi,b.phi,log=T))+
+      sum(dbeta(param$vmat[,-ncomm],1,gamma,log=T))
 
     vec.logl[i]=loglikel
     vec.theta[i,]=param$theta
@@ -470,128 +335,6 @@ rlda.binomialRemote<-function(data, pop, n_community, alpha0 , alpha1, gamma,
   ndig.values<-as.matrix(pop)
   remote<-as.matrix(data)
 
-
-  ############################################################################################
-  fix.MH=function(lo,hi,old1,new1,jump){
-    jold=pnorm(hi,mean=old1,sd=jump)-pnorm(lo,mean=old1,sd=jump)
-    jnew=pnorm(hi,mean=new1,sd=jump)-pnorm(lo,mean=new1,sd=jump)
-    log(jold)-log(jnew) #add this to pnew
-  }
-  #----------------------------------------------------------------------------------------------
-  tnorm <- function(n,lo,hi,mu,sig){   #generates truncated normal variates based on cumulative normal distribution
-    #normal truncated lo and hi
-
-    if(length(lo) == 1 & length(mu) > 1)lo <- rep(lo,length(mu))
-    if(length(hi) == 1 & length(mu) > 1)hi <- rep(hi,length(mu))
-
-    q1 <- pnorm(lo,mu,sig) #cumulative distribution
-    q2 <- pnorm(hi,mu,sig) #cumulative distribution
-
-    z <- runif(n,q1,q2)
-    z <- qnorm(z,mu,sig)
-    z[z == -Inf]  <- lo[z == -Inf]
-    z[z == Inf]   <- hi[z == Inf]
-    z
-  }
-  #----------------------------------------------------------------------------------------------
-  acceptMH <- function(p0,p1,x0,x1,BLOCK){   #accept for M, M-H
-    # if BLOCK, then accept as a block,
-    # otherwise, accept individually
-
-    nz           <- length(x0)  #no. to accept
-    if(BLOCK) nz <- 1
-
-    a    <- exp(p1 - p0)       #acceptance PR
-    z    <- runif(nz,0,1)
-    keep <- which(z < a)
-
-    if(BLOCK & length(keep) > 0) x0 <- x1
-    if(!BLOCK)                   x0[keep] <- x1[keep]
-    accept <- length(keep)
-
-    list(x = x0, accept = accept)
-  }
-  #-------------------------------
-  print.adapt = function(accept1z,jump1z,accept.output){
-    accept1=accept1z; jump1=jump1z;
-
-    for (k in 1:length(accept1)){
-      z=accept1[[k]]/accept.output
-    }
-
-    for (k in 1:length(jump1)){
-      cond=(accept1[[k]]/accept.output)>0.4 & jump1[[k]]<100
-      jump1[[k]][cond] = jump1[[k]][cond]*2
-      cond=(accept1[[k]]/accept.output)<0.2 & jump1[[k]]>0.001
-      jump1[[k]][cond] = jump1[[k]][cond]*0.5
-      accept1[[k]][]=0
-    }
-
-    return(list(jump1=jump1,accept1=accept1))
-  }
-  #----------------------------------------------------
-  update.omega=function(param,jump,ncommun,nbands,ndig.values,a.omega,b.omega){
-    omega.orig=omega.old=param$omega
-    tmp=tnorm(nbands*ncommun,lo=0,hi=1,mu=omega.old,sig=jump)
-    novos=matrix(tmp,ncommun,nbands)
-
-    tmp=fix.MH(lo=0,hi=1,omega.old,novos,jump)
-    ajuste=matrix(tmp,ncommun,nbands)
-
-    prior.old=matrix(dbeta(omega.old,a.omega,b.omega,log=T),ncommun,nbands)
-    prior.new=matrix(dbeta(novos,a.omega,b.omega,log=T),ncommun,nbands)
-
-    for (i in 1:ncommun){
-      omega.new=omega.old
-      omega.new[i,]=novos[i,]
-
-      prob.old=param$theta%*%omega.old
-      llk.old=colSums(dbinom(remote,size=ndig.values,prob=prob.old,log=T))
-
-      prob.new=param$theta%*%omega.new
-      llk.new=colSums(dbinom(remote,size=ndig.values,prob=prob.new,log=T))
-
-      k=acceptMH(llk.old+prior.old[i,],
-                 llk.new+prior.new[i,]+ajuste[i,],
-                 omega.old[i,],omega.new[i,],F)
-      omega.old[i,]=k$x
-    }
-    list(omega=omega.old,accept=omega.old!=omega.orig)
-  }
-
-  update.theta=function(param,jump,ncommun,nloc,ndig.values){
-    v.orig=v.old=param$v
-    tmp=tnorm(nloc*(ncommun-1),lo=0,hi=1,mu=v.old[,-ncommun],sig=jump[,-ncommun])
-    novos=cbind(matrix(tmp,nloc,ncommun-1),1)
-    ajuste=matrix(fix.MH(lo=0,hi=1,v.old,novos,jump),nloc,ncommun)
-
-    prior.old=matrix(dbeta(v.old,1,param$gamma,log=T),nloc,ncommun)
-    prior.new=matrix(dbeta(novos,1,param$gamma,log=T),nloc,ncommun)
-
-    for (j in 1:(ncommun-1)){ #last column has to be 1
-      v.new=v.old
-      v.new[,j]=novos[,j]
-
-      theta.old=convertSBtoNormal(vmat=v.old,ncol=ncommun,nrow=nloc,prod=rep(1,nloc))
-      theta.new=convertSBtoNormal(vmat=v.new,ncol=ncommun,nrow=nloc,prod=rep(1,nloc))
-
-      #contribution from reflectance data
-      pold=theta.old%*%param$omega
-      pnew=theta.new%*%param$omega
-      p1.old=rowSums(dbinom(remote,size=ndig.values,pold,log=T))
-      p1.new=rowSums(dbinom(remote,size=ndig.values,pnew,log=T))
-
-      k=acceptMH(p1.old+prior.old[,j],
-                 p1.new+prior.new[,j]+ajuste[,j],
-                 v.old[,j],v.new[,j],F)
-      v.old[,j]=k$x
-    }
-    theta=convertSBtoNormal(vmat=v.old,ncol=ncommun,nrow=nloc,prod=rep(1,nloc))
-    list(theta=theta,v=v.old,accept=v.old!=v.orig)
-  }
-
-  ############################################################################################
-
   #initial values
   omega=matrix(runif(ncommun*nbands),ncommun,nbands)
   theta=matrix(1/ncommun,nloc,ncommun)
@@ -614,17 +357,17 @@ rlda.binomialRemote<-function(data, pop, n_community, alpha0 , alpha1, gamma,
   if(display_progress) pb <- txtProgressBar(min = 0, max = ngibbs, style = 3)
 
   for (i in 1:ngibbs){
-    tmp=update.theta(param,jump1$v,ncommun,nloc,ndig.values)
-    param$theta=tmp$theta #theta.true#
+    tmp=update.thetaRemote(remote, param,jump1$v,ncommun,nloc,ndig.values)
+    param$theta=tmp$theta
     param$v=tmp$v
     accept1$v=accept1$v+tmp$accept
 
-    tmp=update.omega(param,jump1$omega,ncommun,nbands,ndig.values,a.omega,b.omega)
+    tmp=update.omegaRemote(remote, param,jump1$omega,ncommun,nbands,ndig.values,a.omega,b.omega)
     param$omega=tmp$omega
     accept1$omega=accept1$omega+tmp$accept
 
     if (i%%accept.output==0 & i<1000){
-      k=print.adapt(accept1,jump1,accept.output)
+      k=print.adapt(accept1,jump1,accept.output,FALSE)
       accept1=k$accept1
       jump1=k$jump1
     }

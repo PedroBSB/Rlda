@@ -7,20 +7,23 @@
   \code{rlda.bernoulliSB} works with binary data.frame.
 }
 \usage{
-  rlda.bernoulliSB(data, n_community, alpha0, alpha1, gamma,
-  n_gibbs, ll_prior = TRUE, display_progress = TRUE)
+  rlda.bernoulliSB(data, loc.id, n_community, alpha0, alpha1, gamma,
+  n_gibbs, nadapt, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{
   \item{data}{A binary data.frame where each row is a sampling unit
     (i.e. Plots, Locations, Time, etc.) and each column is a categorical
     type of element (i.e. Species, Firms, Issues, etc.). The elements inside
     this data.frame must be Zeros and Ones.}
+  \item{loc.id}{Vector column from data with the repeated locations for
+  Presence and Absence data.}
   \item{n_community}{Total number of communities to return. It must be less than
   the total number of columns inside the \code{data} data.frame.}
   \item{alpha0}{Hyperparameter associated with the Beta prior Beta(alpha0, alpha1).}
   \item{alpha1}{Hyperparameter associated with the Beta prior Beta(alpha0, alpha1).}
   \item{gamma}{Hyperparameter associated with the Stick-Breaking prior.}
   \item{n_gibbs}{Total number of Gibbs Samples.}
+  \item{nadapt}{Total number of Adaptations.}
   \item{ll_prior}{boolean scalar indicating \code{TRUE} if the log-likelihood
   must be computed using also the priors or \code{FALSE} otherwise.}
   \item{display_progress}{boolean scalar \code{TRUE} if the
@@ -95,9 +98,9 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 		alpha0 <- 0.01
 		alpha1 <- 0.01
 		# Execute the LDA for the Binomial entry
-		res <- rlda.bernoulliSB(data = presence, n_community = 10,
-		alpha0 = alpha0, alpha1 = alpha1, gamma = gamma,
-		n_gibbs = 5000,ll_prior = TRUE, display_progress = TRUE)
-	}
+		res <- rlda.bernoulliSB(data=obs1,loc.id=obs1$loc.id,
+		n_community=5, alpha0=0.01, alpha1=0.99, gamma=0.1,
+    n_gibbs=1000, nadapt=1000, ll_prior = TRUE, display_progress = TRUE)
+ 	}
 }
 

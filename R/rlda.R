@@ -106,6 +106,8 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
 
   #gibbs stuff
   vec.theta=matrix(0,ngibbs,nloc*ncomm)
+
+  #Remove the loc.id
   vec.phi=matrix(0,ngibbs,ncomm*nspp)
   vec.logl=matrix(NA,ngibbs,1)
   param=list(theta=theta,phi=phi,vmat=vmat)
@@ -138,12 +140,16 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
 
     #to assess convergence, examine logl
     prob=get.logl(theta=param$theta,phi=param$phi,y=y,nmat=nmat)
-    loglikel=sum(prob)+
-      sum(dbeta(param$phi,a.phi,b.phi,log=T))+
-      sum(dbeta(param$vmat[,-ncomm],1,gamma,log=T))
+    loglikel=sum(prob)
+    if(ll_prior){
+      loglikel=loglikel+sum(dbeta(param$phi,a.phi,b.phi,log=T))+
+        sum(dbeta(param$vmat[,-ncomm],1,gamma,log=T))
+    }
 
     vec.logl[i]=loglikel
     vec.theta[i,]=param$theta
+
+    #Remove the loc.id
     vec.phi[i,]=param$phi
 
     #Progress Bar
@@ -164,7 +170,7 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
   #Sample size
   res$N<- nrow(data)
   #Covariates
-  res$Species<- colnames(data)
+  res$Species<- nspp
   #Alpha0
   res$alpha0<- alpha0
   #Alpha1
@@ -435,6 +441,9 @@ plot.rlda <- function(x, burnin=0.1, ...){
   par(ask=T)
   #Plot the box-plot Phi
   tmp<- colMeans(x$Phi[i:x$n_gibbs,])
+  if(length(x$Species)==1){
+    x$Species<-seq(1,x$Species)
+  }
   phi<- matrix(tmp,x$n_community,length(x$Species))
   rownames(phi)=paste("Cluster ", 1:x$n_community,sep='')
   colnames(phi)=x$Species

@@ -30,19 +30,19 @@ for (i in 1:ncommun){
 theta=theta/matrix(apply(theta,1,sum),nloc,ncommun)
 theta.true=theta
 
-plot(NA,NA,xlim=c(0,nloc),ylim=c(0,1))
-for (i in 1:ncommun) lines(1:nloc,theta[,i],col=i)
+#plot(NA,NA,xlim=c(0,nloc),ylim=c(0,1))
+#for (i in 1:ncommun) lines(1:nloc,theta[,i],col=i)
 
 #generate phi's
 makesparse=matrix(rbinom(ncommun*nspp,size=1,prob=0.3),ncommun,nspp)
 phi.true=phi=matrix(runif(ncommun*nspp,min=0.5,max=1),ncommun,nspp)*makesparse
 
-par(mfrow=c(3,2),mar=rep(1,4))
-for (i in 1:ncommun) plot(phi[i,],type='h',ylim=c(0,1))
+#par(mfrow=c(3,2),mar=rep(1,4))
+#for (i in 1:ncommun) plot(phi[i,],type='h',ylim=c(0,1))
 
 #generate data
 probs=theta%*%phi
-hist(probs)
+#hist(probs)
 probs1=probs[loc.id,]
 
 #number of observations per location
@@ -52,5 +52,20 @@ obs1=cbind(obs,loc.id)
 colnames(obs1)[ncol(obs1)]='loc.id'
 
 obs1<-data.frame(obs1)
-#teste<- rlda.bernoulliSB(data=obs1,loc.id=obs1$loc.id, n_community=5, alpha0=0.01, alpha1=0.99, gamma=0.1,
-#                           n_gibbs=1000, nadapt=1000, ll_prior = TRUE, display_progress = TRUE)
+
+
+#data=obs1
+#loc.id=obs1$loc.id
+#n_community=5
+#alpha0=0.01
+#alpha1=0.99
+#gamma=0.1
+#n_gibbs=1000
+#nadapt=1000
+#ll_prior = TRUE
+#display_progress = TRUE
+#Rcpp::sourceCpp("src/Utils.cpp")
+
+
+teste<- rlda.bernoulliSB(data=obs1,loc.id=obs1$loc.id, n_community=5, alpha0=0.01, alpha1=0.99, gamma=0.1,
+n_gibbs=1000, nadapt=1000, ll_prior = TRUE, display_progress = TRUE)

@@ -50,16 +50,16 @@ image(remote)
 pop<-as.data.frame(matrix(256,ncol=ncol(remote),nrow=nrow(remote)))
 remote<-as.data.frame(remote)
 
-data=remote
-pop=pop
-n_community=10
-alpha0=1
-alpha1=1
-gamma=0.01
-n_gibbs=1000
-ll_prior = TRUE
-display_progress = TRUE
-Rcpp::sourceCpp("src/Utils.cpp")
+#data=remote
+#pop=pop
+#n_community=10
+#alpha0=1
+#alpha1=1
+#gamma=0.01
+#n_gibbs=1000
+#ll_prior = TRUE
+#display_progress = TRUE
+#Rcpp::sourceCpp("src/Utils.cpp")
 
 #teste<- rlda.binomialRemote(data=remote, pop=pop, n_community=10, alpha0=1 , alpha1=1, gamma=0.01,
 #                              n_gibbs=1000, ll_prior = TRUE, display_progress = TRUE)

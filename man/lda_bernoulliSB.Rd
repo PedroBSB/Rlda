@@ -97,8 +97,8 @@ sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} a
 		gamma <- 0.01
 		alpha0 <- 0.01
 		alpha1 <- 0.01
-		# Execute the LDA for the Binomial entry
-		res <- rlda.bernoulliSB(data=obs1,loc.id=obs1$loc.id,
+		# Execute the LDA for the Bernoulli entry
+		res <- rlda.bernoulliSB(data=presence,loc.id=seq(1,nrow(presence)),
 		n_community=5, alpha0=0.01, alpha1=0.99, gamma=0.1,
     n_gibbs=1000, nadapt=1000, ll_prior = TRUE, display_progress = TRUE)
  	}

@@ -33,7 +33,7 @@
       A R List with three elements:
   \item{Theta}{The individual probability for each observation
   (ex: location) belong in each cluster (ex: community). It is a matrix
-  with dimension equal \code{n_gibbs} by \code{nrow(data) * n_community}}
+  with dimension equal \code{n_gibbs} by \code{length(unique(loc.id)) * n_community}}
   \item{Phi}{The individual probability for each variable
   (ex: Specie) belong in each cluster (ex: community). It is a matrix
   with dimension equal \code{n_gibbs} by \code{ncol(data) * n_community}}
@@ -47,7 +47,7 @@
   Zero or Ones for each variable (column) in each observation (row).
 }
 \note{The \code{Theta} and \code{Phi} matrix can be obtained for the i-th gibbs
-sampling using \code{matrix(Theta[i,], nrow = nrow(data), ncol = n_community)} and
+sampling using \code{matrix(Theta[i,], nrow = length(unique(loc.id)), ncol = n_community)} and
 \code{matrix(Phi[i,], nrow = n_community, ncol = ncol(data))}, respectively.}
 \references{
   \itemize{

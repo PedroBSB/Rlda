@@ -168,7 +168,7 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
   #Number of communities
   res$n_community<- n_community
   #Sample size
-  res$N<- nrow(data)
+  res$N<- (vec.theta[n_gibbs,]/ncomm)
   #Covariates
   res$Species<- seq(1,nspp)
   #Alpha0
@@ -182,7 +182,7 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
   #Species
   res$colnames<-colnames(data)
   #Locations
-  res$rownames<-rownames(data)
+  res$rownames<-unique(loc.id)
   #Create the class
   class(res) <- c("list", "rlda")
   return(res)

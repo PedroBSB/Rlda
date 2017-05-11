@@ -10,14 +10,10 @@ There were no ERRORs or WARNINGs.
 There are currently no downstream dependencies for this package.
 
 ## Update
-* Update to the new version Rlda 0.1.1 .
+* Update to the new version Rlda 0.1.2.
 
 ## News
-* Add Vignette manual.
-* Correct the complaints dataset manual.
-* Insert two more arguments inside the summary method: burn-in control and silient.
-* Update the summary manual.
-* Insert one more argument inside the plot method: burn-in control.
-* Update the plot manual.
-* Update DESCRIPTION file: correct description label, add suggested packages.
-* Create the NEWS file.
+* Correct Vignette manual format.
+* Add new datasets birds and fishnet.
+* Add two more functions rlda.binomialRemote and rlda.bernoulliSB.
+

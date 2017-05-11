@@ -17,9 +17,11 @@ Imports:
     parallel
 SystemRequirements: GNU make
 Suggests:
+    R.rsp,
     knitr,
+    MCMCpack,
     rmarkdown,
     RColorBrewer,
     reshape2
 RoxygenNote: 6.0.1
-VignetteBuilder: knitr
+VignetteBuilder: R.rsp

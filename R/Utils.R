@@ -38,8 +38,8 @@ acceptMH <- function(p0,p1,x0,x1,BLOCK){   #accept for M, M-H
   list(x = x0, accept = accept)
 }
 #-------------------------------
-print.adapt = function(accept1z,jump1z,accept.output,printBool=FALSE){
-  accept1=accept1z; jump1=jump1z;
+print.adapt = function(parmAccept,parmJump,accept.output,printBool=FALSE){
+  accept1=parmAccept; jump1=parmJump;
 
   for (k in 1:length(accept1)){
     z=accept1[[k]]/accept.output

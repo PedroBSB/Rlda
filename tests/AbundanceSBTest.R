@@ -67,5 +67,5 @@ obs1<-data.frame(obs1)
 #Rcpp::sourceCpp("src/Utils.cpp")
 
 
-teste<- rlda.bernoulliSB(data=obs1,loc.id=obs1$loc.id, n_community=5, alpha0=0.01, alpha1=0.99, gamma=0.1,
-n_gibbs=1000, nadapt=1000, ll_prior = TRUE, display_progress = TRUE)
+#teste<- rlda.bernoulliSB(data=obs1,loc.id=obs1$loc.id, n_community=5, alpha0=0.01, alpha1=0.99, gamma=0.1,
+#n_gibbs=1000, nadapt=1000, ll_prior = TRUE, display_progress = TRUE)

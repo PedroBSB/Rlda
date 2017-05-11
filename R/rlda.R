@@ -133,7 +133,7 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
     accept1$vmat=accept1$vmat+tmp$accept
 
     if (i%%accept.output==0 & i<nadapt){
-      k=print.adapt(accept1=accept1,jump1=jump1,accept.output=accept.output)
+      k=print.adapt(parmAccept=accept1,parmJump=jump1,accept.output=accept.output)
       accept1=k$accept1
       jump1=k$jump1
     }
@@ -373,7 +373,7 @@ rlda.binomialRemote<-function(data, pop, n_community, alpha0 , alpha1, gamma,
     accept1$omega=accept1$omega+tmp$accept
 
     if (i%%accept.output==0 & i<1000){
-      k=print.adapt(accept1,jump1,accept.output,FALSE)
+      k=print.adapt(parmAccept=accept1,parmJump=jump1,accept.output=accept.output,FALSE)
       accept1=k$accept1
       jump1=k$jump1
     }

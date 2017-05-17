@@ -13,7 +13,9 @@ There are currently no downstream dependencies for this package.
 * Update to the new version Rlda 0.1.2.
 
 ## News
-* Correct Vignette manual format.
+* Correct Vignette manual format. Using Latex and R.rsp.
+* Need the GhostScript Sys.setenv(R_GSCMD = "C:\\Program Files\\gs\\gs9.21\\bin\\gswin64c.exe")
 * Add new datasets birds and fishnet.
 * Add two more functions rlda.binomialRemote and rlda.bernoulliSB.
+
 

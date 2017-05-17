@@ -53,7 +53,7 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
   return(res)
 }
 
-#' @name rlda.bernoulliSB
+#' @name rlda.bernoulliMH
 #' @title Gibbs Sampling for LDA Presence and Absence with  Stick-Breaking Priors
 #' @description Compute the Gibbs Sampling for LDA Presence and Absence with Stick-Breaking Priors
 #' @param data - DataFrame with Presence and Absecence (Zeros and Ones)
@@ -66,7 +66,7 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return Rlda object
 #' @export
-rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
+rlda.bernoulliMH<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
                          n_gibbs, nadapt, ll_prior = TRUE, display_progress = TRUE){
   #Create a stop point
   stopifnot(inherits(data, "data.frame"))
@@ -301,7 +301,7 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
 }
 
 
-#' @name rlda.binomialRemote
+#' @name rlda.binomialMH
 #' @title Compute the Gibbs Sampling for LDA Binomial for Remote Sensing
 #' @description Compute the Gibbs Sampling for LDA Binomial
 #' @param DATA - DataFrame with Presence and Absecence (Binomial)
@@ -315,7 +315,7 @@ rlda.binomial<-function(data, pop, n_community, alpha0 , alpha1, gamma,
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return Rlda object
 #' @export
-rlda.binomialRemote<-function(data, pop, n_community, alpha0 , alpha1, gamma,
+rlda.binomialMH<-function(data, pop, n_community, alpha0 , alpha1, gamma,
                         n_gibbs, ll_prior = TRUE, display_progress = TRUE){
   #Create a stop point
   stopifnot(inherits(data, "data.frame"))

@@ -168,7 +168,7 @@ rlda.bernoulliSB<-function(data, loc.id, n_community, alpha0, alpha1, gamma,
   #Number of communities
   res$n_community<- n_community
   #Sample size
-  res$N<- (vec.theta[n_gibbs,]/ncomm)
+  res$N<- (length(vec.theta[n_gibbs,])/ncomm)
   #Covariates
   res$Species<- seq(1,nspp)
   #Alpha0

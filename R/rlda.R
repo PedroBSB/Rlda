@@ -54,7 +54,7 @@ rlda.bernoulli<-function(data, n_community, alpha0, alpha1, gamma,
 }
 
 #' @name rlda.bernoulliMH
-#' @title Gibbs Sampling for LDA Presence and Absence with  Stick-Breaking Priors
+#' @title Gibbs Sampling for LDA Presence and Absence with Metropolis-Hasting
 #' @description Compute the Gibbs Sampling for LDA Presence and Absence with Stick-Breaking Priors
 #' @param data - DataFrame with Presence and Absecence (Zeros and Ones)
 #' @param n_community - Number of communities

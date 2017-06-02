@@ -8,13 +8,14 @@
 The \code{plot} function returns three plots based on Theta matrix, Phi matrix and log-likelihood. }
 
 \usage{
-  \S3method{plot}{rlda}(x, burnin=0.1, ...)
+  \S3method{plot}{rlda}(x, burnin=0.1, maxCluster=NA, ...)
 }
 
 \arguments{
 
   \item{x}{a \code{rlda} object created by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} function.}
   \item{burnin}{a percentual of burn-in observations must be a number between 0 and 1. The default value is \code{burnin=0.1}.}
+  \item{maxCluster}{The maximum number of cluster to be shown. The default value is \code{maxCluster=NA} which represents all clusters must be shown.}
   \item{...}{ other arguments may be useful.}
 }
 

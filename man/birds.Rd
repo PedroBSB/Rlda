@@ -397,7 +397,7 @@ This dataset is a subset of the Breeding Bird Survey.
     \item{\code{aou5860}}{Bird specie 5860 presence (1) or absence (0)}
   }
 }
-\source{\url{https://www.pwrc.usgs.gov/bbs/RawData/}}
+\source{Pardieck, K.L., D.J. Ziolkowski Jr., M. Lutmerding, K. Campbell and M.-A.R. Hudson. 2017. North American Breeding Bird Survey Dataset 1966 - 2016, version 2016.0. U.S. Geological Survey, Patuxent Wildlife Research Center. \url{https://www.pwrc.usgs.gov/bbs/RawData/}doi:10.5066/F7W0944J.}
 \examples{
 data(birds)
 }

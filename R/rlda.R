@@ -424,7 +424,7 @@ rlda.binomialMH<-function(data, pop, n_community, alpha0 , alpha1, gamma,
 #' @param x rlda object
 #' @param ... ignored
 #' @export
-plot.rlda <- function(x, burnin=0.1, ...){
+plot.rlda <- function(x, burnin=0.1, maxCluster=NA, ...){
   stopifnot(inherits(burnin, "numeric"))
   stopifnot(!(burnin>1 || burnin<0))
   #Burn-in
@@ -433,16 +433,17 @@ plot.rlda <- function(x, burnin=0.1, ...){
   plot(x$logLikelihood[i:x$n_gibbs],type="l",xlab="Gibbs iteration", ylab="Log-Likelihood",main="Log-Likelihood")
   par(ask=T)
   #Plot the box-plot Theta
+  if(is.na(maxCluster)) maxCluster=x$n_community
   tmp<- colMeans(x$Theta[i:x$n_gibbs,])
-  theta<- matrix(tmp,x$N,x$n_community)
-  colnames(theta)=paste("Cluster ", 1:x$n_community,sep='')
+  theta<- matrix(tmp,x$N,maxCluster)
+  colnames(theta)=paste("Cluster ", 1:maxCluster,sep='')
   rownames(theta)=x$rownames
   boxplot(theta,main="Theta matrix",  ylab="Probability")
   par(ask=T)
   #Plot the box-plot Phi
   tmp<- colMeans(x$Phi[i:x$n_gibbs,])
-  phi<- matrix(tmp,x$n_community,length(x$Species))
-  rownames(phi)=paste("Cluster ", 1:x$n_community,sep='')
+  phi<- matrix(tmp,maxCluster,length(x$Species))
+  rownames(phi)=paste("Cluster ", 1:maxCluster,sep='')
   colnames(phi)=x$Species
   barplot(phi, main="Phi matrix", ylab="Probability", legend=rownames(phi))
   invisible(x)

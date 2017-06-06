@@ -1,6 +1,6 @@
 ## Rlda package
 
-[![Travis-CI Build Status](https://travis-ci.org/daijiang/Rlda.svg?branch=master)](https://travis-ci.org/daijiang/Rlda)
+[![Travis-CI Build Status](https://travis-ci.org/PedroBSB/Rlda.svg?branch=master)](https://travis-ci.org/PedroBSB/Rlda)
 
 This project resulted in a new R package called Rlda for which these types of data can be used to mixed-membership clustering through a Bayesian paradigm. https://CRAN.R-project.org/package=Rlda 
 

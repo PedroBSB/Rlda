@@ -425,6 +425,7 @@ rlda.binomialMH<-function(data, pop, n_community, alpha0 , alpha1, gamma,
 #' @param ... ignored
 #' @export
 plot.rlda <- function(x, burnin=0.1, maxCluster=NA, ...){
+  old.par <-  par(no.readonly = T)
   stopifnot(inherits(burnin, "numeric"))
   stopifnot(!(burnin>1 || burnin<0))
   #Burn-in
@@ -439,14 +440,18 @@ plot.rlda <- function(x, burnin=0.1, maxCluster=NA, ...){
   colnames(theta)=paste("Cluster ", 1:maxCluster,sep='')
   rownames(theta)=x$rownames
   boxplot(theta,main="Theta matrix",  ylab="Probability")
-  par(ask=T)
+  par(mar=c(5.1, 4.1, 4.1, 8.1),ask=T, xpd=TRUE)
   #Plot the box-plot Phi
   tmp<- colMeans(x$Phi[i:x$n_gibbs,])
   phi<- matrix(tmp,maxCluster,length(x$Species))
   rownames(phi)=paste("Cluster ", 1:maxCluster,sep='')
   colnames(phi)=x$Species
-  barplot(phi, main="Phi matrix", ylab="Probability", legend=rownames(phi))
+  #barplot(phi, main="Phi matrix", ylab="Probability", legend=rownames(phi))
+  pal<-grey((nrow(phi):0)/nrow(phi))
+  barplot(phi, main="Phi matrix", ylab="Probability",col=pal)
+  legend("topright", inset=c(-0.38,0), legend=rownames(phi),fill=pal, title="Clusters")
   invisible(x)
+  par(old.par)
 }
 
 #' Summarize the Bayesian LDA.

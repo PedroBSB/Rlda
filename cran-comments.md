@@ -10,12 +10,10 @@ There were no ERRORs or WARNINGs.
 There are currently no downstream dependencies for this package.
 
 ## Update
-* Update to the new version Rlda 0.2.0
+* Update to the new version Rlda 0.2.1
 
 ## News
-* Correct Vignette manual format. Using Latex and R.rsp.
-* Need the GhostScript Sys.setenv(R_GSCMD = "C:\\Program Files\\gs\\gs9.21\\bin\\gswin64c.exe")
-* Add new datasets birds and fishnet.
-* Add two more functions rlda.binomialRemote and rlda.bernoulliSB.
+* Edit the plot.rlda function to guarantee the legend not overlapping the plot.
+
 
 

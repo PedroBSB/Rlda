@@ -79,7 +79,7 @@ set.seed(9292)
 #time.taken <- end.time - start.time
 #time.taken
 
-#plot(res)
+#plot.rlda(res)
 
 
 

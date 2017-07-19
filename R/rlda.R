@@ -21,7 +21,7 @@ rlda.bernoulli <- function(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll
     stopifnot(inherits(n_gibbs, "numeric"))
     stopifnot(inherits(ll_prior, "logical"))
     stopifnot(inherits(display_progress, "logical"))
-    
+
     # Use a function not exported Execute the LDA for the Bernoulli entry
     res <- lda_bernoulli(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
     # Type distribution
@@ -45,7 +45,7 @@ rlda.bernoulli <- function(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll
     # Locations
     res$rownames <- rownames(data)
     # Create the class
-    class(res) <- c("list", "rlda")
+    class(res) <- c("rlda", "list")
     return(res)
 }
 
@@ -72,7 +72,7 @@ rlda.bernoulliMH <- function(data, loc.id, n_community, alpha0, alpha1, gamma, n
     stopifnot(inherits(n_gibbs, "numeric"))
     stopifnot(inherits(ll_prior, "logical"))
     stopifnot(inherits(display_progress, "logical"))
-    
+
     # Dictionary
     dat <- data
     a.phi <- alpha0
@@ -82,7 +82,7 @@ rlda.bernoulliMH <- function(data, loc.id, n_community, alpha0, alpha1, gamma, n
     nloc <- nrow(data)
     y <- as.matrix(data)
     ngibbs <- n_gibbs
-    
+
     # initial values convert from a bunch of bernoulli to a single binomial per location
     tmp = aggregate.data(dat)
     y = tmp$dat
@@ -91,69 +91,69 @@ rlda.bernoulliMH <- function(data, loc.id, n_community, alpha0, alpha1, gamma, n
     nloc = length(unique(loc.id))
     n = tmp$n
     nmat = matrix(n, nloc, nspp)
-    
+
     # initial values
     theta = matrix(1/ncomm, nloc, ncomm)
     vmat = theta
     vmat[, ncomm] = 1
     phi = matrix(0.2, ncomm, nspp, byrow = T)
-    
+
     # gibbs stuff
     vec.theta = matrix(0, ngibbs, nloc * ncomm)
-    
+
     # Remove the loc.id
     vec.phi = matrix(0, ngibbs, ncomm * nspp)
     vec.logl = matrix(NA, ngibbs, 1)
     param = list(theta = theta, phi = phi, vmat = vmat)
-    
+
     # for MH algorithm
     jump1 = list(vmat = matrix(0.1, nloc, ncomm), phi = matrix(0.1, ncomm, nspp))
     accept1 = list(vmat = matrix(0, nloc, ncomm), phi = matrix(0, ncomm, nspp))
     accept.output = 50
-    
+
     # create progress bar
-    if (display_progress) 
+    if (display_progress)
         pb <- txtProgressBar(min = 0, max = n_gibbs, style = 3)
     count = 0
     for (i in 1:ngibbs) {
         tmp = update.phiAbundanceSB(param = param, jump = jump1$phi, ncomm = ncomm, nspp = nspp, y = y, nmat = nmat, a.phi = a.phi, b.phi = b.phi)
         param$phi = tmp$phi
         accept1$phi = accept1$phi + tmp$accept
-        
+
         tmp = update.thetaAbundanceSB(param = param, jump = jump1$vmat, nloc = nloc, ncomm = ncomm, y = y, nmat = nmat, gamma = gamma)
         param$theta = tmp$theta
         param$vmat = tmp$v
         accept1$vmat = accept1$vmat + tmp$accept
-        
+
         if (i%%accept.output == 0 & i < nadapt) {
             k = print.adapt(parmAccept = accept1, parmJump = jump1, accept.output = accept.output)
             accept1 = k$accept1
             jump1 = k$jump1
         }
-        
+
         # to assess convergence, examine logl
         prob = get.logl(theta = param$theta, phi = param$phi, y = y, nmat = nmat)
         loglikel = sum(prob)
         if (ll_prior) {
             loglikel = loglikel + sum(dbeta(param$phi, a.phi, b.phi, log = T)) + sum(dbeta(param$vmat[, -ncomm], 1, gamma, log = T))
         }
-        
+
         vec.logl[i] = loglikel
         vec.theta[i, ] = param$theta
-        
+
         # Remove the loc.id
         vec.phi[i, ] = param$phi
-        
+
         # Progress Bar
-        if (display_progress) 
+        if (display_progress)
             setTxtProgressBar(pb, i)
     }
-    if (display_progress) 
+    if (display_progress)
         close(pb)
-    
+
     # Use a function not exported Execute the LDA for the Bernoulli entry
     res <- list(Theta = vec.theta, Phi = vec.phi, logLikelihood = vec.logl)
-    
+
     # Type distribution
     res$type <- "Bernoulli"
     # Number of communities
@@ -175,7 +175,7 @@ rlda.bernoulliMH <- function(data, loc.id, n_community, alpha0, alpha1, gamma, n
     # Locations
     res$rownames <- unique(loc.id)
     # Create the class
-    class(res) <- c("list", "rlda")
+    class(res) <- c("rlda", "list")
     return(res)
 }
 
@@ -205,7 +205,7 @@ rlda.multinomial <- function(data, n_community, beta, gamma, n_gibbs, ll_prior =
     stopifnot(inherits(n_gibbs, "numeric"))
     stopifnot(inherits(ll_prior, "logical"))
     stopifnot(inherits(display_progress, "logical"))
-    
+
     # Use a function not exported Execute the LDA for the Multinomial entry
     res <- lda_multinomial(data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress)
     # Type distribution
@@ -227,7 +227,7 @@ rlda.multinomial <- function(data, n_community, beta, gamma, n_gibbs, ll_prior =
     # Locations
     res$rownames <- rownames(data)
     # Create the class
-    class(res) <- c("list", "rlda")
+    class(res) <- c("rlda", "list")
     return(res)
 }
 
@@ -282,7 +282,7 @@ rlda.binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs
     # Locations
     res$rownames <- rownames(data)
     # Create the class
-    class(res) <- c("list", "rlda")
+    class(res) <- c("rlda", "list")
     return(res)
 }
 
@@ -315,7 +315,7 @@ rlda.binomialMH <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gib
     if (nrow(data) != nrow(pop)) {
         stop("Both \"data\" and \"pop\" must have the same number of rows.")
     }
-    
+
     # Dictionary
     a.omega <- alpha0
     b.omega <- alpha1
@@ -325,57 +325,57 @@ rlda.binomialMH <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gib
     ngibbs <- n_gibbs
     ndig.values <- as.matrix(pop)
     remote <- as.matrix(data)
-    
+
     # initial values
     omega = matrix(runif(ncommun * nbands), ncommun, nbands)
     theta = matrix(1/ncommun, nloc, ncommun)
     v = theta
     v[, ncommun] = 1
-    
+
     # stuff for gibbs sampling
     param = list(theta = theta, omega = omega, v = v, gamma = gamma)
     vec.theta = matrix(NA, ngibbs, nloc * ncommun)
     vec.omega = matrix(NA, ngibbs, ncommun * nbands)
-    
+
     # stuff for MH algorithm
     jump1 = list(omega = matrix(1, ncommun, nbands), v = matrix(0.3, nloc, ncommun))
     accept1 = list(omega = matrix(0, ncommun, nbands), v = matrix(0, nloc, ncommun))
     accept.output = 50
-    
+
     # create progress bar
-    if (display_progress) 
+    if (display_progress)
         pb <- txtProgressBar(min = 0, max = ngibbs, style = 3)
-    
+
     for (i in 1:ngibbs) {
         tmp = update.thetaRemote(remote, param, jump1$v, ncommun, nloc, ndig.values)
         param$theta = tmp$theta
         param$v = tmp$v
         accept1$v = accept1$v + tmp$accept
-        
+
         tmp = update.omegaRemote(remote, param, jump1$omega, ncommun, nbands, ndig.values, a.omega, b.omega)
         param$omega = tmp$omega
         accept1$omega = accept1$omega + tmp$accept
-        
+
         if (i%%accept.output == 0 & i < 1000) {
             k = print.adapt(parmAccept = accept1, parmJump = jump1, accept.output = accept.output, FALSE)
             accept1 = k$accept1
             jump1 = k$jump1
         }
-        
+
         vec.theta[i, ] = param$theta
         vec.omega[i, ] = param$omega
         # Progress Bar
-        if (display_progress) 
+        if (display_progress)
             setTxtProgressBar(pb, i)
     }
-    if (display_progress) 
+    if (display_progress)
         close(pb)
-    
+
     vec.logl <- rep(0, nloc)
-    
+
     # Use a function not exported Execute the LDA for the Bernoulli entry
     res <- list(Theta = vec.theta, Phi = vec.omega, logLikelihood = vec.logl)
-    
+
     # Type distribution
     res$type <- "Binomial"
     # Maximum value
@@ -397,7 +397,7 @@ rlda.binomialMH <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gib
     # Locations
     res$rownames <- rownames(data)
     # Create the class
-    class(res) <- c("list", "rlda")
+    class(res) <- c("rlda", "list")
     return(res)
 }
 
@@ -417,7 +417,7 @@ plot.rlda <- function(x, burnin = 0.1, maxCluster = NA, ...) {
     plot(x$logLikelihood[i:x$n_gibbs], type = "l", xlab = "Gibbs iteration", ylab = "Log-Likelihood", main = "Log-Likelihood")
     par(ask = T)
     # Plot the box-plot Theta
-    if (is.na(maxCluster)) 
+    if (is.na(maxCluster))
         maxCluster = x$n_community
     tmp <- colMeans(x$Theta[i:x$n_gibbs, ])
     theta <- matrix(tmp, x$N, maxCluster)
@@ -448,7 +448,7 @@ summary.rlda <- function(object, burnin = 0.1, silent = FALSE, ...) {
     stopifnot(inherits(burnin, "numeric"))
     stopifnot(!(burnin > 1 || burnin < 0))
     stopifnot(inherits(silent, "logical"))
-    
+
     # Burn-in
     i <- ceiling(object$n_gibbs * burnin)
     seq <- i:object$n_gibbs
@@ -465,7 +465,7 @@ summary.rlda <- function(object, burnin = 0.1, silent = FALSE, ...) {
     phi <- matrix(tmp, object$n_community, length(object$Species))
     rownames(phi) = paste("Cluster ", 1:object$n_community, sep = "")
     colnames(phi) = object$Species
-    
+
     return(list(Theta = theta, Phi = phi))
 }
 
@@ -483,15 +483,15 @@ predict.rlda <- function(object, data, nclus = NA, burnin = 0.1, places.round = 
     stopifnot(places.round >= 0)
     stopifnot(inherits(burnin, "numeric"))
     stopifnot(!(burnin > 1 || burnin < 0))
-    
+
     # Matrix
     summ <- summary.rlda(object, burnin, T)
     phi <- summ$Phi
-    
+
     if (is.na(nclus)) {
         nclus <- nrow(phi)
     }
-    
+
     # Create a matrix with all possible combinations of proportions
     seq1 <- seq(from = 0, to = 1, by = 0.05)
     combo <- expand.grid(p1 = seq1)
@@ -503,22 +503,22 @@ predict.rlda <- function(object, data, nclus = NA, burnin = 0.1, places.round = 
     cond <- apply(combo, 1, sum) <= 1
     combo1 <- combo[cond, ]
     combo1[, paste0("p", nclus)] <- 1 - apply(combo1, 1, sum)
-    
-    
+
+
     # Calculate implied binomial probabilities
     probs <- data.matrix(combo1) %*% data.matrix(phi)
-    
+
     # Import the data for the desired region
     dat1 <- data[, object$Species]
     nbands <- length(object$Species)
-    
+
     # Let's change the range of our data to start at zero.
     tmp <- apply(dat1, 2, range)
     dat2 <- dat1 - matrix(tmp[1, ], nrow(dat1), nbands, byrow = T)
     tmp <- apply(dat2, 2, range)
     max1 <- tmp[2, ]
     max2 <- matrix(max1, nrow(probs), length(max1), byrow = T)
-    
+
     # Divisor
     div <- 10^(places.round)
     max2 <- floor(max2/div)
@@ -528,11 +528,11 @@ predict.rlda <- function(object, data, nclus = NA, burnin = 0.1, places.round = 
     dat2full$ID <- as.character(do.call(paste, df_args))
     dat2full$Sort <- seq(1, nrow(dat2full))
     dat2 <- unique(dat2)
-    
+
     # Keep the same scale
     max2 <- max2 * div
     dat2 <- dat2 * div
-    
+
     ncl <- detectCores()
     cl <- makeCluster(ncl)
     registerDoParallel(cl)
@@ -548,7 +548,7 @@ predict.rlda <- function(object, data, nclus = NA, burnin = 0.1, places.round = 
     rownames(res2) = NULL
     # Stop clusters
     stopCluster(cl)
-    
+
     # Convert to data.frame
     dat2 <- as.data.frame(dat2)
     df_args <- c(dat2, sep = "")

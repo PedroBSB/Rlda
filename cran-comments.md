@@ -14,6 +14,7 @@ There are currently no downstream dependencies for this package.
 
 ## News
 * Edit the plot.rlda function to guarantee the legend not overlapping the plot.
-
+* Add accessor functions for the S3 objects.
+* Add print method.
 
 

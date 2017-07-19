@@ -2,8 +2,7 @@ NEWS file for package Rlda
 
 Rlda is an R package that estimates the Bayesian LDA model for mixed-membership clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries).
 
-Changes in version 0.1.2 2017-05-29
-     + Correct the Vignette manual.
-     + Add the LDA presence absence with stick-breaking priors.
-     + Add the LDA for Remote Sensing data.
-     + Add Breeding Bird Survey data.
+Changes in version 0.2.0 2017-07-21
+     + Add accessor functions for the S3 objects.
+     + Add print method.
+

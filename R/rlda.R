@@ -561,7 +561,9 @@ predict.rlda <- function(object, data, nclus = NA, burnin = 0.1, places.round = 
     return(final)
 }
 
-
+getLogLikelihood.rlda <- function(object) {
+  return(object$logLikelihood)
+}
 
 
 

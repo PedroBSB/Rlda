@@ -87,3 +87,11 @@ set.seed(9292)
 #logLikeli<-res$logLikelihood
 
 
+#Get the matrices in a list of coda objects
+#listParms <- rlda2mcmc(res)
+#thetaMCMC<-listParms[[1]]
+#plot(thetaMCMC[,1])
+
+#Example using coda package
+#library(coda)
+

@@ -621,7 +621,7 @@ getPhi.rlda <- function(object, burnin = 0.1, ...) {
   return(phi)
 }
 
-rlda2mcmc<-function(object, ...){
+rlda2mcmc.rlda<-function(object, ...){
   stopifnot(inherits(object, "rlda"))
 
   #Theta object

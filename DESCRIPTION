@@ -14,8 +14,7 @@ LinkingTo:
     RcppProgress
 Imports:
     gtools,
-    parallel,
-    coda
+    parallel
 SystemRequirements: GNU make
 Suggests:
     R.rsp,

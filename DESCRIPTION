@@ -7,14 +7,15 @@ Maintainer: Pedro Albuquerque <pedroa@unb.br>
 Description: Estimates the Bayesian LDA model for mixed-membership clustering based on different types of data (i.e., Multinomial, Bernoulli, and Binomial entries).
 License: GPL-2
 LazyData: TRUE
-Depends: R (>= 2.10), Rcpp (>= 0.9.4), RcppProgress (>= 0.1), doParallel (>= 1.0.10), foreach (>=	1.4.3)
+Depends: R (>= 2.10), Rcpp (>= 0.9.4), RcppProgress (>= 0.1), doParallel (>= 1.0.10), foreach (>=	1.4.3), coda (>= 0.19.1)
 LinkingTo:
     Rcpp,
     RcppArmadillo,
     RcppProgress
 Imports:
     gtools,
-    parallel
+    parallel,
+    coda
 SystemRequirements: GNU make
 Suggests:
     R.rsp,

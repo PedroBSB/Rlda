@@ -621,4 +621,27 @@ getPhi.rlda <- function(object, burnin = 0.1, ...) {
   return(phi)
 }
 
+rlda2mcmc<-function(object, ...){
+  stopifnot(inherits(object, "rlda"))
+
+  #Theta object
+  thetaMCMC <- object$Theta
+  ss1<- paste("Cluster ", 1:object$n_community, sep = "")
+  ss2<- object$rownames
+  colnames(thetaMCMC) <- apply(expand.grid(ss2,ss1),1,function(x) paste(x,collapse=" - "))
+  rownames(thetaMCMC) <- paste("Gibbs ", 1:nrow(thetaMCMC), sep = "")
+  #Casting
+  Theta <- coda::mcmc(thetaMCMC)
+
+  #Phi object
+  phiMCMC <- object$Phi
+  ss1<- paste("Cluster ", 1:object$n_community, sep = "")
+  ss2<- object$Species
+  colnames(phiMCMC) <- apply(expand.grid(ss1,ss2),1,function(x) paste(x,collapse=" - "))
+  rownames(phiMCMC) <- paste("Gibbs ", 1:nrow(phiMCMC), sep = "")
+  #Casting
+  Phi <- coda::mcmc(phiMCMC)
+  return(list(Theta,Phi))
+}
+
 

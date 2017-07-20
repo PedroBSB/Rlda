@@ -10,11 +10,9 @@ There were no ERRORs or WARNINGs.
 There are currently no downstream dependencies for this package.
 
 ## Update
-* Update to the new version Rlda 0.2.1
+* Update to the new version Rlda 0.2.2
 
 ## News
-* Edit the plot.rlda function to guarantee the legend not overlapping the plot.
-* Add accessor functions for the S3 objects.
-* Add print method.
+* Add the casting between rlda object and coda.
 
 

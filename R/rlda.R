@@ -561,9 +561,64 @@ predict.rlda <- function(object, data, nclus = NA, burnin = 0.1, places.round = 
     return(final)
 }
 
-getLogLikelihood.rlda <- function(object) {
+logLik.rlda <- function(object, ...) {
   return(object$logLikelihood)
 }
 
+print.rlda <- function(object, burnin = 0.1, ...) {
+  stopifnot(inherits(object, "rlda"))
+  stopifnot(inherits(burnin, "numeric"))
+  stopifnot(!(burnin > 1 || burnin < 0))
+
+  # Burn-in
+  i <- ceiling(object$n_gibbs * burnin)
+  seq <- i:object$n_gibbs
+
+  # Summary Theta
+  tmp <- colMeans(object$Theta[i:object$n_gibbs, ])
+  theta <- matrix(tmp, object$N, object$n_community)
+  colnames(theta) = paste("Cluster ", 1:object$n_community, sep = "")
+  rownames(theta) = object$rownames
+  # Summary Phi
+  tmp <- colMeans(object$Phi[i:object$n_gibbs, ])
+  phi <- matrix(tmp, object$n_community, length(object$Species))
+  rownames(phi) = paste("Cluster ", 1:object$n_community, sep = "")
+  colnames(phi) = object$Species
+  #Get the logLik
+  logLikeli= logLik.rlda(object)
+  return(list(Theta = theta, Phi = phi, logLik=logLikeli))
+}
+
+
+
+getTheta.rlda <- function(object, burnin = 0.1, ...) {
+  stopifnot(inherits(object, "rlda"))
+  stopifnot(inherits(burnin, "numeric"))
+  stopifnot(!(burnin > 1 || burnin < 0))
+  # Burn-in
+  i <- ceiling(object$n_gibbs * burnin)
+  seq <- i:object$n_gibbs
+  # Summary Theta
+  tmp <- colMeans(object$Theta[i:object$n_gibbs, ])
+  theta <- matrix(tmp, object$N, object$n_community)
+  colnames(theta) = paste("Cluster ", 1:object$n_community, sep = "")
+  rownames(theta) = object$rownames
+  return(theta)
+}
+
+getPhi.rlda <- function(object, burnin = 0.1, ...) {
+  stopifnot(inherits(object, "rlda"))
+  stopifnot(inherits(burnin, "numeric"))
+  stopifnot(!(burnin > 1 || burnin < 0))
+  # Burn-in
+  i <- ceiling(object$n_gibbs * burnin)
+  seq <- i:object$n_gibbs
+  # Summary Phi
+  tmp <- colMeans(object$Phi[i:object$n_gibbs, ])
+  phi <- matrix(tmp, object$n_community, length(object$Species))
+  rownames(phi) = paste("Cluster ", 1:object$n_community, sep = "")
+  colnames(phi) = object$Species
+  return(phi)
+}
 
 

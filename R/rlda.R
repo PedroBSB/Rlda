@@ -641,7 +641,7 @@ rlda2mcmc<-function(object, ...){
   rownames(phiMCMC) <- paste("Gibbs ", 1:nrow(phiMCMC), sep = "")
   #Casting
   Phi <- coda::mcmc(phiMCMC)
-  return(list(Theta,Phi))
+  return(list("Theta"=Theta,"Phi"=Phi))
 }
 
 

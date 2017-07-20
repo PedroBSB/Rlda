@@ -1,18 +1,14 @@
 \name{rlda2mcmc}
-\alias{rlda2mcmc,Rlda}
+\alias{rlda2mcmc}
+\alias{rlda2mcmc.rlda}
 \title{Conversion between rlda to mcmc object from coda package}
-
-
 \description{Convert rlda object to mcmc object from coda package
 The \code{rlda2mcmc} function create a list of two elements incluing the Theta matrix and Phi matrix in a mcmc class.
 }
-
 \usage{
-  \S3method{rlda2mcmc}{rlda}(object, ...)
+  \method{rlda2mcmc}{rlda}(object, ...)
 }
-
 \arguments{
-
   \item{object}{a \code{rlda} object created by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} function.}
   \item{...}{ other arguments may be useful.}
 }

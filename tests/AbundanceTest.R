@@ -2,8 +2,8 @@
 #rm(list=ls())
 
 #res<- generateMultinomialLDA.rlda(seed0=5587, community=4,
-#                             variables=100, observations=1000, totalElements=40,
-#                             beta=rep(1,100), gamma=0.01)
+#                            variables=100, observations=1000, totalElements=40,
+#                            beta=rep(1,100), gamma=0.01)
 
 
 #FIA<-as.data.frame(res$Data)

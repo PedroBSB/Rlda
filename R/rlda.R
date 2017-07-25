@@ -430,11 +430,22 @@ plot.rlda <- function(x, burnin = 0.1, maxCluster = NA, ...) {
   phi <- matrix(tmp, maxCluster, length(x$Species))
   rownames(phi) = paste("Cluster ", 1:maxCluster, sep = "")
   colnames(phi) = x$Species
-  # barplot(phi, main='Phi matrix', ylab='Probability', legend=rownames(phi))
-  pal <- grey((nrow(phi):0)/nrow(phi))
-  phi<-t(phi)
-  barplot(phi, main = "Phi matrix", ylab = "Probability", col = pal)
-  legend("topright", inset = c(-0.38, 0), legend = rownames(phi), fill = pal, title = "Clusters")
+  #Add
+  #par(mfrow=c(3,3),mar=c(4,4,4,1))
+  for (i in 1:maxCluster){
+    plot(phi[i,],main=rownames(phi)[i],type='h',ylim=c(0,1),ylab='Probability',
+         xaxt='n',xlab='')
+    axis(1,at=1:ncol(phi),colnames(phi),las=2)
+    abline(h=seq(0,1,by=0.2),lty=3,col='grey')
+    abline(v=1:ncol(phi),lty=3,col='grey')
+    par(new=TRUE)
+    plot(phi[i,],main=rownames(phi)[i],type='h',ylim=c(0,1),
+         xaxt='n',xlab='',ylab='')
+  }
+  #pal <- grey((nrow(phi):0)/nrow(phi))
+  #phi<-t(phi)
+  #barplot(phi, main = "Phi matrix", ylab = "Probability", col = pal)
+  #legend("topright", inset = c(-0.38, 0), legend = rownames(phi), fill = pal, title = "Clusters")
   invisible(x)
   par(old.par)
 }
@@ -860,5 +871,5 @@ generateBinomialLDA.rlda<-function(seed0, community, variables, observations, to
   colnames(POP)<-paste0("Bands ",seq(1,ncol(POP)))
 
 
-  return(list("Theta"=Theta,"Phi"=Omega, "Pop"=POP, "Data"= DATA))
+  return(list("Theta"=Theta, "Phi"=Omega, "Pop"=POP, "Data"= DATA))
 }

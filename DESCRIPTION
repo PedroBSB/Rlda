@@ -13,8 +13,8 @@ LinkingTo:
     RcppArmadillo,
     RcppProgress
 Imports:
-    gtools,
-    parallel
+    parallel,
+    gtools
 SystemRequirements: GNU make
 Suggests:
     R.rsp,

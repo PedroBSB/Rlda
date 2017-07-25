@@ -4,5 +4,6 @@ Rlda is an R package that estimates the Bayesian LDA model for mixed-membership 
 
 Changes in version 0.2.1 2017-07-28
      + Add the casting between rlda object and coda.
-
+     + Create the generate fake data for each data type.
+     + Correct the Phi plot.
 

@@ -14,5 +14,6 @@ There are currently no downstream dependencies for this package.
 
 ## News
 * Add the casting between rlda object and coda.
-
+* Create the generate fake data for each data type.
+* Correct the Phi plot.
 

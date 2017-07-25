@@ -6,10 +6,10 @@
 Takes a \code{rlda} object produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} and produces a print from it.
 }
 \usage{
-  \method{print}{rlda}(object, burnin=0.1, ...)
+  \method{print}{rlda}(x, burnin=0.1, ...)
 }
 \arguments{
-  \item{object}{a \code{rlda} object as produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial}.}
+  \item{x}{a \code{rlda} object as produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial}.}
   \item{burnin}{a percentual of burn-in observations must be a number between 0 and 1. The default value is \code{burnin=0.1}}
   \item{...}{ other arguments may be useful.}
 }

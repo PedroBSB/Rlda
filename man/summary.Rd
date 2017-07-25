@@ -6,11 +6,12 @@
 Takes a \code{rlda} object produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial} and produces a summary from it.
 }
 \usage{
-  \method{summary}{rlda}(object, burnin=0.1, silent=FALSE, ...)
+  \method{summary}{rlda}(object, burnin=0.1, quantile = 0.95, silent=FALSE, ...)
 }
 \arguments{
   \item{object}{a \code{rlda} object as produced by \code{rlda.binomial}, \code{rlda.bernoulli} or \code{rlda.multinomial}.}
   \item{burnin}{a percentual of burn-in observations must be a number between 0 and 1. The default value is \code{burnin=0.1}}
+ \item{quantile}{a quantile for the credible interval. The default value is \code{quantile=0.95}}
   \item{silent}{a logical value specifying if the number of clusters, variables and gibbs interations must be printed. The default value is \code{silent=FALSE}}
   \item{...}{ other arguments may be useful.}
 }

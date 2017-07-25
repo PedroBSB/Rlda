@@ -431,9 +431,8 @@ plot.rlda <- function(x, burnin = 0.1, maxCluster = NA, ...) {
   rownames(phi) = paste("Cluster ", 1:maxCluster, sep = "")
   colnames(phi) = x$Species
   #Add
-  #par(mfrow=c(3,3),mar=c(4,4,4,1))
+  par(mar = c(5.1, 4.1, 4.1, 2.1), ask = T, xpd = FALSE)
   for (i in 1:maxCluster){
-    par(xpd=F)
     plot(phi[i,],main=rownames(phi)[i],type='h',ylim=c(0,1),ylab='Probability',
          xaxt='n',xlab='')
     axis(1,at=1:ncol(phi),colnames(phi),las=2)

@@ -26,6 +26,10 @@ export(generateMultinomialLDA.rlda)
 export(getTheta.rlda)
 export(getPhi.rlda)
 export(rlda2mcmc.rlda)
+
+export(generateM1M0matrix)
+
+
 S3method("plot", "rlda")
 S3method("print", "rlda")
 S3method("summary", "rlda")

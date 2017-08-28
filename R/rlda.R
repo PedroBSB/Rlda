@@ -317,7 +317,7 @@ rlda.binomialVR <- function(data, loc.id, n_community, alpha0, alpha1, gamma, ma
 
   #Initialize
   delta_elbo<-Inf
-  nobs<-max(table(data[,id]))
+  nobs<-max(table(data[,loc.id]))
   nloc=nrow(dat)
   nspp=ncol(dat)
   tmp<-as.matrix(data)

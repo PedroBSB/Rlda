@@ -314,7 +314,7 @@ arma::mat generateThetaBinomialVariational(int nLocations,int n_community, arma:
 
 
 // [[Rcpp::export]]
-Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_obs, double gamma, double a_phi, double b_phi, double thresh, double delta_elbo, arma::cube m1, arma::cube m0,  bool display_progress=true) {
+Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_obs, double gamma, double a_phi, double b_phi, double thresh, double delta_elbo, arma::cube m1, arma::cube m0) {
 
  //Elbo Vector
  Rcpp::NumericVector elboVec(maxit);

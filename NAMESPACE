@@ -26,16 +26,7 @@ export(generateMultinomialLDA.rlda)
 export(getTheta.rlda)
 export(getPhi.rlda)
 export(rlda2mcmc.rlda)
-
-export(lda_binomial_var)
-export(generateABmatrix)
-export(generateM1M0matrix)
-export(generateCDmatrix)
-export(generateELBO)
-
-
-
-
+export(rlda.binomialVR)
 S3method("plot", "rlda")
 S3method("print", "rlda")
 S3method("summary", "rlda")

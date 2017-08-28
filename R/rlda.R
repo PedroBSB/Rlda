@@ -1,3 +1,18 @@
+aggregate.data=function(dat,id){
+  ind=which(colnames(dat)==id)
+  locid=dat[,ind]
+  dat1=dat[,-ind]
+
+  nloc=max(locid)
+  nspp=ncol(dat1)
+  res=matrix(NA,nloc,nspp)
+  for (i in 1:nloc){
+    cond=locid==i
+    res[i,]=colSums(dat1[cond,])
+  }
+  res
+}
+
 #' @name rlda.bernoulli
 #' @title Gibbs Sampling for LDA Presence and Absence
 #' @description Compute the Gibbs Sampling for LDA Presence and Absence
@@ -279,6 +294,62 @@ rlda.binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs
   res$gamma <- gamma
   # Number of gibbs
   res$n_gibbs <- n_gibbs
+  # Locations
+  res$rownames <- rownames(data)
+  # Create the class
+  class(res) <- c("rlda", "list")
+  return(res)
+}
+
+
+
+
+
+rlda.binomialVR <- function(data, loc.id, n_community, alpha0, alpha1, gamma, maxit=1000, thresh=0.0001) {
+  # Create a stop point
+  stopifnot(inherits(data, "data.frame"))
+  stopifnot(inherits(n_community, "numeric"))
+  stopifnot(inherits(alpha0, "numeric"))
+  stopifnot(inherits(alpha1, "numeric"))
+  stopifnot(inherits(gamma, "numeric") | is.na(gamma))
+  stopifnot(inherits(maxit, "numeric"))
+  stopifnot(inherits(thresh, "numeric"))
+
+  #Initialize
+  delta_elbo<-Inf
+  nobs<-max(table(data[,id]))
+  nloc=nrow(dat)
+  nspp=ncol(dat)
+  tmp<-as.matrix(data)
+  dat=aggregate.data(tmp, loc.id)
+
+
+  m0=m1=array(abs(rnorm(nloc*nspp*ncommun)),dim=c(nloc,nspp,ncommun),
+              dimnames=list(paste('loc',1:nloc,sep=''),
+                            paste('spp',1:nspp,sep=''),
+                            paste('comm',1:ncommun,sep='')))
+  a=b=matrix(1,nloc,ncommun)
+  c=d=matrix(1,ncommun,nspp)
+
+
+  # Execute the LDA for the Binomial entry
+  res <- lda_binomial_var(dat, ncommun, maxit, nobs, gamma, alpha0, alpha1, thresh, delta_elbo, m1, m0)
+  # Type distribution
+  res$type <- "Binomial Variational"
+  # Number of communities
+  res$n_community <- ncommun
+  # Sample size
+  res$N <- nrow(data)
+  # Covariates
+  res$Species <- colnames(data)
+  # Alpha0
+  res$alpha0 <- alpha0
+  # Alpha1
+  res$alpha1 <- alpha1
+  # Gamma
+  res$gamma <- gamma
+  # Number of gibbs
+  res$n_gibbs <- maxit
   # Locations
   res$rownames <- rownames(data)
   # Create the class

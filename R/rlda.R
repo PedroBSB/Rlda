@@ -318,26 +318,26 @@ rlda.binomialVR <- function(data, loc.id, n_community, alpha0, alpha1, gamma, ma
   #Initialize
   delta_elbo<-Inf
   nobs<-max(table(data[,loc.id]))
-  nloc=nrow(dat)
-  nspp=ncol(dat)
+
   tmp<-as.matrix(data)
   dat=aggregate.data(tmp, loc.id)
+  nloc=nrow(dat)
+  nspp=ncol(dat)
 
-
-  m0=m1=array(abs(rnorm(nloc*nspp*ncommun)),dim=c(nloc,nspp,ncommun),
+  m0=m1=array(abs(rnorm(nloc*nspp*n_community)),dim=c(nloc,nspp,n_community),
               dimnames=list(paste('loc',1:nloc,sep=''),
                             paste('spp',1:nspp,sep=''),
-                            paste('comm',1:ncommun,sep='')))
-  a=b=matrix(1,nloc,ncommun)
-  c=d=matrix(1,ncommun,nspp)
+                            paste('comm',1:n_community,sep='')))
+  a=b=matrix(1,nloc,n_community)
+  c=d=matrix(1,n_community,nspp)
 
 
   # Execute the LDA for the Binomial entry
-  res <- lda_binomial_var(dat, ncommun, maxit, nobs, gamma, alpha0, alpha1, thresh, delta_elbo, m1, m0)
+  res <- lda_binomial_var(dat, n_community, maxit, nobs, gamma, alpha0, alpha1, thresh, delta_elbo, m1, m0)
   # Type distribution
   res$type <- "Binomial Variational"
   # Number of communities
-  res$n_community <- ncommun
+  res$n_community <- n_community
   # Sample size
   res$N <- nrow(data)
   # Covariates

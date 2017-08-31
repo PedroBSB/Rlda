@@ -88,9 +88,10 @@ arma::rowvec meltVariational(arma::mat mat){
   return(vec);
 }
 
-void updateThetaVariational(arma::mat &ThetaGibbs, arma::mat Theta, int gibbs){
+void updateThetaVariational(arma::mat &ThetaGibbs, arma::mat Theta, arma::mat &PhiGibbs, arma::mat Phi, int gibbs){
   //'meltAbundance the Theta and Phi matrix
   ThetaGibbs.row(gibbs)=meltVariational(Theta);
+  PhiGibbs.row(gibbs)=meltVariational(Phi);
 }
 
 /***************************************************************************************************************************/
@@ -98,7 +99,7 @@ void updateThetaVariational(arma::mat &ThetaGibbs, arma::mat Theta, int gibbs){
 /***************************************************************************************************************************/
 
 
-// [[Rcpp::export]]
+
 double generateELBO(arma::mat a,arma::mat b,arma::mat c,arma::mat d,arma::cube m1,arma::cube m0,arma::mat dat,int n_community,int n_species,int n_obs,int nLocation,double gamma, double a_phi,double b_phi) {
   //Utils
   arma::mat dig_a=digammaMat(a);
@@ -176,7 +177,7 @@ double generateELBO(arma::mat a,arma::mat b,arma::mat c,arma::mat d,arma::cube m
   return(p1+p2+p3+p4-p5-p6-p7);
 }
 
-// [[Rcpp::export]]
+
 Rcpp::List generateCDmatrix(int n_community,int n_species,int n_obs, double a_phi, double b_phi, arma::cube m1, arma::cube m0, arma::mat dat) {
   arma::mat matC(n_community,n_species);
   arma::mat matD(n_community,n_species);
@@ -196,7 +197,7 @@ Rcpp::List generateCDmatrix(int n_community,int n_species,int n_obs, double a_ph
 
 
 
-// [[Rcpp::export]]
+
 Rcpp::List generateABmatrix(int nLocations,int n_community,int n_species,int n_obs, double gamma, arma::cube m1, arma::cube m0, arma::mat dat) {
   arma::mat matA(nLocations,n_community);
   arma::mat matB(nLocations,n_community);
@@ -239,7 +240,7 @@ Rcpp::List generateABmatrix(int nLocations,int n_community,int n_species,int n_o
 }
 
 
-// [[Rcpp::export]]
+
 Rcpp::List generateM1M0matrix(int nLocations,int n_community,int n_species, arma::mat matA, arma::mat matB, arma::mat matC, arma::mat matD) {
   //' Calculate digamma
   arma::mat matAdi = digammaMat(matA);
@@ -287,7 +288,6 @@ Rcpp::List generateM1M0matrix(int nLocations,int n_community,int n_species, arma
   return(resTemp);
 }
 
-// [[Rcpp::export]]
 arma::mat generateThetaBinomialVariational(int nLocations,int n_community, arma::mat matA, arma::mat matB) {
   //'Intialize the Theta matrix
   arma::mat Theta(nLocations,n_community);
@@ -312,7 +312,6 @@ arma::mat generateThetaBinomialVariational(int nLocations,int n_community, arma:
 /***************************************************************************************************************************/
 
 
-
 // [[Rcpp::export]]
 Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_obs, double gamma, double a_phi, double b_phi, double thresh, double delta_elbo, arma::cube m1, arma::cube m0) {
 
@@ -328,6 +327,8 @@ Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_ob
 
  //'Initialize the ThetaGibbs
  arma::mat ThetaGibbs(maxit,nLocations*n_community);
+ arma::mat PhiGibbs(maxit,n_community*n_species);
+
 
   while (i < maxit & delta_elbo>thresh){
 
@@ -347,7 +348,8 @@ Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_ob
     m0=tm0;
 
     arma::mat Theta = generateThetaBinomialVariational(nLocations, n_community, matA, matB);
-    updateThetaVariational(ThetaGibbs, Theta, i);
+    arma::mat Phi = matC/(matC+matD);
+    updateThetaVariational(ThetaGibbs, Theta, PhiGibbs, Phi, i);
 
     elboVec(i) = generateELBO(matA, matB, matC, matD, m1, m0, data, n_community, n_species, n_obs, nLocations, gamma, a_phi, b_phi);
     if (i!=0) delta_elbo=std::abs(elboVec(i)-elboVec(i-1));
@@ -356,7 +358,8 @@ Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_ob
 
   //'Store the results
   Rcpp::List resTemp = Rcpp::List::create(Rcpp::Named("Theta") = ThetaGibbs,
-                                    Rcpp::Named("Elbo")  = elboVec);
+                                          Rcpp::Named("Phi") = PhiGibbs,
+                                          Rcpp::Named("Elbo")  = elboVec);
 
   return resTemp;
 }

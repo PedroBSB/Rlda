@@ -1,17 +1,4 @@
-aggregate.data=function(dat,id){
-  ind=which(colnames(dat)==id)
-  locid=dat[,ind]
-  dat1=dat[,-ind]
 
-  nloc=max(locid)
-  nspp=ncol(dat1)
-  res=matrix(NA,nloc,nspp)
-  for (i in 1:nloc){
-    cond=locid==i
-    res[i,]=colSums(dat1[cond,])
-  }
-  res
-}
 
 #' @name rlda.bernoulli
 #' @title Gibbs Sampling for LDA Presence and Absence
@@ -303,9 +290,7 @@ rlda.binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs
 
 
 
-
-
-rlda.binomialVR <- function(data, loc.id, n_community, alpha0, alpha1, gamma, maxit=1000, thresh=0.0001) {
+rlda.binomialVB <- function(data, loc.id, n_community, alpha0, alpha1, gamma, maxit=1000, thresh=0.0001) {
   # Create a stop point
   stopifnot(inherits(data, "data.frame"))
   stopifnot(inherits(n_community, "numeric"))
@@ -341,7 +326,7 @@ rlda.binomialVR <- function(data, loc.id, n_community, alpha0, alpha1, gamma, ma
   # Sample size
   res$N <- nrow(data)
   # Covariates
-  res$Species <- colnames(data)
+  res$Species <- colnames(data)[!colnames(data) %in% loc.id]
   # Alpha0
   res$alpha0 <- alpha0
   # Alpha1
@@ -352,10 +337,31 @@ rlda.binomialVR <- function(data, loc.id, n_community, alpha0, alpha1, gamma, ma
   res$n_gibbs <- maxit
   # Locations
   res$rownames <- rownames(data)
+  names(res)[3]<-"logLikelihood"
   # Create the class
   class(res) <- c("rlda", "list")
   return(res)
 }
+
+
+
+
+aggregate.data=function(dat,id){
+  ind<-which(colnames(dat)==id)
+  locid=dat[,ind]
+  dat1=dat[,-ind]
+
+  nloc=max(locid)
+  nspp=ncol(dat1)
+  res<- matrix(NA,nloc,nspp)
+  for (i in 1:nloc){
+    cond=locid==i
+    res[i,]=colSums(dat1[cond,])
+  }
+  return(res)
+}
+
+
 
 
 #' @name rlda.binomialMH
@@ -478,6 +484,9 @@ rlda.binomialMH <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gib
 #' @param x rlda object
 #' @param ... ignored
 #' @export
+#'
+#'
+
 plot.rlda <- function(x, burnin = 0.1, maxCluster = NA, ...) {
   old.par <- par(no.readonly = T)
   stopifnot(inherits(burnin, "numeric"))
@@ -485,7 +494,13 @@ plot.rlda <- function(x, burnin = 0.1, maxCluster = NA, ...) {
   # Burn-in
   i <- ceiling(x$n_gibbs * burnin)
   # Plot the log-likelihood
-  plot(x$logLikelihood[i:x$n_gibbs], type = "l", xlab = "Gibbs iteration", ylab = "Log-Likelihood", main = "Log-Likelihood")
+  if(x$type == "Binomial Variational"){
+    plot(x$logLikelihood[i:x$n_gibbs], type = "l", xlab = "Variational iteration", ylab = "ELBO", main = "ELBO")
+  }
+  else{
+    plot(x$logLikelihood[i:x$n_gibbs], type = "l", xlab = "Gibbs iteration", ylab = "Log-Likelihood", main = "Log-Likelihood")
+  }
+
   par(ask = T)
   # Plot the box-plot Theta
   if (is.na(maxCluster))
@@ -513,10 +528,6 @@ plot.rlda <- function(x, burnin = 0.1, maxCluster = NA, ...) {
     plot(phi[i,],main=rownames(phi)[i],type='h',ylim=c(0,1),
          xaxt='n',xlab='',ylab='')
   }
-  #pal <- grey((nrow(phi):0)/nrow(phi))
-  #phi<-t(phi)
-  #barplot(phi, main = "Phi matrix", ylab = "Probability", col = pal)
-  #legend("topright", inset = c(-0.38, 0), legend = rownames(phi), fill = pal, title = "Clusters")
   invisible(x)
   par(old.par)
 }
@@ -944,3 +955,8 @@ generateBinomialLDA.rlda<-function(seed0, community, variables, observations, to
 
   return(list("Theta"=Theta, "Phi"=Omega, "Pop"=POP, "Data"= DATA))
 }
+
+
+
+
+

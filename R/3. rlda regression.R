@@ -1,8 +1,3 @@
-rm(list=ls())
-library(boot)
-
-path <- 'c:/A. UFL/1. regression/1. simulation/'
-
 #============================
 # define regression function
 #============================

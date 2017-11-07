@@ -54,13 +54,13 @@ acceptMH <- function(p0, p1, x0, x1, BLOCK) {
   list(x = x0, accept = accept)
 } # acceptMH
 
-update.theta <- function(param, jump, nl, nc, ns, y, x, nmat, id.perf) {
+update.theta <- function(param, jump, nl, nc, ns, y, x, nmat, id.binomial) {
   phi <- param$phi
   beta <- param$beta
   mu <- x %*% beta
   pobs <- param$pobs
   pobs.mat <- matrix(pobs, nl, ns, byrow=T)
-  pobs.mat[id.perf,] <- 1
+  pobs.mat[id.binomial,] <- 1
 
   vmat.ori <- vmat.old <- param$vmat
   vmat.tmp <- exp(rnorm(nl*(nc-1), mean=log(vmat.old[,-nc]), sd=jump[,-nc]))
@@ -88,11 +88,11 @@ update.theta <- function(param, jump, nl, nc, ns, y, x, nmat, id.perf) {
   list(theta=theta, vmat=vmat, accept=vmat.ori!=vmat.old)
 } # update.theta
 
-update.phi <- function(param, jump, nl, nc, ns, y, nmat, id.perf, a.phi, b.phi) {
+update.phi <- function(param, jump, nl, nc, ns, y, nmat, id.binomial, a.phi, b.phi) {
   theta <- param$theta
   pobs <- param$pobs
   pobs.mat <- matrix(pobs, nl, ns, byrow=T)
-  pobs.mat[id.perf,] <- 1
+  pobs.mat[id.binomial,] <- 1
 
   phi.ori <- phi.old <- param$phi
   proposed <- matrix(tnorm(nc*ns, lo=0, hi=1, mu=phi.old, sig=jump), nc, ns)
@@ -135,7 +135,7 @@ update.lpmu <- function(param, jump, ns) {
   list(lpmu=lpmu, lpsigma=lpsigma)
 } # update.lpmu
 
-update.pobs <- function(param, jump, nl, ns, id.perf) {
+update.pobs <- function(param, jump, nl, ns, id.binomial) {
   theta <- param$theta
   phi <- param$phi
   lpmu <- param$lpmu
@@ -146,9 +146,9 @@ update.pobs <- function(param, jump, nl, ns, id.perf) {
   pobs.new <- ifelse(pobs.new > .99, .99, pobs.new)
   pobs.new <- ifelse(pobs.new < .01, .01, pobs.new)
   pobs.old.mat <- matrix(pobs.old, nl, ns, byrow=T)
-  pobs.old.mat[id.perf,] <- 1
+  pobs.old.mat[id.binomial,] <- 1
   pobs.new.mat <- matrix(pobs.new, nl, ns, byrow=T)
-  pobs.new.mat[id.perf,] <- 1
+  pobs.new.mat[id.binomial,] <- 1
 
   prob.old <- get.logl(theta=theta, phi=phi, pobs.mat=pobs.old.mat, y=y, nmat=nmat)
   prob.new <- get.logl(theta=theta, phi=phi, pobs.mat=pobs.new.mat, y=y, nmat=nmat)
@@ -217,5 +217,121 @@ pobsbeta.jumpTune <- function(accept, jump, ni, adapt=2000, low=.3, high=.8) {
   jump <- jump.new
   list(jump=jump)
 } # pobsbeta.jumpTune
+
+#============================
+# define regression function
+#============================
+rlda.regression <- function(y=y, x=x, nmat=nmat, id.binomial=id.binomial, nc=nc, 
+                            niter=niter, nburn=nburn, adapt=adapt, 
+                            vmat.init=vmat.init, phi.init=phi.init, beta.init=beta.init, 
+                            logit_pobs_mu.init=logit_pobs_mu.init, 
+                            logit_pobs_sigma.init=logit_pobs_sigma.init, 
+                            pobs.init=pobs.init) {
+
+#===========
+# run model
+#===========
+nl <- dim(y)[1] # number of locations
+ns <- dim(y)[2] # number of species
+nx <- dim(x)[2] # number of covariates
+
+theta.jump <- matrix(.05, nrow=nl, ncol=nc)
+phi.jump <- matrix(.05, nrow=nc, ncol=ns)
+pobs.jump <- .05
+beta.jump <- .05
+
+param <- list()
+
+param$vmat <- vmat.init
+param$theta <- vmat.init / rowSums(vmat.init)
+param$phi <- phi.init
+param$beta <- beta.init
+param$lpmu <- logit_pobs_mu.init
+param$lpsigma <- logit_pobs_sigma.init
+param$pobs <- pobs.init
+
+vmat.post <- theta.post <- theta.jump.post <- theta.accept <- array(, dim=c(nl, nc, niter))
+vmat.post[,,1] <- param$vmat
+theta.post[,,1] <- param$theta
+theta.jump.post[,,1] <- theta.jump
+theta.accept[,,1] <- FALSE
+
+phi.post <- phi.jump.post <- phi.accept <- array(, dim=c(nc, ns, niter))
+phi.post[,,1] <- param$phi
+phi.jump.post[,,1] <- phi.jump
+phi.accept[,,1] <- FALSE
+
+lpmu.post <- lpsigma.post <- numeric(niter)
+lpmu.post[1] <- param$lpmu
+lpsigma.post[1] <- param$lpsigma
+
+pobs.post <- matrix(, ns, niter)
+pobs.post[,1] <- param$pobs
+pobs.jump.post <- numeric(niter)
+pobs.jump.post[1] <- pobs.jump
+pobs.accept <- logical(niter)
+
+beta.post <- array(, dim=c(nx,nc,niter))
+beta.post[,,1] <- param$beta
+beta.jump.post <- numeric(niter)
+beta.jump.post[1] <- beta.jump
+beta.accept <- logical(niter)
+
+for (i in 2:niter) {
+  theta.up <- update.theta(param, jump=theta.jump, nl, nc, ns, y, x, nmat, id.binomial)
+  vmat.post[,,i] <- param$vmat <- theta.up$vmat
+  theta.post[,,i] <- param$theta <- theta.up$theta
+  theta.accept[,,i] <- theta.up$accept
+
+  phi.up <- update.phi(param, jump=phi.jump, nl, nc, ns, y, nmat, id.binomial, a.phi=1, b.phi=1)
+  phi.post[,,i] <- param$phi <- phi.up$phi
+  phi.accept[,,i] <- phi.up$accept
+
+  theta.jump.up <- thetaphi.jumpTune(accept=theta.accept, jump=theta.jump, ni=i, adapt=adapt, low=.3, high=.8)
+  theta.jump.post[,,i] <- theta.jump <- theta.jump.up$jump
+
+  phi.jump.up <- thetaphi.jumpTune(accept=phi.accept, jump=phi.jump, ni=i, adapt=adapt, low=.3, high=.8)
+  phi.jump.post[,,i] <- phi.jump <- phi.jump.up$jump
+
+  lpmu.up <- update.lpmu(param, jump=.1, ns)
+  lpmu.post[i] <- param$lpmu <- lpmu.up$lpmu
+  lpsigma.post[i] <- param$lpsigma <- lpmu.up$lpsigma
+
+  pobs.up <- update.pobs(param, jump=pobs.jump, nl, ns, id.binomial)
+  pobs.post[,i] <- param$pobs <- pobs.up$pobs
+  pobs.accept[i] <- pobs.up$accept
+
+  pobs.jump.up <- pobsbeta.jumpTune(accept=pobs.accept, jump=pobs.jump, ni=i, adapt=adapt, low=.3, high=.8)
+  pobs.jump.post[i] <- pobs.jump <- pobs.jump.up$jump
+
+  beta.up <- update.beta(param, jump=beta.jump, nl, nc, x)
+  beta.post[,,i] <- param$beta <- beta.up$beta
+  beta.accept[i] <- beta.up$accept
+
+  beta.jump.up <- pobsbeta.jumpTune(accept=beta.accept, jump=beta.jump, ni=i, adapt=adapt, low=.3, high=.8)
+  beta.jump.post[i] <- beta.jump <- beta.jump.up$jump
+}
+
+#==============
+# save results
+#==============
+theta.est <- apply(theta.post[,,nburn:niter], 1:2, median)
+phi.est <- apply(phi.post[,,nburn:niter], 1:2, median)
+beta.est <- apply(beta.post[,,nburn:niter], 1:2, median)
+lpmu.est <- median(lpmu.post[nburn:niter])
+lpsigma.est <- median(lpsigma.post[nburn:niter])
+pobs.est <- apply(pobs.post[,nburn:niter], 1, median)
+
+res <- list()
+res$theta <- theta.est
+res$phi <- phi.est
+res$beta <- beta.est
+res$lpmu <- lpmu.est
+res$lpsigma <- lpsigma.est
+res$pobs <- pobs.est
+
+class(res) <- c("rlda", "list")
+res
+} # rlda.regression
 
 

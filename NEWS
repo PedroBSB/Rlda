@@ -4,4 +4,4 @@ Rlda is an R package that estimates the Bayesian LDA model for mixed-membership 
 
 Changes in version 0.2.3 2017-11-06
      + Create the rlda.fastbernoulli function.
-
+     + Add Variational Bayes

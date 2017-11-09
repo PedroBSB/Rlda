@@ -7,7 +7,7 @@
   \code{rlda.fastbernoulli} works with binary data.frame.
 }
 \usage{
-  rlda.fastbernoulli(data, n_community, alpha0, alpha1, gamma,
+  rlda.fastbernoulli(data, loc.id,  n_community, alpha0, alpha1, gamma,
   n_gibbs, ll_prior = TRUE, display_progress = TRUE)
 }
 \arguments{

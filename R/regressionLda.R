@@ -135,7 +135,7 @@ update.lpmu <- function(param, jump, ns) {
   list(lpmu=lpmu, lpsigma=lpsigma)
 } # update.lpmu
 
-update.pobs <- function(param, jump, nl, ns, id.binomial) {
+update.pobs <- function(param, jump, nl, ns, y, nmat, id.binomial) {
   theta <- param$theta
   phi <- param$phi
   lpmu <- param$lpmu
@@ -162,6 +162,7 @@ update.pobs <- function(param, jump, nl, ns, id.binomial) {
 } # update.pobs
 
 update.beta <- function(param, jump, nl, nc, x) {
+  nx <- dim(x)[2]
   vmat <- param$vmat
 
   beta.old <- param$beta
@@ -297,7 +298,7 @@ for (i in 2:niter) {
   lpmu.post[i] <- param$lpmu <- lpmu.up$lpmu
   lpsigma.post[i] <- param$lpsigma <- lpmu.up$lpsigma
 
-  pobs.up <- update.pobs(param, jump=pobs.jump, nl, ns, id.binomial)
+  pobs.up <- update.pobs(param, jump=pobs.jump, nl, ns, y, nmat, id.binomial)
   pobs.post[,i] <- param$pobs <- pobs.up$pobs
   pobs.accept[i] <- pobs.up$accept
 

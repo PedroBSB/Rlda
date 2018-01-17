@@ -27,7 +27,31 @@ NULL
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return List - With Theta(n_gibbs,nLocations*n_community), Phi(n_gibbs,n_community*nSpecies) and logLikelihood
 lda_multinomial <- function(data, n_community, beta, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
-    .Call('Rlda_lda_multinomial', PACKAGE = 'Rlda', data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress)
+    .Call(`_Rlda_lda_multinomial`, data, n_community, beta, gamma, n_gibbs, ll_prior, display_progress)
+}
+
+#' This function summarizes the z matrix into 2 K x S matrices
+#' where K is the number of communities and S is the number of species.
+#' The matrix "res1" holds the values for dat=1
+#' The matrix "res0" holds the values for dat=0
+getks <- function(z, ncommun, dat) {
+    .Call(`_Rlda_getks`, z, ncommun, dat)
+}
+
+#' This function summarizes the z matrix into a L x K matrix
+#' where K is the number of communities and L is the number of locations
+getlk <- function(z, locid, ncommun, nloc) {
+    .Call(`_Rlda_getlk`, z, locid, ncommun, nloc)
+}
+
+#' This function samples z's
+samplez <- function(ltheta, l1minustheta, lphi, dat1, locid, randu, ncommun, nloc) {
+    .Call(`_Rlda_samplez`, ltheta, l1minustheta, lphi, dat1, locid, randu, ncommun, nloc)
+}
+
+#' This function converts vmat into theta
+convertVtoTheta <- function(vmat, prod) {
+    .Call(`_Rlda_convertVtoTheta`, vmat, prod)
 }
 
 #' @name GibbsSamplingBinomial
@@ -60,7 +84,11 @@ NULL
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return List - With Theta(n_gibbs,n_community*nSpecies), Phi(n_gibbs,nLocations*n_community) and logLikelihood
 lda_binomial <- function(data, pop, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
-    .Call('Rlda_lda_binomial', PACKAGE = 'Rlda', data, pop, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
+    .Call(`_Rlda_lda_binomial`, data, pop, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
+}
+
+lda_binomial_var <- function(data, n_community, maxit, n_obs, gamma, a_phi, b_phi, thresh, delta_elbo, m1, m0) {
+    .Call(`_Rlda_lda_binomial_var`, data, n_community, maxit, n_obs, gamma, a_phi, b_phi, thresh, delta_elbo, m1, m0)
 }
 
 #' @name GibbsSamplingPresence
@@ -91,17 +119,17 @@ NULL
 #' @param bool display_progress=true - Should I Show the progressBar ?
 #' @return List - With Phi(n_gibbs,n_community*nSpecies), Theta(n_gibbs,nLocations*n_community) and logLikelihood
 lda_bernoulli <- function(data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior = TRUE, display_progress = TRUE) {
-    .Call('Rlda_lda_bernoulli', PACKAGE = 'Rlda', data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
+    .Call(`_Rlda_lda_bernoulli`, data, n_community, alpha0, alpha1, gamma, n_gibbs, ll_prior, display_progress)
 }
 
 #''[[Rcpp::export]]
 NULL
 
 convertSBtoNormal <- function(vmat, ncol, nrow, prod) {
-    .Call('Rlda_convertSBtoNormal', PACKAGE = 'Rlda', vmat, ncol, nrow, prod)
+    .Call(`_Rlda_convertSBtoNormal`, vmat, ncol, nrow, prod)
 }
 
 aggregatesum <- function(Tobesum, nind, nobs, ind) {
-    .Call('Rlda_aggregatesum', PACKAGE = 'Rlda', Tobesum, nind, nobs, ind)
+    .Call(`_Rlda_aggregatesum`, Tobesum, nind, nobs, ind)
 }
 

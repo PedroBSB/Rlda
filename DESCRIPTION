@@ -1,7 +1,7 @@
 Package: Rlda
 Type: Package
 Title: Bayesian LDA for Mixed-Membership Clustering Analysis
-Version: 0.2.3
+Version: 0.2.5
 Author: Pedro Albuquerque and Denis Valle and Daijiang Li
 URL: https://github.com/PedroBSB/Rlda
 Maintainer: Pedro Albuquerque <pedroa@unb.br>

@@ -10,10 +10,9 @@ There were no ERRORs or WARNINGs.
 There are currently no downstream dependencies for this package.
 
 ## Update
-* Update to the new version Rlda 0.2.2
+* Update to the new version Rlda 0.2.6
 
 ## News
-* Add the casting between rlda object and coda.
-* Create the generate fake data for each data type.
-* Correct the Phi plot.
+* Correct some minor warnings.
+
 

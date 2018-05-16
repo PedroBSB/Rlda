@@ -76,10 +76,10 @@ void updateThetaAndPhiAndOmegaRemote(arma::mat &ThetaGibbs,arma::mat Theta,arma:
 void updateMatrixJumps(arma::mat &matAcceptance, arma::mat &matJump){
   for(int r=0;r<matAcceptance.n_rows;r++){
     for(int c=0;c<matAcceptance.n_cols;c++){
-      if(matAcceptance(r,c)>0.4 & matJump(r,c)<100){
+      if((matAcceptance(r,c)>0.4) &( matJump(r,c)<100)){
         matJump(r,c)=matJump(r,c)*2;
       }
-      else if(matAcceptance(r,c)<0.2 & matJump(r,c)>0.001){
+      else if((matAcceptance(r,c)<0.2) & (matJump(r,c)>0.001)){
         matJump(r,c)=matJump(r,c)*0.5;
       }
     }
@@ -439,7 +439,7 @@ List lda_remote(arma::mat remoteMat,arma::mat forestMat, List jumpList, int n_co
     thetaMat = generateThetaRemote(vMat, omegaMat, phiMat, forestMat, jumpList, jumpAcceptance, gamma);
 
       //Adapt the Jumps
-    if (g%accept_output==0 & g<1000){
+    if ((g%accept_output==0) & (g<1000)){
       updateJumps(jumpAcceptance, jumpList, accept_output);
     }
 

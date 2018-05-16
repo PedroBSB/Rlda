@@ -330,7 +330,7 @@ Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_ob
  arma::mat PhiGibbs(maxit,n_community*n_species);
 
 
-  while (i < maxit & delta_elbo>thresh){
+  while ((i < maxit) & (delta_elbo>thresh)){
 
     //Get A and B matrices
     Rcpp::List tmp0=generateABmatrix(nLocations, n_community, n_species, n_obs, gamma, m1, m0, data);

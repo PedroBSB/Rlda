@@ -426,10 +426,10 @@ List lda_multinomial(DataFrame data, int n_community,NumericVector beta, double 
 
     //Generate gamma MH
     if(bgamma){
-      if (g%50==0 & g<500){
+      if ((g%50==0) & (g<500)){
         double z = acept/50;
-        if (z>0.4 & jump<100)   jump=jump*2;
-        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        if ((z>0.4) & (jump<100))   jump=jump*2;
+        if ((z<0.1) & (jump>0.001)) jump=jump*0.5;
         gamma = gammaMHAbundance(vMat, gamma, jump,acept);
       }
     }
@@ -538,10 +538,10 @@ List lda_multinomial_burn(DataFrame data, int n_community,NumericVector beta, do
 
     //Generate gamma MH
     if(bgamma){
-      if (g%50==0 & g<500){
+      if ((g%50==0) & (g<500)){
         double z = acept/50;
-        if (z>0.4 & jump<100)   jump=jump*2;
-        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        if ((z>0.4) & (jump<100))   jump=jump*2;
+        if ((z<0.1) & (jump>0.001)) jump=jump*0.5;
         gamma = gammaMHAbundance(vMat, gamma, jump,acept);
       }
     }

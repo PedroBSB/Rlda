@@ -445,11 +445,11 @@ double ll_priorFunctionBinomial(NumericMatrix matDATA,NumericMatrix matPOP, Nume
     //'Initialize the V_{cl} and Theta_{sc} prior
     for(int c=0;c<n_community;c++){
       for(int l=0;l<nLocations;l++){
-        if(vMat(l,c)>0 && vMat(l,c)<1)  priorV=priorV+R::dbeta(vMat(l,c),1,gamma,true);
+        if((vMat(l,c)>0) && (vMat(l,c)<1))  priorV=priorV+R::dbeta(vMat(l,c),1,gamma,true);
       }
 
       for (int b=0;b<nBands;b++){
-        if(Phi(b,c)>0 && Phi(b,c)<1) priorPhi=priorPhi+R::dbeta(Phi(b,c),alpha0,alpha1,true);
+        if((Phi(b,c)>0) && (Phi(b,c)<1)) priorPhi=priorPhi+R::dbeta(Phi(b,c),alpha0,alpha1,true);
       }
     }
   }
@@ -537,10 +537,10 @@ List lda_binomial(DataFrame data,DataFrame pop, int n_community, double alpha0, 
 
     //Generate gamma MH
     if(bgamma){
-      if (g%50==0 & g<500){
+      if ((g%50==0) & (g<500)){
         double z = acept/50;
-        if (z>0.4 & jump<100)   jump=jump*2;
-        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        if ((z>0.4) & (jump<100))   jump=jump*2;
+        if ((z<0.1) & (jump>0.001)) jump=jump*0.5;
         gamma = gammaMHBinomial(vMat, gamma, jump,acept);
       }
     }
@@ -647,10 +647,10 @@ List lda_binomial_burn(DataFrame data,DataFrame pop, int n_community, double alp
 
     //Generate gamma MH
     if(bgamma){
-      if (g%50==0 & g<500){
+      if ((g%50==0) & (g<500)){
         double z = acept/50;
-        if (z>0.4 & jump<100)   jump=jump*2;
-        if (z<0.1 & jump>0.001) jump=jump*0.5;
+        if ((z>0.4) & (jump<100))   jump=jump*2;
+        if ((z<0.1) & (jump>0.001)) jump=jump*0.5;
         gamma = gammaMHBinomial(vMat, gamma, jump,acept);
       }
     }

@@ -166,3 +166,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_Rlda_lda_multinomial", (DL_FUNC) &_Rlda_lda_multinomial, 7},
+    {"_Rlda_getks", (DL_FUNC) &_Rlda_getks, 3},
+    {"_Rlda_getlk", (DL_FUNC) &_Rlda_getlk, 4},
+    {"_Rlda_samplez", (DL_FUNC) &_Rlda_samplez, 8},
+    {"_Rlda_convertVtoTheta", (DL_FUNC) &_Rlda_convertVtoTheta, 2},
+    {"_Rlda_lda_binomial", (DL_FUNC) &_Rlda_lda_binomial, 9},
+    {"_Rlda_lda_binomial_var", (DL_FUNC) &_Rlda_lda_binomial_var, 11},
+    {"_Rlda_lda_bernoulli", (DL_FUNC) &_Rlda_lda_bernoulli, 8},
+    {"_Rlda_convertSBtoNormal", (DL_FUNC) &_Rlda_convertSBtoNormal, 4},
+    {"_Rlda_aggregatesum", (DL_FUNC) &_Rlda_aggregatesum, 4},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_Rlda(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

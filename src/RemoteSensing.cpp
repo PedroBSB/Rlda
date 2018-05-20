@@ -55,8 +55,8 @@ arma::rowvec meltRemote(arma::mat mat){
   arma::rowvec vec(mat.n_rows*mat.n_cols);
   //'Initialize the position
   int pos=0;
-  for(int col=0;col<mat.n_cols;col++){
-    for(int row=0;row<mat.n_rows;row++){
+  for(int col=0;col<(int)mat.n_cols;col++){
+    for(int row=0;row<(int)mat.n_rows;row++){
       //'meltAbundance the matrix
       vec(pos)=mat(row,col);
       //'Increment the position
@@ -74,9 +74,9 @@ void updateThetaAndPhiAndOmegaRemote(arma::mat &ThetaGibbs,arma::mat Theta,arma:
 }
 
 void updateMatrixJumps(arma::mat &matAcceptance, arma::mat &matJump){
-  for(int r=0;r<matAcceptance.n_rows;r++){
-    for(int c=0;c<matAcceptance.n_cols;c++){
-      if((matAcceptance(r,c)>0.4) &( matJump(r,c)<100)){
+  for(int r=0;r<(int)matAcceptance.n_rows;r++){
+    for(int c=0;c<(int)matAcceptance.n_cols;c++){
+      if((matAcceptance(r,c)>0.4) & (matJump(r,c)<100)){
         matJump(r,c)=matJump(r,c)*2;
       }
       else if((matAcceptance(r,c)<0.2) & (matJump(r,c)>0.001)){
@@ -134,8 +134,8 @@ arma::mat generateOmegaRemote(arma::mat thetaMat, arma::mat Omega, List jumpList
 
 
   //Truncated Normal
-  for(int c=0;c<omegaMat.n_rows;c++){
-    for(int b=0;b<omegaMat.n_cols;b++){
+  for(int c=0;c<(int)omegaMat.n_rows;c++){
+    for(int b=0;b<(int)omegaMat.n_cols;b++){
       //Truncated Normal
       omegaMat(c,b) = tnormRemote(0.0, 1.0,Omega(c,b), jumpOmega(c,b));
 

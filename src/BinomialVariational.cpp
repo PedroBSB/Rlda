@@ -17,8 +17,8 @@ using namespace arma;
 
 arma::mat digammaMat(arma::mat x){
   arma::mat xdi(x.n_rows,x.n_cols);
-  for(int r=0;r<x.n_rows;r++){
-    for(int c=0;c<x.n_cols;c++){
+  for(int r=0;r<(int)x.n_rows;r++){
+    for(int c=0;c<(int)x.n_cols;c++){
       xdi(r,c)=R::digamma(x(r,c));
     }
   }
@@ -27,8 +27,8 @@ arma::mat digammaMat(arma::mat x){
 
 arma::mat lgammaMat(arma::mat x){
   arma::mat xdi(x.n_rows,x.n_cols);
-  for(int r=0;r<x.n_rows;r++){
-    for(int c=0;c<x.n_cols;c++){
+  for(int r=0;r<(int)x.n_rows;r++){
+    for(int c=0;c<(int)x.n_cols;c++){
       xdi(r,c)=R::lgamma1p(x(r,c));
     }
   }
@@ -37,7 +37,7 @@ arma::mat lgammaMat(arma::mat x){
 
 arma::colvec digammaVec(arma::colvec x){
   arma::colvec xdi(x.n_rows);
-  for(int r=0;r<x.n_rows;r++){
+  for(int r=0;r<(int)x.n_rows;r++){
     xdi(r)=R::digamma(x(r));
   }
   return(xdi);
@@ -63,9 +63,8 @@ arma::rowvec colSums(arma::mat X){
 
 arma::mat vec2mat(arma::colvec x, int ncol, int nrow){
   arma::mat matTemp(nrow,ncol);
-  int count=0;
   for(int j=0;j<ncol;j++){
-    for(int i=0;i<x.n_elem;i++){
+    for(int i=0;i<(int)x.n_elem;i++){
       matTemp(i,j)=x(i);
     }
   }
@@ -77,8 +76,8 @@ arma::rowvec meltVariational(arma::mat mat){
   arma::rowvec vec(mat.n_rows*mat.n_cols);
   //'Initialize the position
   int pos=0;
-  for(int col=0;col<mat.n_cols;col++){
-    for(int row=0;row<mat.n_rows;row++){
+  for(int col=0;col<(int)mat.n_cols;col++){
+    for(int row=0;row<(int)mat.n_rows;row++){
       //'meltAbundance the matrix
       vec(pos)=mat(row,col);
       //'Increment the position
@@ -251,7 +250,7 @@ Rcpp::List generateM1M0matrix(int nLocations,int n_community,int n_species, arma
   stb.col(n_community-1).fill(0.0);
   arma::colvec res(stb.n_rows);
   res.fill(0.0);
-    for (int c=0;c<stb.n_cols-1;c++){
+    for (int c=0;c<(int)stb.n_cols-1;c++){
       arma::colvec sumAB = matA.col(c)+matB.col(c);
       res = res + digammaVec(matB.col(c)) - digammaVec(sumAB);
       stb.col(c+1)=stb.col(c+1)+res;
@@ -354,6 +353,7 @@ Rcpp::List lda_binomial_var(arma::mat data, int n_community, int maxit, int n_ob
     elboVec(i) = generateELBO(matA, matB, matC, matD, m1, m0, data, n_community, n_species, n_obs, nLocations, gamma, a_phi, b_phi);
     if (i!=0) delta_elbo=std::abs(elboVec(i)-elboVec(i-1));
     i=i+1;
+    if(i>maxit) break;
   }
 
   //'Store the results

@@ -287,8 +287,6 @@ double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpeci
     double priorPhi=0.0;
     //'For each location
     for(int l=0;l<nLocations;l++){
-      //'Initiate the Phi Counter
-      int PhiGibbsCount=0;
       //'Compute the prior for V_{cl}
       for(int c=0;c<n_community;c++){
         if(vMat(l,c)<1)priorV=priorV+R::dbeta(vMat(l,c),1,gamma,1);
@@ -296,9 +294,6 @@ double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpeci
 
       //'For each Specie
       for(int s=0;s<nSpecies;s++){
-        //'Initiate the Gibbs Counter
-        int ThetaGibbsCount=0;
-
         //'Compute just one time the prior for Phi_{sc}
         if(l==0){
           //'Compute the prior for Phi_{sc}
@@ -332,12 +327,8 @@ double ll_priorFunctionPresence(NumericMatrix matDATA,int nLocations, int nSpeci
   else{
     //'For each location
     for(int l=0;l<nLocations;l++){
-      //'Initiate the Phi Counter
-      int PhiGibbsCount=0;
       //'For each Specie
       for(int s=0;s<nSpecies;s++){
-        //'Initiate the Gibbs Counter
-        int ThetaGibbsCount=0;
         //'Initialize the product between Phi and Theta
         double PhiTheta=0.0;
         //'For each community
@@ -543,7 +534,7 @@ List lda_bernoulli_burn(DataFrame data, int n_community, double alpha0, double a
       if ((g%50==0) & (g<500)){
         double z = acept/50;
         if ((z>0.4) & (jump<100))   jump=jump*2;
-        if ((z<0.1) & (jump>0.001)) jump=jump*0.5;
+        if ((z<0.1) &( jump>0.001)) jump=jump*0.5;
         gamma = gammaMHPresenceAbsence(vMat, gamma, jump,acept);
       }
     }

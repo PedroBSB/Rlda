@@ -1,7 +1,7 @@
 Package: Rlda
 Type: Package
 Title: Bayesian LDA for Mixed-Membership Clustering Analysis
-Version: 0.2.6
+Version: 0.2.5
 Author: Pedro Albuquerque and Denis Valle and Daijiang Li
 URL: https://github.com/PedroBSB/Rlda
 Maintainer: Pedro Albuquerque <pedroa@unb.br>
@@ -10,21 +10,12 @@ Description: Estimates the Bayesian LDA model for mixed-membership clustering ba
     (i.e., Multinomial, Bernoulli, and Binomial entries). Albuquerque, Valle and Li (2017) <doi:10.13140/RG.2.2.34599.96164>.
 License: GPL-2
 LazyData: TRUE
-Depends: R (>= 2.10), Rcpp (>= 0.9.4), RcppProgress (>= 0.1), doParallel (>= 1.0.10), foreach (>=	1.4.3), coda (>= 0.19.1)
-LinkingTo:
-    Rcpp,
-    RcppArmadillo,
-    RcppProgress
-Imports:
-    parallel,
-    gtools
+Depends: R (>= 2.10), Rcpp (>= 0.9.4), RcppProgress (>= 0.1),
+        doParallel (>= 1.0.10), foreach (>= 1.4.3), coda (>= 0.19.1)
+LinkingTo: Rcpp, RcppArmadillo, RcppProgress
+Imports: parallel, gtools
 SystemRequirements: GNU make
-Suggests:
-    R.rsp,
-    knitr,
-    MCMCpack,
-    rmarkdown,
-    RColorBrewer,
-    reshape2
+Suggests: R.rsp, knitr, MCMCpack, rmarkdown, RColorBrewer, reshape2
 RoxygenNote: 6.0.1
 VignetteBuilder: R.rsp
+NeedsCompilation: yes

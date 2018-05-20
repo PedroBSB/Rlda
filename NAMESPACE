@@ -34,5 +34,5 @@ S3method("print", "rlda")
 S3method("summary", "rlda")
 S3method("predict", "rlda")
 S3method("logLik", "rlda")
-useDynLib(Rlda, .registration = TRUE)
+
 

@@ -226,9 +226,9 @@ NumericMatrix mmultBinomial(const NumericMatrix& m1, const NumericMatrix& m2){
   if (m1.ncol() != m2.nrow()) stop ("Incompatible matrix dimensions");
   NumericMatrix out(m1.nrow(),m2.ncol());
   NumericVector rm1, cm2;
-  for (size_t i = 0; i < m1.nrow(); ++i) {
+  for (int i = 0; i < (int) m1.nrow(); ++i) {
     rm1 = m1(i,_);
-    for (size_t j = 0; j < m2.ncol(); ++j) {
+    for (int j = 0; j < (int) m2.ncol(); ++j) {
       cm2 = m2(_,j);
       out(i,j) = std::inner_product(rm1.begin(), rm1.end(), cm2.begin(), 0.);
     }
@@ -445,11 +445,11 @@ double ll_priorFunctionBinomial(NumericMatrix matDATA,NumericMatrix matPOP, Nume
     //'Initialize the V_{cl} and Theta_{sc} prior
     for(int c=0;c<n_community;c++){
       for(int l=0;l<nLocations;l++){
-        if((vMat(l,c)>0) && (vMat(l,c)<1))  priorV=priorV+R::dbeta(vMat(l,c),1,gamma,true);
+        if(vMat(l,c)>0 && vMat(l,c)<1)  priorV=priorV+R::dbeta(vMat(l,c),1,gamma,true);
       }
 
       for (int b=0;b<nBands;b++){
-        if((Phi(b,c)>0) && (Phi(b,c)<1)) priorPhi=priorPhi+R::dbeta(Phi(b,c),alpha0,alpha1,true);
+        if(Phi(b,c)>0 && Phi(b,c)<1) priorPhi=priorPhi+R::dbeta(Phi(b,c),alpha0,alpha1,true);
       }
     }
   }

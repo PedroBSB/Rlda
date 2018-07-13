@@ -16,7 +16,6 @@ Specifically in this dataset we work with only credit card complaint's for the 2
     \item{\code{Company}}{a factor variable describing the companies available}
   }
 }
-\source{\url{http://catalog.data.gov/dataset/consumer-complaint-database}}
 \examples{
 data(complaints)
 }

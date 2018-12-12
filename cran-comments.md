@@ -10,7 +10,7 @@ There were no ERRORs or WARNINGs.
 There are currently no downstream dependencies for this package.
 
 ## Update
-* Update to the new version Rlda 0.2.5
+* Update to the new version Rlda 0.2.6
 
 ## News
 * Correct some minor warnings.

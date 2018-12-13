@@ -18,4 +18,4 @@ SystemRequirements: GNU make
 Suggests: knitr, MCMCpack, rmarkdown, RColorBrewer, reshape2
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-https://www.sciencedirect.com/science/article/pii/S0950705118305100
+URL: https://www.sciencedirect.com/science/article/pii/S0950705118305100

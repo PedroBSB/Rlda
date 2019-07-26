@@ -234,7 +234,7 @@ rlda.bernoulliMH <- function(data, loc.id, n_community, alpha0, alpha1, gamma, n
   ngibbs <- n_gibbs
 
   # initial values convert from a bunch of bernoulli to a single binomial per location
-  tmp = aggregate.data(dat, loc.id)
+  tmp = aggregate.data.complete(dat, loc.id)
   y = tmp$dat
   loc.id = tmp$loc.id
   nspp = ncol(y)

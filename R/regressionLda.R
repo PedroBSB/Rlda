@@ -4,14 +4,14 @@
 tnorm <- function(n, lo, hi, mu, sig) {
   # generates truncated normal variates based on cumulative normal distribution normal truncated lo and hi
 
-  if (length(lo) == 1 & length(mu) > 1) 
+  if (length(lo) == 1 & length(mu) > 1)
     lo <- rep(lo, length(mu))
-  if (length(hi) == 1 & length(mu) > 1) 
+  if (length(hi) == 1 & length(mu) > 1)
     hi <- rep(hi, length(mu))
-    
+
   q1 <- pnorm(lo, mu, sig)  #cumulative distribution
   q2 <- pnorm(hi, mu, sig)  #cumulative distribution
-    
+
   z <- runif(n, q1, q2)
   z <- qnorm(z, mu, sig)
   z[z == -Inf] <- lo[z == -Inf]
@@ -25,7 +25,7 @@ fix.MH <- function(lo, hi, old1, new1, jump) {
   log(jold) - log(jnew)  #add this to pnew
 } # fix.MH
 
-get.logl <- function(theta, phi, pobs.mat, y, nmat) {
+get.logl2 <- function(theta, phi, pobs.mat, y, nmat) {
   prob <- theta %*% phi * pobs.mat
   cond <- prob < 1e-05
   prob[cond] <- 1e-05
@@ -36,21 +36,21 @@ get.logl <- function(theta, phi, pobs.mat, y, nmat) {
 
 acceptMH <- function(p0, p1, x0, x1, BLOCK) {
   # accept for M, M-H if BLOCK, then accept as a block, otherwise, accept individually
-    
+
   nz <- length(x0)  #no. to accept
-  if (BLOCK) 
+  if (BLOCK)
     nz <- 1
-    
+
   a <- exp(p1 - p0)  #acceptance PR
   z <- runif(nz, 0, 1)
   keep <- which(z < a)
-    
-  if (BLOCK & length(keep) > 0) 
+
+  if (BLOCK & length(keep) > 0)
     x0 <- x1
-  if (!BLOCK) 
+  if (!BLOCK)
     x0[keep] <- x1[keep]
   accept <- length(keep)
-    
+
   list(x = x0, accept = accept)
 } # acceptMH
 
@@ -74,8 +74,8 @@ update.theta <- function(param, jump, nl, nc, ns, y, x, nmat, id.binomial) {
     theta.old <- vmat.old / rowSums(vmat.old)
     theta.new <- vmat.new / rowSums(vmat.new)
 
-    prob.old <- get.logl(theta=theta.old, phi=phi, pobs.mat=pobs.mat, y=y, nmat=nmat)
-    prob.new <- get.logl(theta=theta.new, phi=phi, pobs.mat=pobs.mat, y=y, nmat=nmat)
+    prob.old <- get.logl2(theta=theta.old, phi=phi, pobs.mat=pobs.mat, y=y, nmat=nmat)
+    prob.new <- get.logl2(theta=theta.new, phi=phi, pobs.mat=pobs.mat, y=y, nmat=nmat)
 
     pold <- rowSums(prob.old) + dnorm(log(vmat.old[,j]), mu[,j], sigma, log = T)
     pnew <- rowSums(prob.new) + dnorm(log(vmat.new[,j]), mu[,j], sigma, log = T)
@@ -102,8 +102,8 @@ update.phi <- function(param, jump, nl, nc, ns, y, nmat, id.binomial, a.phi, b.p
     phi.new <- phi.old
     phi.new[j,] <- proposed[j,]
 
-    prob.old <- get.logl(theta=theta, phi=phi.old, pobs.mat=pobs.mat, y=y, nmat=nmat)
-    prob.new <- get.logl(theta=theta, phi=phi.new, pobs.mat=pobs.mat, y=y, nmat=nmat)
+    prob.old <- get.logl2(theta=theta, phi=phi.old, pobs.mat=pobs.mat, y=y, nmat=nmat)
+    prob.new <- get.logl2(theta=theta, phi=phi.new, pobs.mat=pobs.mat, y=y, nmat=nmat)
 
     pold <- colSums(prob.old) + dbeta(phi.old[j,], a.phi, b.phi, log=T)
     pnew <- colSums(prob.new) + dbeta(phi.new[j,], a.phi, b.phi, log=T)
@@ -124,9 +124,9 @@ update.lpmu <- function(param, jump, ns) {
   lpmu.new <- rnorm(1, lpmu.old, jump)
   lpsigma.new <- exp(rnorm(1, log(lpsigma.old), jump))
 
-  pold <- sum(dnorm(logit(pobs), lpmu.old, lpsigma.old, log=T)) + 
+  pold <- sum(dnorm(logit(pobs), lpmu.old, lpsigma.old, log=T)) +
           dnorm(lpmu.old, 0, 10, log=T) + dnorm(log(lpsigma.old), 0, 10, log=T)
-  pnew <- sum(dnorm(logit(pobs), lpmu.new, lpsigma.new, log=T)) + 
+  pnew <- sum(dnorm(logit(pobs), lpmu.new, lpsigma.new, log=T)) +
           dnorm(lpmu.new, 0, 10, log=T) + dnorm(log(lpsigma.new), 0, 10, log=T)
 
   k <- acceptMH(p0=pold, p1=pnew, x0=c(lpmu.old,lpsigma.old), x1=c(lpmu.new,lpsigma.new), BLOCK=F)
@@ -150,8 +150,8 @@ update.pobs <- function(param, jump, nl, ns, y, nmat, id.binomial) {
   pobs.new.mat <- matrix(pobs.new, nl, ns, byrow=T)
   pobs.new.mat[id.binomial,] <- 1
 
-  prob.old <- get.logl(theta=theta, phi=phi, pobs.mat=pobs.old.mat, y=y, nmat=nmat)
-  prob.new <- get.logl(theta=theta, phi=phi, pobs.mat=pobs.new.mat, y=y, nmat=nmat)
+  prob.old <- get.logl2(theta=theta, phi=phi, pobs.mat=pobs.old.mat, y=y, nmat=nmat)
+  prob.new <- get.logl2(theta=theta, phi=phi, pobs.mat=pobs.new.mat, y=y, nmat=nmat)
 
   pold <- sum(prob.old) + sum(dnorm(logit(pobs.old), lpmu, lpsigma, log=T))
   pnew <- sum(prob.new) + sum(dnorm(logit(pobs.new), lpmu, lpsigma, log=T))
@@ -190,9 +190,9 @@ thetaphi.jumpTune <- function(accept, jump, ni, adapt=2000, low=.3, high=.8) {
   } else {
     accept.rate <- apply(accept[,,nstart:ni], 1:2, mean)
     jump.new <- jump
-    jump.new[which(accept.rate < low)] <- 
+    jump.new[which(accept.rate < low)] <-
       jump[which(accept.rate < low)] * rnorm(length(which(accept.rate < low)),.5,.01)
-    jump.new[which(accept.rate > high)] <- 
+    jump.new[which(accept.rate > high)] <-
       jump[which(accept.rate > high)] * rnorm(length(which(accept.rate > high)),2,.01)
   }
   jump <- jump.new
@@ -222,11 +222,11 @@ pobsbeta.jumpTune <- function(accept, jump, ni, adapt=2000, low=.3, high=.8) {
 #============================
 # define regression function
 #============================
-rlda.regression <- function(y=y, x=x, nmat=nmat, id.binomial=id.binomial, nc=nc, 
-                            niter=niter, nburn=nburn, adapt=adapt, 
-                            vmat.init=vmat.init, phi.init=phi.init, beta.init=beta.init, 
-                            logit_pobs_mu.init=logit_pobs_mu.init, 
-                            logit_pobs_sigma.init=logit_pobs_sigma.init, 
+rlda.regression <- function(y=y, x=x, nmat=nmat, id.binomial=id.binomial, nc=nc,
+                            niter=niter, nburn=nburn, adapt=adapt,
+                            vmat.init=vmat.init, phi.init=phi.init, beta.init=beta.init,
+                            logit_pobs_mu.init=logit_pobs_mu.init,
+                            logit_pobs_sigma.init=logit_pobs_sigma.init,
                             pobs.init=pobs.init) {
 
 #===========
